@@ -1,0 +1,179 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+	Copy,
+	ExternalLink,
+	FilePlus2,
+	Loader2,
+	MoreHorizontal,
+	Pencil,
+	Trash2,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Badge } from "#/components/ui/badge";
+import { Button } from "#/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "#/components/ui/dropdown-menu";
+import { Input } from "#/components/ui/input";
+import {
+	createPage,
+	deletePage,
+	duplicatePage,
+	listPages,
+} from "#/server/pages";
+import { listProjects } from "#/server/projects";
+
+export const Route = createFileRoute("/_app/projects/$projectId")({
+	component: ProjectPages,
+});
+
+function ProjectPages() {
+	const { projectId } = Route.useParams();
+	const queryClient = useQueryClient();
+	const navigate = useNavigate();
+	const [name, setName] = useState("");
+	const projects = useQuery({
+		queryKey: ["projects"],
+		queryFn: () => listProjects(),
+	});
+	const project = projects.data?.find((p) => p.id === projectId);
+	const pages = useQuery({
+		queryKey: ["pages", projectId],
+		queryFn: () => listPages({ data: { projectId } }),
+	});
+	const refresh = () =>
+		queryClient.invalidateQueries({ queryKey: ["pages", projectId] });
+
+	const create = useMutation({
+		mutationFn: () => createPage({ data: { projectId, name } }),
+		onSuccess: (p) =>
+			navigate({ to: "/editor/$pageId", params: { pageId: p.id } }),
+		onError: (e) => toast.error(e.message),
+	});
+	const duplicate = useMutation({
+		mutationFn: (pageId: string) => duplicatePage({ data: { pageId } }),
+		onSuccess: refresh,
+		onError: (e) => toast.error(e.message),
+	});
+	const remove = useMutation({
+		mutationFn: (pageId: string) => deletePage({ data: { pageId } }),
+		onSuccess: refresh,
+		onError: (e) => toast.error(e.message),
+	});
+
+	return (
+		<div className="flex flex-col gap-6">
+			<div className="flex items-end justify-between gap-4">
+				<div>
+					<Link
+						to="/projects"
+						className="text-xs text-muted-foreground hover:text-foreground"
+					>
+						← Projetos
+					</Link>
+					<h1 className="text-2xl font-semibold">{project?.name ?? "..."}</h1>
+				</div>
+				<form
+					className="flex gap-2"
+					onSubmit={(e) => {
+						e.preventDefault();
+						if (name.trim()) create.mutate();
+					}}
+				>
+					<Input
+						placeholder="Nome da nova página"
+						value={name}
+						onChange={(e) => setName(e.target.value)}
+						className="w-64"
+					/>
+					<Button type="submit" disabled={create.isPending || !name.trim()}>
+						{create.isPending ? (
+							<Loader2 className="size-4 animate-spin" />
+						) : (
+							<FilePlus2 className="size-4" />
+						)}
+						Nova página
+					</Button>
+				</form>
+			</div>
+			{pages.isLoading ? (
+				<Loader2 className="size-5 animate-spin text-muted-foreground" />
+			) : null}
+			{pages.data?.length === 0 ? (
+				<p className="rounded-lg border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
+					Nenhuma página ainda.
+				</p>
+			) : null}
+			<div className="overflow-hidden rounded-xl border border-border">
+				{pages.data?.map((p) => (
+					<div
+						key={p.id}
+						className="flex items-center gap-4 border-b border-border bg-card px-5 py-3 last:border-0"
+					>
+						<div className="flex min-w-0 flex-1 flex-col">
+							<Link
+								to="/editor/$pageId"
+								params={{ pageId: p.id }}
+								className="truncate font-medium hover:text-primary"
+							>
+								{p.name}
+							</Link>
+							<span className="text-xs text-muted-foreground">/{p.slug}</span>
+						</div>
+						<Badge variant={p.status === "published" ? "default" : "secondary"}>
+							{p.status === "published" ? "Publicada" : "Rascunho"}
+						</Badge>
+						<span className="w-36 text-right text-xs text-muted-foreground">
+							{new Date(p.updatedAt).toLocaleString("pt-BR", {
+								dateStyle: "short",
+								timeStyle: "short",
+							})}
+						</span>
+						<Button asChild size="sm" variant="outline">
+							<Link to="/editor/$pageId" params={{ pageId: p.id }}>
+								<Pencil className="size-3.5" /> Editar
+							</Link>
+						</Button>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button size="icon" variant="ghost" className="size-8">
+									<MoreHorizontal className="size-4" />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
+								{p.status === "published" && project ? (
+									<DropdownMenuItem asChild>
+										<a
+											href={`/p/${project.slug}/${p.slug}`}
+											target="_blank"
+											rel="noreferrer"
+										>
+											<ExternalLink className="size-4" /> Abrir publicada
+										</a>
+									</DropdownMenuItem>
+								) : null}
+								<DropdownMenuItem onClick={() => duplicate.mutate(p.id)}>
+									<Copy className="size-4" /> Duplicar
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									className="text-destructive"
+									onClick={() => {
+										if (window.confirm(`Excluir a página "${p.name}"?`))
+											remove.mutate(p.id);
+									}}
+								>
+									<Trash2 className="size-4" /> Excluir
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
