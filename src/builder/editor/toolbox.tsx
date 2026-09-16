@@ -127,6 +127,10 @@ export const TOOLBOX_GROUPS: { title: string; items: ToolboxItem[] }[] = [
 		],
 	},
 	{
+		title: "Site",
+		items: ["Logo", "Menu", "SocialIcons"].map(simple),
+	},
+	{
 		title: "Básico",
 		items: ["Heading", "Text", "Button", "Divider"].map(simple),
 	},

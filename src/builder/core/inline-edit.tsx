@@ -101,3 +101,8 @@ export function useInlineEdit(
 				},
 	};
 }
+
+/** Substitui tokens dinâmicos do texto (ex.: `{ano}` → ano atual). */
+export function fillTokens(text: string): string {
+	return text.replaceAll("{ano}", String(new Date().getFullYear()));
+}

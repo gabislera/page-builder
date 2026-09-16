@@ -10,10 +10,13 @@ import { Header } from "./components/header.tsx";
 import { Heading } from "./components/heading.tsx";
 import { Html } from "./components/html.tsx";
 import { Image } from "./components/image.tsx";
+import { Logo } from "./components/logo.tsx";
+import { Menu } from "./components/menu.tsx";
 import { Modal } from "./components/modal.tsx";
 import { Page } from "./components/page.tsx";
 import { ProgressBar } from "./components/progress-bar.tsx";
 import { Section } from "./components/section.tsx";
+import { SocialIcons } from "./components/social-icons.tsx";
 import { Spacer } from "./components/spacer.tsx";
 import { Text } from "./components/text.tsx";
 import { Video } from "./components/video.tsx";
@@ -42,6 +45,9 @@ export const COMPONENTS: Record<string, AnyComponentDefinition> =
 			Modal,
 			FloatingButtons,
 			Html,
+			Logo,
+			Menu,
+			SocialIcons,
 		].map((def) => [def.type, def]),
 	);
 

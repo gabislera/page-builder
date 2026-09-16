@@ -7,6 +7,7 @@ import { countdownScript } from "./features/countdown.ts";
 import { floatingScript } from "./features/floating.ts";
 import { formScript } from "./features/form.ts";
 import { headerScript } from "./features/header.ts";
+import { menuScript } from "./features/menu.ts";
 import { modalScript } from "./features/modal.ts";
 import { progressScript } from "./features/progress.ts";
 import { videoScript } from "./features/video.ts";
@@ -48,6 +49,7 @@ export const FEATURE_SCRIPTS: Partial<
 	Record<RuntimeFeature, (cfg: RuntimeConfig) => string>
 > = {
 	header: headerScript,
+	menu: menuScript,
 	form: formScript,
 	modal: modalScript,
 	floating: floatingScript,

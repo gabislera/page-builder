@@ -19,6 +19,7 @@ ul,ol{margin:0;padding-left:1.25em}
 .pb-rich a{text-decoration:underline}
 .pb-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;cursor:pointer;border:0;text-align:center}
 .pb-btn svg{flex-shrink:0}
+.pb-header:has(.pb-menu-open){z-index:2000 !important}
 .pb-anim-pulse{animation:pb-pulse 1.6s ease-in-out infinite}
 @keyframes pb-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
 .pb-anim-fade-in,.pb-anim-fade-up{opacity:0;transition:opacity .7s ease,transform .7s ease}
