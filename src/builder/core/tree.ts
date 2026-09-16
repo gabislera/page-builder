@@ -13,11 +13,18 @@ export const ROOT_ID = "ROOT";
 
 export type SectionKind = "section" | "header" | "footer";
 
+export type SitePart = "header" | "footer";
+
 export type SectionTree = {
 	rootNodeId: string;
 	kind: SectionKind;
 	name: string;
 	isGlobal: boolean;
+	/**
+	 * Cabeçalho/rodapé do site: vem das configurações do projeto e aparece em
+	 * todas as páginas que usam o padrão. Não entra na lista de seções da página.
+	 */
+	sitePart?: SitePart;
 	nodes: SerializedNodes;
 };
 
@@ -69,7 +76,8 @@ export function splitPage(nodes: SerializedNodes): {
 			rootNodeId: childId,
 			kind,
 			name: (child.custom?.displayName as string) || child.displayName,
-			isGlobal: Boolean(child.custom?.isGlobal),
+			isGlobal: Boolean(child.custom?.isGlobal || child.custom?.sitePart),
+			sitePart: (child.custom?.sitePart as SitePart | undefined) ?? undefined,
 			nodes: subtree(nodes, childId),
 		};
 	});
@@ -79,7 +87,10 @@ export function splitPage(nodes: SerializedNodes): {
 /** Remonta a árvore completa a partir do ROOT salvo e das seções ordenadas. */
 export function mergePage(
 	root: SerializedNode,
-	sections: Pick<SectionTree, "rootNodeId" | "nodes" | "isGlobal">[],
+	sections: Pick<
+		SectionTree,
+		"rootNodeId" | "nodes" | "isGlobal" | "sitePart"
+	>[],
 ): SerializedNodes {
 	const out: SerializedNodes = {};
 	const rootNodes: string[] = [];
@@ -90,7 +101,11 @@ export function mergePage(
 		out[s.rootNodeId] = {
 			...sectionRoot,
 			parent: ROOT_ID,
-			custom: { ...sectionRoot.custom, isGlobal: s.isGlobal },
+			custom: {
+				...sectionRoot.custom,
+				isGlobal: s.sitePart ? false : s.isGlobal,
+				sitePart: s.sitePart,
+			},
 		};
 		rootNodes.push(s.rootNodeId);
 	}
@@ -126,7 +141,7 @@ export function cloneTree(
 			oldId === rootNodeId ? parentId : node.parent ? map(node.parent) : null
 		) as string;
 		if (oldId === rootNodeId && node.custom) {
-			node.custom = { ...node.custom, isGlobal: false };
+			node.custom = { ...node.custom, isGlobal: false, sitePart: undefined };
 		}
 		out[newId] = node;
 	}

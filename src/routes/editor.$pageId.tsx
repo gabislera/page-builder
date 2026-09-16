@@ -18,6 +18,7 @@ import {
 	updatePageSettings,
 } from "#/server/pages";
 import { getSession } from "#/server/session";
+import { republishSite, updateSiteSettings } from "#/server/site";
 
 export const Route = createFileRoute("/editor/$pageId")({
 	// o Craft.js roda só no navegador
@@ -39,7 +40,7 @@ export const Route = createFileRoute("/editor/$pageId")({
 });
 
 function EditorRoute() {
-	const { page, nodes } = Route.useLoaderData();
+	const { page, nodes, site, siteParts } = Route.useLoaderData();
 
 	const services = useMemo<EditorServices>(() => {
 		const { id: pageId, projectId } = page;
@@ -77,8 +78,19 @@ function EditorRoute() {
 			publishPage: (republish) => publishPage({ data: { pageId, republish } }),
 			updateSettings: (patch) =>
 				updatePageSettings({ data: { pageId, ...patch } }),
+			updateSiteSettings: (patch) =>
+				updateSiteSettings({ data: { projectId, ...patch } }),
+			republishSite: () => republishSite({ data: { projectId } }),
 		};
 	}, [page]);
 
-	return <EditorShell page={page} nodes={nodes} services={services} />;
+	return (
+		<EditorShell
+			page={page}
+			nodes={nodes}
+			site={site}
+			siteParts={siteParts}
+			services={services}
+		/>
+	);
 }

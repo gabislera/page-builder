@@ -4,7 +4,12 @@
  * remover o driver do Postgres do bundle do navegador.
  */
 import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
-import { mergePage, type SectionTree } from "#/builder/core/tree";
+import { normalizeSiteSettings, type SiteSettings } from "#/builder/core/theme";
+import {
+	mergePage,
+	type SectionTree,
+	type SitePart,
+} from "#/builder/core/tree";
 import { renderPageHtml } from "#/builder/renderer/render-page";
 import { db } from "#/db";
 import { page, pageSection, project, section } from "#/db/schema";
@@ -12,24 +17,89 @@ import { page, pageSection, project, section } from "#/db/schema";
 export const publicPagePath = (projectSlug: string, pageSlug: string) =>
 	`/p/${projectSlug}/${pageSlug}`;
 
+type PageRow = typeof page.$inferSelect;
+
+/** Configurações do site (tema, identidade, cabeçalho/rodapé padrão). */
+export async function loadSiteSettings(projectId: string) {
+	const row = await db.query.project.findFirst({
+		where: eq(project.id, projectId),
+	});
+	if (!row) throw new Error("Projeto não encontrado");
+	return { project: row, settings: normalizeSiteSettings(row.settings) };
+}
+
+/** Seção de cabeçalho/rodapé do site, marcada como parte do site. */
+export async function loadSitePart(
+	projectId: string,
+	sectionId: string | null,
+	part: SitePart,
+): Promise<SectionTree | null> {
+	if (!sectionId) return null;
+	const row = await db.query.section.findFirst({
+		where: and(eq(section.id, sectionId), eq(section.projectId, projectId)),
+	});
+	if (!row) return null;
+	return {
+		rootNodeId: row.rootNodeId,
+		kind: row.kind,
+		name: row.name,
+		isGlobal: true,
+		sitePart: part,
+		nodes: row.nodes,
+	};
+}
+
+/**
+ * Seções da página na ordem de exibição, incluindo o cabeçalho e o rodapé do
+ * site quando a página usa o padrão.
+ */
+export async function loadPageSections(row: PageRow, settings: SiteSettings) {
+	const [own, header, footer] = await Promise.all([
+		loadSections(row.id),
+		row.headerMode === "site"
+			? loadSitePart(row.projectId, settings.headerSectionId, "header")
+			: null,
+		row.footerMode === "site"
+			? loadSitePart(row.projectId, settings.footerSectionId, "footer")
+			: null,
+	]);
+	return [...(header ? [header] : []), ...own, ...(footer ? [footer] : [])];
+}
+
+/** Página inicial do projeto: slug "home"/"inicio" ou a mais antiga. */
+export async function homeSlug(projectId: string) {
+	const rows = await db
+		.select({ slug: page.slug })
+		.from(page)
+		.where(and(eq(page.projectId, projectId), isNull(page.deletedAt)))
+		.orderBy(asc(page.createdAt));
+	return (
+		rows.find((r) => r.slug === "home" || r.slug === "inicio")?.slug ??
+		rows[0]?.slug ??
+		null
+	);
+}
+
 export async function publishPageById(pageId: string) {
 	const row = await db.query.page.findFirst({ where: eq(page.id, pageId) });
 	if (!row) throw new Error("Página não encontrada");
-	const [proj, sections, siblings] = await Promise.all([
-		db.query.project.findFirst({ where: eq(project.id, row.projectId) }),
-		loadSections(row.id),
+	const { project: proj, settings } = await loadSiteSettings(row.projectId);
+	const [sections, siblings] = await Promise.all([
+		loadPageSections(row, settings),
 		db
 			.select({ id: page.id, slug: page.slug })
 			.from(page)
 			.where(and(eq(page.projectId, row.projectId), isNull(page.deletedAt))),
 	]);
-	const projectSlug = proj?.slug ?? "";
+	const projectSlug = proj.slug;
 	const slugs = new Map(siblings.map((s) => [s.id, s.slug]));
 	const html = renderPageHtml({
 		pageId: row.id,
 		nodes: mergePage(row.root, sections),
 		seo: row.seo,
 		tracking: row.tracking,
+		site: settings,
+		homeUrl: `/p/${projectSlug}`,
 		pageUrl: (id) => {
 			const slug = slugs.get(id);
 			return slug ? publicPagePath(projectSlug, slug) : "#";
@@ -46,6 +116,22 @@ export async function publishPageById(pageId: string) {
 		publishedAt: updated.publishedAt?.toISOString() ?? null,
 		url: publicPagePath(projectSlug, updated.slug),
 	};
+}
+
+/** Republica todas as páginas publicadas do projeto (ex.: depois de mudar o tema). */
+export async function republishProject(projectId: string) {
+	const rows = await db
+		.select({ id: page.id })
+		.from(page)
+		.where(
+			and(
+				eq(page.projectId, projectId),
+				eq(page.status, "published"),
+				isNull(page.deletedAt),
+			),
+		);
+	for (const r of rows) await publishPageById(r.id);
+	return rows.length;
 }
 
 export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];

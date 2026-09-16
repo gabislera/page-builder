@@ -7,6 +7,7 @@ import { DebouncedInput } from "../controls/inputs.tsx";
 import { ROOT_ID } from "../core/tree.ts";
 import { COMPONENTS } from "../registry.ts";
 import { unlinkGlobal } from "./node-actions.ts";
+import { SitePartCard } from "./site-parts.tsx";
 
 /** Painel direito: configurações do nó selecionado. */
 export function SettingsPanel() {
@@ -22,6 +23,8 @@ export function SettingsPanel() {
 				customName: (node.data.custom?.displayName as string) ?? "",
 				isTopLevel: node.data.parent === ROOT_ID,
 				isGlobal: Boolean(node.data.custom?.isGlobal),
+				sitePart: node.data.custom?.sitePart as string | undefined,
+				isSiteBlock: node.data.name === "Header" || node.data.name === "Footer",
 				settings: node.related?.settings,
 			},
 		};
@@ -61,7 +64,11 @@ export function SettingsPanel() {
 						}
 					/>
 				) : null}
-				{selected.isTopLevel ? (
+				{selected.isSiteBlock ? (
+					<SitePartCard
+						part={selected.type === "Header" ? "header" : "footer"}
+					/>
+				) : selected.isTopLevel ? (
 					<GlobalToggle
 						isGlobal={selected.isGlobal}
 						onChange={(v) =>

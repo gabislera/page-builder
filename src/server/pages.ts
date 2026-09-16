@@ -1,8 +1,13 @@
 import type { SerializedNode, SerializedNodes } from "@craftjs/core";
 import { createServerFn } from "@tanstack/react-start";
-import { and, asc, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
-import { mergePage, type SectionTree } from "#/builder/core/tree";
+import type { SiteSettings } from "#/builder/core/theme";
+import {
+	mergePage,
+	type SectionTree,
+	type SitePart,
+} from "#/builder/core/tree";
 import { blankPage } from "#/builder/templates/pages";
 import { db } from "#/db";
 import { page, pageSection, project, section } from "#/db/schema";
@@ -12,7 +17,10 @@ import { authMiddleware } from "./middleware.ts";
 import {
 	deleteOrphanSections,
 	insertSections,
+	loadPageSections,
 	loadSections,
+	loadSitePart,
+	loadSiteSettings,
 	publishPageById,
 	uniqueSlug,
 	upsertSections,
@@ -106,6 +114,8 @@ export const duplicatePage = createServerFn({ method: "POST" })
 					root: source.root,
 					seo: source.seo,
 					tracking: source.tracking,
+					headerMode: source.headerMode,
+					footerMode: source.footerMode,
 				})
 				.returning({ id: page.id });
 			await insertSections(tx, source.projectId, created.id, copies);
@@ -144,15 +154,17 @@ export const getEditorPage = createServerFn({ method: "GET" })
 	.validator(z.object({ pageId: z.string() }))
 	.handler(async ({ data, context }) => {
 		const row = await requirePageAccess(context.user.id, data.pageId);
-		const proj = await db.query.project.findFirst({
-			where: eq(project.id, row.projectId),
-		});
-		const sections = await loadSections(row.id);
+		const { project: proj, settings } = await loadSiteSettings(row.projectId);
+		const [sections, header, footer] = await Promise.all([
+			loadPageSections(row, settings),
+			loadSitePart(row.projectId, settings.headerSectionId, "header"),
+			loadSitePart(row.projectId, settings.footerSectionId, "footer"),
+		]);
 		return {
 			page: {
 				id: row.id,
 				projectId: row.projectId,
-				projectSlug: proj?.slug ?? "",
+				projectSlug: proj.slug,
 				name: row.name,
 				slug: row.slug,
 				status: row.status,
@@ -162,6 +174,9 @@ export const getEditorPage = createServerFn({ method: "GET" })
 				updatedAt: row.updatedAt.toISOString(),
 				publishedAt: row.publishedAt?.toISOString() ?? null,
 			},
+			site: settings,
+			/** Cabeçalho/rodapé do site, para reinserir numa página que não usa. */
+			siteParts: { header, footer },
 			nodes: mergePage(row.root, sections),
 		};
 	});
@@ -171,6 +186,7 @@ const sectionInput = z.object({
 	kind: z.enum(["section", "header", "footer"]),
 	name: z.string().max(120),
 	isGlobal: z.boolean(),
+	sitePart: z.enum(["header", "footer"]).optional(),
 	nodes: nodesSchema,
 });
 
@@ -213,11 +229,43 @@ export const savePage = createServerFn({ method: "POST" })
 					.where(eq(pageSection.pageId, current.id))
 			).map((r) => r.id);
 
+			const siteParts = data.sections.filter((s) => s.sitePart);
+			const own = data.sections.filter((s) => !s.sitePart);
 			const { sectionIds, touchedGlobalIds } = await upsertSections(
 				tx,
 				current.projectId,
-				data.sections,
+				own,
 			);
+
+			// cabeçalho/rodapé do site: seção global apontada nas configurações do projeto
+			const { settings } = await loadSiteSettings(current.projectId);
+			const sitePatch: Partial<SiteSettings> = {};
+			const touchedParts: SitePart[] = [];
+			for (const part of siteParts) {
+				const {
+					sectionIds: [id],
+				} = await upsertSections(tx, current.projectId, [
+					{ ...part, isGlobal: true },
+				]);
+				const key =
+					part.sitePart === "header" ? "headerSectionId" : "footerSectionId";
+				if (settings[key] !== id) sitePatch[key] = id;
+				touchedParts.push(part.sitePart as SitePart);
+			}
+			if (Object.keys(sitePatch).length) {
+				await tx
+					.update(project)
+					.set({ settings: { ...settings, ...sitePatch } })
+					.where(eq(project.id, current.projectId));
+			}
+			const modeOf = (part: SitePart) =>
+				siteParts.some((s) => s.sitePart === part)
+					? ("site" as const)
+					: own.some((s) => s.kind === part)
+						? ("custom" as const)
+						: ("none" as const);
+			const headerMode = modeOf("header");
+			const footerMode = modeOf("footer");
 
 			await tx.delete(pageSection).where(eq(pageSection.pageId, current.id));
 			if (sectionIds.length) {
@@ -236,7 +284,12 @@ export const savePage = createServerFn({ method: "POST" })
 
 			const [updated] = await tx
 				.update(page)
-				.set({ root: { ...data.root, nodes: [] }, version: locked.version + 1 })
+				.set({
+					root: { ...data.root, nodes: [] },
+					version: locked.version + 1,
+					headerMode,
+					footerMode,
+				})
 				.where(eq(page.id, current.id))
 				.returning({ version: page.version, updatedAt: page.updatedAt });
 
@@ -255,7 +308,32 @@ export const savePage = createServerFn({ method: "POST" })
 							),
 						)
 				: [];
-			return { ...updated, affectedPageIds: affected.map((a) => a.id) };
+			// páginas publicadas que usam o cabeçalho/rodapé do site alterado
+			const usingSiteParts = touchedParts.length
+				? await tx
+						.select({ id: page.id })
+						.from(page)
+						.where(
+							and(
+								eq(page.projectId, current.projectId),
+								ne(page.id, current.id),
+								eq(page.status, "published"),
+								isNull(page.deletedAt),
+								or(
+									touchedParts.includes("header")
+										? eq(page.headerMode, "site")
+										: undefined,
+									touchedParts.includes("footer")
+										? eq(page.footerMode, "site")
+										: undefined,
+								),
+							),
+						)
+				: [];
+			const affectedIds = [
+				...new Set([...affected, ...usingSiteParts].map((a) => a.id)),
+			];
+			return { ...updated, affectedPageIds: affectedIds };
 		});
 
 		return {
@@ -373,7 +451,12 @@ export const listGlobalSections = createServerFn({ method: "GET" })
 			})
 			.from(section)
 			.where(
-				and(eq(section.projectId, data.projectId), eq(section.isGlobal, true)),
+				and(
+					eq(section.projectId, data.projectId),
+					eq(section.isGlobal, true),
+					// cabeçalho e rodapé do site são geridos à parte
+					eq(section.kind, "section"),
+				),
 			)
 			.orderBy(asc(section.name));
 		return rows;

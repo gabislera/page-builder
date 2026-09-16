@@ -72,7 +72,7 @@ export function RenderNode({ render }: { render: ReactNode }) {
 							name={name}
 							selected={isSelected}
 							isTopLevel={isTopLevel}
-							isGlobal={Boolean(custom?.isGlobal)}
+							isGlobal={Boolean(custom?.isGlobal || custom?.sitePart)}
 							canDelete={isDeletable && editor.query.node(id).isDeletable()}
 							canDrag={isDraggable}
 							canDuplicate={!custom?.notDuplicable}

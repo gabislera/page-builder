@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { ScrollArea } from "#/components/ui/scroll-area";
 import { TooltipProvider } from "#/components/ui/tooltip";
 import { RenderProvider } from "../core/render-context.tsx";
+import type { SiteSettings } from "../core/theme.ts";
+import type { SectionTree } from "../core/tree.ts";
 import { resolver } from "../resolver.ts";
 import { AutosaveController, clearDraft, readDraft } from "./autosave.tsx";
 import { CanvasFrame } from "./canvas-frame.tsx";
@@ -16,6 +18,8 @@ import { useSaveState } from "./save-store.ts";
 import { SectionLibraryDialog } from "./section-library.tsx";
 import { SettingsPanel } from "./settings-panel.tsx";
 import { KeyboardShortcuts } from "./shortcuts.tsx";
+import { useSiteStore } from "./site-store.ts";
+import { SiteSettingsController } from "./theme-panel.tsx";
 import { TopBar } from "./top-bar.tsx";
 
 export type EditorPageData = {
@@ -34,12 +38,19 @@ export type EditorPageData = {
 export function EditorShell({
 	page,
 	nodes,
+	site,
+	siteParts,
 	services,
 }: {
 	page: EditorPageData;
 	nodes: SerializedNodes;
+	site: SiteSettings;
+	siteParts: { header: SectionTree | null; footer: SectionTree | null };
 	services: EditorContextValue["services"];
 }) {
+	// o tema precisa estar no store antes do primeiro render do canvas
+	useState(() => useSiteStore.getState().init(site, siteParts));
+	const identity = useSiteStore((s) => s.settings.identity);
 	const [meta, setMeta] = useState<PageMeta>({
 		name: page.name,
 		slug: page.slug,
@@ -75,7 +86,13 @@ export function EditorShell({
 	return (
 		<EditorContextProvider value={context}>
 			<RenderProvider
-				value={{ mode: "editor", pageId: page.id, pageUrl: () => "#" }}
+				value={{
+					mode: "editor",
+					pageId: page.id,
+					pageUrl: () => "#",
+					site: identity,
+					homeUrl: "#",
+				}}
 			>
 				<TooltipProvider delayDuration={300}>
 					<Editor
@@ -103,6 +120,7 @@ export function EditorShell({
 						</div>
 						<SectionLibraryDialog />
 						<AutosaveController />
+						<SiteSettingsController />
 						<KeyboardShortcuts canvasDoc={canvasDoc} />
 						<DraftRecovery
 							pageId={page.id}

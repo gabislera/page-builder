@@ -37,7 +37,9 @@ function LayerItem({ id, depth }: { id: string; depth: number }) {
 								(n.data.custom?.displayName as string) || n.data.displayName,
 							children: n.data.nodes,
 							hidden: n.data.hidden,
-							isGlobal: Boolean(n.data.custom?.isGlobal),
+							isGlobal: Boolean(
+								n.data.custom?.isGlobal || n.data.custom?.sitePart,
+							),
 						}
 					: null,
 				isSelected: state.events.selected.has(id),
