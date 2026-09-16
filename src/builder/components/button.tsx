@@ -55,6 +55,7 @@ import type {
 	Sides,
 	Typography,
 } from "../core/style-types.ts";
+import { C } from "../core/theme.ts";
 import type { ComponentDefinition, NodeViewProps } from "../core/types.ts";
 
 export type ButtonProps = {
@@ -206,15 +207,19 @@ export const Button: ComponentDefinition<ButtonProps> = {
 			textAlign: responsive("center"),
 			color: "#ffffff",
 		}),
-		background: defaultBackground({ type: "color", color: "#2563eb" }),
+		background: defaultBackground({ type: "color", color: C.primary }),
 		border: defaultBorder({ radius: responsive(corners("10px")) }),
 		shadow: defaultShadow({
 			enabled: true,
 			y: 8,
 			blur: 20,
-			color: "#2563eb40",
+			color: `color-mix(in srgb, ${C.primary} 25%, transparent)`,
 		}),
-		hover: defaultHover({ enabled: true, background: "#1d4ed8", scale: 1.02 }),
+		hover: defaultHover({
+			enabled: true,
+			background: `color-mix(in srgb, ${C.primary} 85%, black)`,
+			scale: 1.02,
+		}),
 		box: defaultBox({ alignSelf: responsive("flex-start") }),
 	},
 	View: ButtonView,

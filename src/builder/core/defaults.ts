@@ -10,6 +10,7 @@ import type {
 	TextShadow,
 	Typography,
 } from "./style-types.ts";
+import { C } from "./theme.ts";
 
 export const sides = (
 	top: string,
@@ -51,7 +52,7 @@ export const defaultTypography = (
 	textTransform: "none",
 	fontStyle: "normal",
 	textDecoration: "none",
-	color: "#18181b",
+	color: C.text,
 	...overrides,
 });
 
@@ -59,13 +60,13 @@ export const defaultBackground = (
 	overrides: Partial<Background> = {},
 ): Background => ({
 	type: "none",
-	color: "#ffffff",
+	color: C.background,
 	gradient: {
 		type: "linear",
 		angle: 135,
-		from: "#2563eb",
+		from: C.primary,
 		fromPosition: 0,
-		to: "#06b6d4",
+		to: C.secondary,
 		toPosition: 100,
 	},
 	image: {
@@ -82,7 +83,7 @@ export const defaultBackground = (
 export const defaultBorder = (overrides: Partial<Border> = {}): Border => ({
 	style: "none",
 	width: responsive(sides("1px")),
-	color: "#e4e4e7",
+	color: C.border,
 	radius: responsive(corners("0px")),
 	...overrides,
 });

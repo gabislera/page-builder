@@ -326,6 +326,8 @@ export const FONT_OPTIONS = [
 
 export function fontStack(family: string): string {
 	if (family === "inherit") return "inherit";
+	// referência a uma fonte global do tema (var(--pb-font-...))
+	if (family.startsWith("var(")) return family;
 	if (SYSTEM_FONTS[family]) return SYSTEM_FONTS[family];
 	return `'${family}', ${SYSTEM_FONTS["Sans-serif"]}`;
 }

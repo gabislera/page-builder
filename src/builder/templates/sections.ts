@@ -6,6 +6,7 @@ import { containerPresets } from "../components/container.tsx";
 import { h, type NodeSpec } from "../core/build.ts";
 import { corners, defaultBackground, sides } from "../core/defaults.ts";
 import { responsive } from "../core/responsive.ts";
+import { C } from "../core/theme.ts";
 import type { SectionKind } from "../core/tree.ts";
 
 export type SectionTemplate = {
@@ -32,11 +33,11 @@ const card = (children: NodeSpec[]) =>
 		{
 			...containerPresets.stack,
 			gap: responsive("12px"),
-			background: defaultBackground({ type: "color", color: "#ffffff" }),
+			background: defaultBackground({ type: "color", color: C.background }),
 			border: {
 				style: "solid",
 				width: responsive(sides("1px")),
-				color: "#e4e4e7",
+				color: C.border,
 				radius: responsive(corners("16px")),
 			},
 			box: { padding: responsive(sides("28px")) },
@@ -192,7 +193,7 @@ export const SECTION_TEMPLATES: SectionTemplate[] = [
 			h(
 				"Section",
 				{
-					background: defaultBackground({ type: "color", color: "#f4f4f5" }),
+					background: defaultBackground({ type: "color", color: C.surface }),
 					alignItems: responsive("center"),
 					gap: responsive("40px"),
 				},
@@ -301,12 +302,18 @@ export const SECTION_TEMPLATES: SectionTemplate[] = [
 					}),
 					h("Text", {
 						html: "<p>Reforce a oferta e a urgência em uma linha.</p>",
-						typography: { textAlign: responsive("center"), color: "#dbeafe" },
+						typography: {
+							textAlign: responsive("center"),
+							color: "color-mix(in srgb, #ffffff 80%, transparent)",
+						},
 					}),
 					h("Button", {
 						background: defaultBackground({ type: "color", color: "#ffffff" }),
-						typography: { color: "#1e40af" },
-						hover: { background: "#dbeafe" },
+						typography: { color: C.primary },
+						hover: {
+							background:
+								"color-mix(in srgb, #ffffff 85%, var(--pb-c-primary))",
+						},
 						box: { alignSelf: responsive("center") },
 					}),
 				],

@@ -740,7 +740,7 @@ export const Form: ComponentDefinition<FormProps> = {
 		}),
 		inputHeight: responsive("48px"),
 		inputPaddingX: responsive("14px"),
-		focusColor: "#2563eb",
+		focusColor: "var(--pb-c-primary)",
 		submitText: "Quero me inscrever",
 		submitIcon: "arrow-right",
 		loadingText: "Enviando...",

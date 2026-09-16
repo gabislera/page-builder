@@ -14,7 +14,12 @@ import {
 	defaultTextShadow,
 	defaultTypography,
 } from "../core/defaults.ts";
-import { Lines, mergeRefs, useInlineEdit } from "../core/inline-edit.tsx";
+import {
+	fillTokens,
+	Lines,
+	mergeRefs,
+	useInlineEdit,
+} from "../core/inline-edit.tsx";
 import { nodeClassName } from "../core/node-helpers.ts";
 import { useRender } from "../core/render-context.tsx";
 import { responsive } from "../core/responsive.ts";
@@ -30,6 +35,7 @@ import type {
 	TextShadow,
 	Typography,
 } from "../core/style-types.ts";
+import { C, FONT_HEADING } from "../core/theme.ts";
 import type { ComponentDefinition, NodeViewProps } from "../core/types.ts";
 
 export type HeadingProps = {
@@ -64,10 +70,10 @@ function HeadingView({
 		>
 			{edit.editing ? null : link ? (
 				<a {...link}>
-					<Lines text={props.text} />
+					<Lines text={fillTokens(props.text)} />
 				</a>
 			) : (
-				<Lines text={props.text} />
+				<Lines text={fillTokens(props.text)} />
 			)}
 		</Tag>
 	);
@@ -129,11 +135,11 @@ export const Heading: ComponentDefinition<HeadingProps> = {
 		text: "Escreva um título que prenda a atenção",
 		tag: "h2",
 		typography: defaultTypography({
-			fontFamily: "inherit",
+			fontFamily: FONT_HEADING,
 			fontSize: responsive("40px", "34px", "28px"),
 			fontWeight: "700",
 			lineHeight: responsive("1.2"),
-			color: "#18181b",
+			color: C.text,
 		}),
 		textShadow: defaultTextShadow(),
 		action: { type: "none" },

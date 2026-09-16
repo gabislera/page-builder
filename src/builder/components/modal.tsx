@@ -104,7 +104,7 @@ const EDITOR_LABEL: CSSProperties = {
 	padding: "3px 8px",
 	borderRadius: 4,
 	background: "#eff6ff",
-	color: "#1d4ed8",
+	color: "color-mix(in srgb, var(--pb-c-primary) 85%, black)",
 	font: "600 11px/1.4 Inter, system-ui, sans-serif",
 	pointerEvents: "none",
 };

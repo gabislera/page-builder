@@ -18,7 +18,7 @@ import {
 	defaultTextShadow,
 	defaultTypography,
 } from "../core/defaults.ts";
-import { mergeRefs } from "../core/inline-edit.tsx";
+import { fillTokens, mergeRefs } from "../core/inline-edit.tsx";
 import { nodeClassName } from "../core/node-helpers.ts";
 import { useIsEditor } from "../core/render-context.tsx";
 import { responsive } from "../core/responsive.ts";
@@ -30,6 +30,7 @@ import {
 	textShadowToCss,
 } from "../core/style-engine.ts";
 import type { Box, TextShadow, Typography } from "../core/style-types.ts";
+import { C } from "../core/theme.ts";
 import type { ComponentDefinition, NodeViewProps } from "../core/types.ts";
 
 export type TextProps = {
@@ -72,7 +73,7 @@ function TextView({
 			data-pb-node={id}
 			onDoubleClick={isEditor ? () => setEditing(true) : undefined}
 			// biome-ignore lint/security/noDangerouslySetInnerHtml: HTML produzido pelo Tiptap (schema restrito)
-			dangerouslySetInnerHTML={{ __html: props.html }}
+			dangerouslySetInnerHTML={{ __html: fillTokens(props.html) }}
 		/>
 	);
 }
@@ -170,9 +171,9 @@ export const Text: ComponentDefinition<TextProps> = {
 		typography: defaultTypography({
 			fontSize: responsive("18px", undefined, "16px"),
 			lineHeight: responsive("1.6"),
-			color: "#3f3f46",
+			color: C.textMuted,
 		}),
-		linkColor: "#2563eb",
+		linkColor: C.primary,
 		textShadow: defaultTextShadow(),
 		box: defaultBox(),
 	},

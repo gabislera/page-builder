@@ -9,6 +9,7 @@ import {
 	RenderProvider,
 } from "../core/render-context.tsx";
 import { googleFontsHref } from "../core/style-engine.ts";
+import { type SiteSettings, themeCss, themeFonts } from "../core/theme.ts";
 import { ROOT_ID, typeOf } from "../core/tree.ts";
 import type { RuntimeFeature } from "../core/types.ts";
 import { getDefinition } from "../registry.ts";
@@ -18,12 +19,22 @@ export type RenderInput = {
 	pageId: string;
 	nodes: SerializedNodes;
 	pageUrl: (pageId: string) => string;
+	/** Tema e identidade do site: viram variáveis CSS e alimentam o Logo. */
+	site: SiteSettings;
+	homeUrl: string;
 };
 
 /** Renderiza a árvore de nós em HTML + CSS usando as mesmas views do editor. */
-export function renderBody({ pageId, nodes, pageUrl }: RenderInput) {
-	const css: string[] = [];
-	const fonts = new Set<string>();
+export function renderBody({
+	pageId,
+	nodes,
+	pageUrl,
+	site,
+	homeUrl,
+}: RenderInput) {
+	// variáveis do tema vêm antes do CSS dos nós, que as referencia
+	const css: string[] = [themeCss(site.theme)];
+	const fonts = new Set<string>(themeFonts(site.theme));
 	const features = new Set<RuntimeFeature>();
 
 	const renderNode = (id: string): ReactNode => {
@@ -43,7 +54,13 @@ export function renderBody({ pageId, nodes, pageUrl }: RenderInput) {
 		);
 	};
 
-	const ctx: RenderContextValue = { mode: "publish", pageId, pageUrl };
+	const ctx: RenderContextValue = {
+		mode: "publish",
+		pageId,
+		pageUrl,
+		site: site.identity,
+		homeUrl,
+	};
 	const html = renderToStaticMarkup(
 		<RenderProvider value={ctx}>{renderNode(ROOT_ID)}</RenderProvider>,
 	);
@@ -77,7 +94,7 @@ export function renderPageHtml(input: RenderPageInput): string {
 	const head = [
 		'<meta charset="utf-8">',
 		'<meta name="viewport" content="width=device-width, initial-scale=1">',
-		`<title>${esc(seo.title || "")}</title>`,
+		`<title>${esc(seo.title || input.site.identity.name || "")}</title>`,
 		seo.description
 			? `<meta name="description" content="${esc(seo.description)}">`
 			: "",

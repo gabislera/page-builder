@@ -7,6 +7,8 @@ import {
 	PopoverTrigger,
 } from "#/components/ui/popover";
 import { cn } from "#/lib/utils";
+import { colorRefId, colorVar, resolveThemeVars } from "../core/theme.ts";
+import { useSiteStore } from "../editor/site-store.ts";
 import { useEditorUI } from "../editor/store.ts";
 import { Field } from "./field.tsx";
 import { useField } from "./use-field.ts";
@@ -49,16 +51,31 @@ export function ColorInput({
 	value,
 	onChange,
 	allowEmpty,
+	allowGlobal = true,
+	className,
 }: {
 	value: string | undefined;
 	onChange: (value: string, throttle?: boolean) => void;
 	allowEmpty?: boolean;
+	/** Oferece as cores globais do site (desligado no próprio editor de paleta). */
+	allowGlobal?: boolean;
+	className?: string;
 }) {
+	const theme = useSiteStore((s) => s.settings.theme);
+	const refId = colorRefId(value);
+	const globalColor = refId ? theme.colors.find((c) => c.id === refId) : null;
+	// o painel fica fora do canvas: referências ao tema são trocadas pelo valor real
+	const shown = resolveThemeVars(value ?? "", theme);
+	const label = globalColor
+		? globalColor.name
+		: value && !value.startsWith("#")
+			? "personalizada"
+			: value || "nenhuma";
 	const favorites = useEditorUI((s) => s.favoriteColors);
 	const addFavorite = useEditorUI((s) => s.addFavoriteColor);
 	const removeFavorite = useEditorUI((s) => s.removeFavoriteColor);
-	const [hex, setHex] = useState(value ?? "");
-	useEffect(() => setHex(value ?? ""), [value]);
+	const [hex, setHex] = useState(shown);
+	useEffect(() => setHex(shown), [shown]);
 
 	const hasEyeDropper = typeof window !== "undefined" && "EyeDropper" in window;
 
@@ -89,7 +106,10 @@ export function ColorInput({
 			<PopoverTrigger asChild>
 				<button
 					type="button"
-					className="flex h-8 w-[118px] items-center gap-2 rounded-md border border-input px-1.5 text-left text-[11px] hover:bg-accent/50"
+					className={cn(
+						"flex h-8 w-[118px] items-center gap-2 rounded-md border border-input px-1.5 text-left text-[11px] hover:bg-accent/50",
+						className,
+					)}
 				>
 					<span
 						className="size-5 shrink-0 overflow-hidden rounded-sm border border-border"
@@ -97,18 +117,52 @@ export function ColorInput({
 					>
 						<span
 							className="block size-full"
-							style={{ background: value || "transparent" }}
+							style={{ background: shown || "transparent" }}
 						/>
 					</span>
-					<span className="truncate font-mono text-muted-foreground">
-						{value || "nenhuma"}
+					<span
+						className={cn(
+							"truncate text-muted-foreground",
+							!globalColor && "font-mono",
+							globalColor && "text-foreground",
+						)}
+					>
+						{label}
 					</span>
 				</button>
 			</PopoverTrigger>
 			<PopoverContent className="w-60 p-3" align="end">
 				<div className="flex flex-col gap-3">
+					{allowGlobal ? (
+						<div className="flex flex-col gap-1.5">
+							<span className="text-[10px] font-medium text-muted-foreground uppercase">
+								Cores do site
+							</span>
+							<div className="flex flex-wrap gap-1.5">
+								{theme.colors.map((c) => (
+									<button
+										key={c.id}
+										type="button"
+										title={c.name}
+										onClick={() => onChange(colorVar(c.id))}
+										className={cn(
+											"size-6 overflow-hidden rounded-full border border-border",
+											refId === c.id &&
+												"ring-2 ring-primary ring-offset-1 ring-offset-popover",
+										)}
+										style={{ background: CHECKER }}
+									>
+										<span
+											className="block size-full"
+											style={{ background: c.value }}
+										/>
+									</button>
+								))}
+							</div>
+						</div>
+					) : null}
 					<HexAlphaColorPicker
-						color={value || "#000000ff"}
+						color={shown.startsWith("#") ? shown : "#000000ff"}
 						onChange={(c) => onChange(c, true)}
 						style={{ width: "100%", height: 160 }}
 					/>
@@ -144,6 +198,9 @@ export function ColorInput({
 							</button>
 						) : null}
 					</div>
+					<span className="-mb-1.5 text-[10px] font-medium text-muted-foreground uppercase">
+						Salvas
+					</span>
 					<div className="flex flex-wrap gap-1.5">
 						{favorites.map((c) => (
 							<button
@@ -164,11 +221,11 @@ export function ColorInput({
 								<span className="block size-full" style={{ background: c }} />
 							</button>
 						))}
-						{value ? (
+						{shown.startsWith("#") ? (
 							<button
 								type="button"
 								title="Salvar cor"
-								onClick={() => addFavorite(value)}
+								onClick={() => addFavorite(shown)}
 								className="flex size-6 items-center justify-center rounded border border-dashed border-border text-muted-foreground hover:text-foreground"
 							>
 								<Plus className="size-3" />

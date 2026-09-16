@@ -10,12 +10,13 @@ import { type Responsive, responsive } from "../core/responsive.ts";
 import {
 	applyBackground,
 	createSheet,
-	FONT_OPTIONS,
 	fontStack,
 	nodeClass,
 } from "../core/style-engine.ts";
 import type { Background, Length } from "../core/style-types.ts";
+import { C, FONT_BODY, FONT_HEADING, fontChoices } from "../core/theme.ts";
 import type { ComponentDefinition } from "../core/types.ts";
+import { SitePartSlot } from "../editor/site-part-slot.tsx";
 
 export type PageProps = {
 	contentWidth: Length;
@@ -39,6 +40,7 @@ function PageView({
 			className={`pb-page ${nodeClass(id)}`}
 			data-pb-node={id}
 		>
+			{isEditor ? <SitePartSlot part="header" /> : null}
 			{children}
 			{isEditor && empty ? (
 				<div
@@ -48,6 +50,7 @@ function PageView({
 					Página vazia. Adicione uma seção pelo painel "Adicionar".
 				</div>
 			) : null}
+			{isEditor ? <SitePartSlot part="footer" /> : null}
 		</div>
 	);
 }
@@ -69,18 +72,13 @@ function PageSettings() {
 				<SelectField
 					path="fontFamily"
 					label="Fonte do texto"
-					options={FONT_OPTIONS.filter((f) => f !== "inherit").map((f) => ({
-						value: f,
-						label: f,
-					}))}
+					options={fontChoices()}
+					hint="O padrão segue as fontes globais do site."
 				/>
 				<SelectField
 					path="headingFontFamily"
 					label="Fonte dos títulos"
-					options={FONT_OPTIONS.map((f) => ({
-						value: f,
-						label: f === "inherit" ? "Mesma do texto" : f,
-					}))}
+					options={fontChoices()}
 				/>
 				<NumberUnitField
 					path="baseFontSize"
@@ -107,11 +105,11 @@ export const Page: ComponentDefinition<PageProps> = {
 	notDeletable: true,
 	defaults: {
 		contentWidth: "1200px",
-		fontFamily: "Inter",
-		headingFontFamily: "inherit",
-		textColor: "#18181b",
+		fontFamily: FONT_BODY,
+		headingFontFamily: FONT_HEADING,
+		textColor: C.text,
 		baseFontSize: responsive("16px"),
-		background: defaultBackground({ type: "color", color: "#ffffff" }),
+		background: defaultBackground({ type: "color", color: C.background }),
 	},
 	rules: {
 		canDrag: () => false,

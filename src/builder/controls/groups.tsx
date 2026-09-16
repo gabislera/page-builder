@@ -16,8 +16,8 @@ import { cn } from "#/lib/utils";
 import { corners, sides } from "../core/defaults.ts";
 import { getPath } from "../core/path.ts";
 import type { Responsive } from "../core/responsive.ts";
-import { FONT_OPTIONS } from "../core/style-engine.ts";
 import type { Background, Corners, Sides } from "../core/style-types.ts";
+import { fontChoices } from "../core/theme.ts";
 import { ColorField } from "./color.tsx";
 import { Field, Group } from "./field.tsx";
 import {
@@ -215,10 +215,7 @@ export function TypographyFields({
 			<SelectField
 				path={join(base, "fontFamily")}
 				label="Fonte"
-				options={FONT_OPTIONS.map((f) => ({
-					value: f,
-					label: f === "inherit" ? "Padrão da página" : f,
-				}))}
+				options={fontChoices({ inherit: true })}
 			/>
 			<div className="grid grid-cols-1 gap-3">
 				<NumberUnitField

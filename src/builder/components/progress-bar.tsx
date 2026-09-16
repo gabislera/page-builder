@@ -254,11 +254,11 @@ export const ProgressBar: ComponentDefinition<ProgressBarProps> = {
 		gap: responsive("8px"),
 		trackColor: "#e4e4e7",
 		fill: "solid",
-		barColor: "#2563eb",
+		barColor: "var(--pb-c-primary)",
 		barGradient: {
 			type: "linear",
 			angle: 90,
-			from: "#2563eb",
+			from: "var(--pb-c-primary)",
 			fromPosition: 0,
 			to: "#06b6d4",
 			toPosition: 100,

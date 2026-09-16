@@ -13,6 +13,7 @@ import { nodeClassName } from "../core/node-helpers.ts";
 import { type Responsive, responsive } from "../core/responsive.ts";
 import { applyBox, createSheet } from "../core/style-engine.ts";
 import type { Box, Length } from "../core/style-types.ts";
+import { C } from "../core/theme.ts";
 import type { ComponentDefinition, NodeViewProps } from "../core/types.ts";
 
 export type DividerProps = {
@@ -89,7 +90,7 @@ export const Divider: ComponentDefinition<DividerProps> = {
 	defaults: {
 		style: "solid",
 		thickness: responsive("1px"),
-		color: "#e4e4e7",
+		color: C.border,
 		length: responsive("100%"),
 		align: responsive("center"),
 		box: defaultBox({

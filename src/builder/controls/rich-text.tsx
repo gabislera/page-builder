@@ -25,7 +25,8 @@ import {
 import { useEffect } from "react";
 import { create } from "zustand";
 import { cn } from "#/lib/utils";
-import { FONT_OPTIONS, fontStack } from "../core/style-engine.ts";
+import { fontStack } from "../core/style-engine.ts";
+import { fontChoices } from "../core/theme.ts";
 import { ColorInput } from "./color.tsx";
 import { Field } from "./field.tsx";
 import { useNodeProps } from "./use-field.ts";
@@ -278,7 +279,8 @@ export function RichToolbar({ editor }: { editor: Editor }) {
 				<select
 					className="h-7 flex-1 rounded border border-input bg-transparent px-1 text-[11px] outline-none"
 					value={
-						FONT_OPTIONS.find((f) => fontStack(f) === state.fontFamily) ?? ""
+						fontChoices().find((f) => fontStack(f.value) === state.fontFamily)
+							?.value ?? ""
 					}
 					onChange={(e) =>
 						e.target.value
@@ -287,9 +289,9 @@ export function RichToolbar({ editor }: { editor: Editor }) {
 					}
 				>
 					<option value="">Fonte</option>
-					{FONT_OPTIONS.filter((f) => f !== "inherit").map((f) => (
-						<option key={f} value={f}>
-							{f}
+					{fontChoices().map((f) => (
+						<option key={f.value} value={f.value}>
+							{f.label}
 						</option>
 					))}
 				</select>
