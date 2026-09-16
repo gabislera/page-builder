@@ -14,6 +14,7 @@ import {
 	uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
+import type { SiteSettings } from "#/builder/core/theme";
 import { user } from "./auth.ts";
 
 const id = () =>
@@ -64,6 +65,11 @@ export const project = pgTable("project", {
 	id: id(),
 	name: text("name").notNull(),
 	slug: text("slug").notNull().unique(),
+	/** Tema global, identidade e cabeçalho/rodapé padrão do site. */
+	settings: jsonb("settings")
+		.$type<Partial<SiteSettings>>()
+		.notNull()
+		.default({}),
 	...timestamps,
 });
 
@@ -93,6 +99,18 @@ export const projectMember = pgTable(
 
 export const pageStatus = pgEnum("page_status", ["draft", "published"]);
 
+/**
+ * De onde vem o cabeçalho/rodapé da página:
+ * - site: o padrão do projeto (muda junto em todas as páginas)
+ * - none: a página não tem
+ * - custom: a página tem um próprio (salvo nas seções dela)
+ */
+export const sitePartMode = pgEnum("site_part_mode", [
+	"site",
+	"none",
+	"custom",
+]);
+
 export const page = pgTable(
 	"page",
 	{
@@ -103,6 +121,8 @@ export const page = pgTable(
 		name: text("name").notNull(),
 		slug: text("slug").notNull(),
 		status: pageStatus("status").notNull().default("draft"),
+		headerMode: sitePartMode("header_mode").notNull().default("site"),
+		footerMode: sitePartMode("footer_mode").notNull().default("site"),
 		/** Nó ROOT (componente Page) serializado: estilos globais da página. */
 		root: jsonb("root").$type<SerializedNode>().notNull(),
 		seo: jsonb("seo").$type<PageSeo>().notNull().default({}),
