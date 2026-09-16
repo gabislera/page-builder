@@ -10,8 +10,12 @@ import { ROOT_ID, type SectionTree } from "#/builder/core/tree.ts";
 import { HEADER_FOOTER_TEMPLATES } from "#/builder/templates/headers-footers.ts";
 import { SECTION_TEMPLATES } from "#/builder/templates/sections.ts";
 import { db } from "#/db/index.ts";
-import { page, pageSection } from "#/db/schema/index.ts";
-import { insertSections, publishPageById } from "#/server/page-store.ts";
+import { page, pageSection, project } from "#/db/schema/index.ts";
+import {
+	insertSections,
+	publishPageById,
+	upsertSections,
+} from "#/server/page-store.ts";
 
 const projectId = process.argv[2];
 if (!projectId) throw new Error("Informe o projectId");
@@ -27,8 +31,11 @@ const section = (spec: ReturnType<typeof h>, kind: SectionTree["kind"], name: st
 	return { rootNodeId: tree.rootNodeId, kind, name, isGlobal: false, nodes: tree.nodes };
 };
 
+// cabeçalho e rodapé do site (aparecem em todas as páginas que usam o padrão)
+const siteHeader = section(tpl("header-menu-right").build(), "header", "Cabeçalho do site");
+const siteFooter = section(tpl("footer-columns").build(), "footer", "Rodapé do site");
+
 const sections: SectionTree[] = [
-	section(tpl("header-classic").build(), "header", "Cabeçalho"),
 	section(tpl("hero-split").build(), "section", "Hero"),
 	section(
 		h("Section", { gap: responsive("32px") }, [
@@ -66,7 +73,6 @@ const sections: SectionTree[] = [
 		"Avançado",
 	),
 	section(tpl("cta-gradient").build(), "section", "CTA"),
-	section(tpl("footer-columns").build(), "footer", "Rodapé"),
 ];
 
 // o botão "Abrir pop-up" abre o modal da mesma seção
@@ -81,6 +87,17 @@ if (existing) {
 	await db.delete(page).where(eq(page.id, existing.id));
 }
 const created = await db.transaction(async (tx) => {
+	const {
+		sectionIds: [headerSectionId, footerSectionId],
+	} = await upsertSections(tx, projectId, [
+		{ ...siteHeader, isGlobal: true },
+		{ ...siteFooter, isGlobal: true },
+	]);
+	const proj = await tx.query.project.findFirst({ where: eq(project.id, projectId) });
+	await tx
+		.update(project)
+		.set({ settings: { ...proj?.settings, headerSectionId, footerSectionId } })
+		.where(eq(project.id, projectId));
 	const [row] = await tx
 		.insert(page)
 		.values({ projectId, name: "Vitrine de componentes", slug: "vitrine", root: buildRoot(), seo: { title: "Vitrine" } })
