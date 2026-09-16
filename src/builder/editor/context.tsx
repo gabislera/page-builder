@@ -48,6 +48,11 @@ export type EditorServices = {
 		republish: string[],
 	) => Promise<{ publishedAt: string | null; url: string }>;
 	updateSettings: (patch: PageSettingsPatch) => Promise<PageSettingsPatch>;
+	updateSiteSettings: (patch: {
+		theme?: import("../core/theme.ts").SiteTheme;
+		identity?: import("../core/theme.ts").SiteIdentity;
+	}) => Promise<import("../core/theme.ts").SiteSettings>;
+	republishSite: () => Promise<{ count: number }>;
 };
 
 export type EditorContextValue = {

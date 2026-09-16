@@ -1,4 +1,4 @@
-import { Layers, LayoutTemplate, Plus, Settings2 } from "lucide-react";
+import { Layers, LayoutTemplate, Palette, Plus, Settings2 } from "lucide-react";
 import { Button } from "#/components/ui/button";
 import { ScrollArea } from "#/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
@@ -8,12 +8,14 @@ import { type PageMeta, PageMetaPanel } from "./page-settings.tsx";
 import { useSectionPicker } from "./section-picker-store.ts";
 import { PageStylesPanel } from "./settings-panel.tsx";
 import { type LeftPanel as Panel, useEditorUI } from "./store.ts";
+import { ThemePanel } from "./theme-panel.tsx";
 import { Toolbox } from "./toolbox.tsx";
 
 const TABS: { value: Panel; label: string; icon: typeof Plus }[] = [
 	{ value: "add", label: "Adicionar", icon: Plus },
 	{ value: "layers", label: "Camadas", icon: Layers },
 	{ value: "page", label: "Página", icon: Settings2 },
+	{ value: "theme", label: "Tema", icon: Palette },
 ];
 
 export function LeftPanel({
@@ -29,7 +31,7 @@ export function LeftPanel({
 
 	return (
 		<aside className="flex w-72 shrink-0 flex-col border-r border-border bg-editor-panel">
-			<div className="grid grid-cols-3 border-b border-border">
+			<div className="grid grid-cols-4 border-b border-border">
 				{TABS.map(({ value, label, icon: Icon }) => (
 					<button
 						key={value}
@@ -58,6 +60,7 @@ export function LeftPanel({
 					</>
 				) : null}
 				{panel === "layers" ? <LayersPanel /> : null}
+				{panel === "theme" ? <ThemePanel /> : null}
 				{panel === "page" ? (
 					<Tabs defaultValue="styles" className="gap-0">
 						<TabsList className="mx-4 mt-3 mb-1 grid h-8 w-[calc(100%-2rem)] grid-cols-2">

@@ -10,6 +10,8 @@ import { createPortal } from "react-dom";
 import { BASE_CSS, EDITOR_CSS } from "../core/base-css.ts";
 import { DEVICE_WIDTH } from "../core/responsive.ts";
 import { GOOGLE_FONTS, googleFontsHref } from "../core/style-engine.ts";
+import { themeCss } from "../core/theme.ts";
+import { useSiteStore } from "./site-store.ts";
 import { useEditorUI } from "./store.ts";
 
 /** No editor carregamos todas as fontes oferecidas; o navegador só baixa as usadas. */
@@ -35,6 +37,19 @@ export function CanvasFrame({
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 	const [doc, setDoc] = useState<Document | null>(null);
 	const [area, setArea] = useState({ width: 0, height: 0 });
+	const theme = useSiteStore((s) => s.settings.theme);
+
+	// variáveis do tema global, atualizadas ao vivo enquanto o usuário edita a paleta
+	useEffect(() => {
+		if (!doc) return;
+		let el = doc.getElementById("pb-theme");
+		if (!el) {
+			el = doc.createElement("style");
+			el.id = "pb-theme";
+			doc.head.prepend(el);
+		}
+		el.textContent = themeCss(theme);
+	}, [doc, theme]);
 	const { actions } = useEditor();
 
 	useLayoutEffect(() => {

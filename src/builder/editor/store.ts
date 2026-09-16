@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Device } from "../core/responsive.ts";
 
-export type LeftPanel = "add" | "layers" | "page";
+export type LeftPanel = "add" | "layers" | "page" | "theme";
 
 type EditorUIState = {
 	device: Device;

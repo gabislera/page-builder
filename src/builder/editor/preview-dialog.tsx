@@ -6,6 +6,7 @@ import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { DEVICE_WIDTH, type Device } from "../core/responsive.ts";
 import { renderPageHtml } from "../renderer/render-page.tsx";
 import { useEditorContext } from "./context.tsx";
+import { useSiteStore } from "./site-store.ts";
 
 /** Prévia do estado atual (inclusive não salvo), com o HTML final da publicação. */
 export function PreviewDialog({
@@ -26,6 +27,8 @@ export function PreviewDialog({
 			nodes: query.getSerializedNodes(),
 			pageUrl: () => "#",
 			seo: { title: "Prévia" },
+			site: useSiteStore.getState().settings,
+			homeUrl: "#",
 			tracking: {},
 			formEndpoint: "#",
 			viewEndpoint: "data:,",
