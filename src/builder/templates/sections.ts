@@ -80,9 +80,9 @@ export const SECTION_TEMPLATES: SectionTemplate[] = [
 	blankColumns(2),
 	blankColumns(3),
 	blankColumns(4),
-	blankColumns(2, "1fr 2fr", "1/3 + 2/3"),
-	blankColumns(2, "2fr 1fr", "2/3 + 1/3"),
-	blankColumns(3, "1fr 2fr 1fr", "1/4 + 1/2 + 1/4"),
+	blankColumns(2, "1fr 2fr", "Estreita + larga"),
+	blankColumns(2, "2fr 1fr", "Larga + estreita"),
+	blankColumns(3, "1fr 2fr 1fr", "Central mais larga"),
 	{
 		id: "hero-centered",
 		category: "Hero",

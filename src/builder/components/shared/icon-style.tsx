@@ -17,7 +17,7 @@ import type { StyleRule, StyleSheet } from "../../core/style-engine.ts";
 import type { Length } from "../../core/style-types.ts";
 import { C } from "../../core/theme.ts";
 
-/** Aparência de um ícone com forma opcional (Ícone, Caixa de ícone). */
+/** Aparência de um ícone com forma opcional (Ícone, Card com ícone). */
 export type IconStyle = {
 	name: string;
 	size: Responsive<Length>;

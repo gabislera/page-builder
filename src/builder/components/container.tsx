@@ -323,15 +323,15 @@ const LAYOUT_PRESETS: Record<number, string[]> = {
 };
 
 const PRESET_LABEL: Record<string, string> = {
-	"1fr 2fr": "1/3 + 2/3",
-	"2fr 1fr": "2/3 + 1/3",
-	"1fr 3fr": "1/4 + 3/4",
-	"3fr 1fr": "3/4 + 1/4",
-	"1fr 2fr 1fr": "1/4 + 1/2 + 1/4",
-	"2fr 1fr 1fr": "1/2 + 1/4 + 1/4",
-	"1fr 1fr 2fr": "1/4 + 1/4 + 1/2",
-	"2fr 1fr 1fr 1fr": "2/5 + 1/5 + 1/5 + 1/5",
-	"1fr 1fr 1fr 2fr": "1/5 + 1/5 + 1/5 + 2/5",
+	"1fr 2fr": "Estreita + larga",
+	"2fr 1fr": "Larga + estreita",
+	"1fr 3fr": "Bem estreita + larga",
+	"3fr 1fr": "Larga + bem estreita",
+	"1fr 2fr 1fr": "Central mais larga",
+	"2fr 1fr 1fr": "Primeira mais larga",
+	"1fr 1fr 2fr": "Última mais larga",
+	"2fr 1fr 1fr 1fr": "Primeira mais larga",
+	"1fr 1fr 1fr 2fr": "Última mais larga",
 };
 
 /** Número de colunas + proporção visual (por dispositivo). */

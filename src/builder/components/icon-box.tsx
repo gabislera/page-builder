@@ -332,7 +332,7 @@ function IconBoxSettings() {
 
 export const IconBox: ComponentDefinition<IconBoxProps> = {
 	type: "IconBox",
-	displayName: "Caixa de ícone",
+	displayName: "Card com ícone",
 	category: "basic",
 	icon: SquareStar,
 	inToolbox: true,

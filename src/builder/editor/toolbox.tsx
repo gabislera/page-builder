@@ -1,23 +1,17 @@
 import { Element, useEditor } from "@craftjs/core";
-import {
-	Columns2,
-	Columns3,
-	type LucideIcon,
-	PanelLeft,
-	PanelRight,
-	Rows3,
-} from "lucide-react";
-import type { ReactElement } from "react";
+import type { ComponentType, ReactElement } from "react";
 import { containerPresets } from "../components/container.tsx";
 import { deepMerge } from "../core/build.ts";
 import { responsive } from "../core/responsive.ts";
 import { COMPONENTS } from "../registry.ts";
 import { resolver } from "../resolver.ts";
 
+type ToolboxIcon = ComponentType<{ className?: string }>;
+
 type ToolboxItem = {
 	key: string;
 	label: string;
-	icon: LucideIcon;
+	icon: ToolboxIcon;
 	create: () => ReactElement;
 };
 
@@ -44,7 +38,7 @@ const simple = (type: string): ToolboxItem => {
 const columns = (
 	n: number,
 	label: string,
-	icon: LucideIcon,
+	icon: ToolboxIcon,
 	template = "",
 ): ToolboxItem => ({
 	key: `columns-${n}-${template || "iguais"}`,
@@ -115,28 +109,49 @@ function modalItem(): ToolboxItem {
 	};
 }
 
+/** Miniatura das colunas na proporção real (mais clara que "1/3 + 2/3"). */
+function columnsGlyph(ratios: number[]): ToolboxIcon {
+	const total = ratios.reduce((a, b) => a + b, 0);
+	const gap = 1.5;
+	const width = 20 - gap * (ratios.length - 1);
+	function ColumnsGlyph({ className }: { className?: string }) {
+		let x = 2;
+		return (
+			<svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+				{ratios.map((r, i) => {
+					const w = (width * r) / total;
+					const rect = (
+						<rect
+							// biome-ignore lint/suspicious/noArrayIndexKey: colunas fixas
+							key={i}
+							x={x}
+							y={5}
+							width={w}
+							height={14}
+							rx={1.5}
+							fill="none"
+							stroke="currentColor"
+							strokeWidth={1.6}
+						/>
+					);
+					x += w + gap;
+					return rect;
+				})}
+			</svg>
+		);
+	}
+	return ColumnsGlyph;
+}
+
 export const TOOLBOX_GROUPS: { title: string; items: ToolboxItem[] }[] = [
 	{
 		title: "Layout",
 		items: [
 			simple("Container"),
-			{
-				key: "row",
-				label: "Linha",
-				icon: Rows3,
-				create: () => (
-					<Element
-						is={C.Container}
-						canvas
-						{...containerPresets.row}
-						custom={{ displayName: "Linha" }}
-					/>
-				),
-			},
-			columns(2, "2 colunas", Columns2),
-			columns(3, "3 colunas", Columns3),
-			columns(2, "1/3 + 2/3", PanelLeft, "1fr 2fr"),
-			columns(2, "2/3 + 1/3", PanelRight, "2fr 1fr"),
+			columns(2, "2 colunas", columnsGlyph([1, 1])),
+			columns(3, "3 colunas", columnsGlyph([1, 1, 1])),
+			columns(2, "Estreita + larga", columnsGlyph([1, 2]), "1fr 2fr"),
+			columns(2, "Larga + estreita", columnsGlyph([2, 1]), "2fr 1fr"),
 			simple("Spacer"),
 		],
 	},
