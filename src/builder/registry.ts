@@ -9,6 +9,9 @@ import { Form } from "./components/form.tsx";
 import { Header } from "./components/header.tsx";
 import { Heading } from "./components/heading.tsx";
 import { Html } from "./components/html.tsx";
+import { Icon } from "./components/icon.tsx";
+import { IconBox } from "./components/icon-box.tsx";
+import { IconList } from "./components/icon-list.tsx";
 import { Image } from "./components/image.tsx";
 import { Logo } from "./components/logo.tsx";
 import { Menu } from "./components/menu.tsx";
@@ -45,6 +48,9 @@ export const COMPONENTS: Record<string, AnyComponentDefinition> =
 			Modal,
 			FloatingButtons,
 			Html,
+			Icon,
+			IconList,
+			IconBox,
 			Logo,
 			Menu,
 			SocialIcons,

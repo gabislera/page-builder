@@ -1,5 +1,12 @@
 import { Element, useEditor } from "@craftjs/core";
-import { Columns2, Columns3, type LucideIcon, Rows3 } from "lucide-react";
+import {
+	Columns2,
+	Columns3,
+	type LucideIcon,
+	PanelLeft,
+	PanelRight,
+	Rows3,
+} from "lucide-react";
 import type { ReactElement } from "react";
 import { containerPresets } from "../components/container.tsx";
 import { deepMerge } from "../core/build.ts";
@@ -34,15 +41,20 @@ const simple = (type: string): ToolboxItem => {
 	};
 };
 
-const columns = (n: number, label: string, icon: LucideIcon): ToolboxItem => ({
-	key: `columns-${n}`,
+const columns = (
+	n: number,
+	label: string,
+	icon: LucideIcon,
+	template = "",
+): ToolboxItem => ({
+	key: `columns-${n}-${template || "iguais"}`,
 	label,
 	icon,
 	create: () => (
 		<Element
 			is={C.Container}
 			canvas
-			{...containerPresets.grid(n)}
+			{...containerPresets.grid(n, template)}
 			custom={{ displayName: "Colunas" }}
 		>
 			{Array.from({ length: n }, (_, i) => `col-${i}`).map((key) => (
@@ -123,6 +135,8 @@ export const TOOLBOX_GROUPS: { title: string; items: ToolboxItem[] }[] = [
 			},
 			columns(2, "2 colunas", Columns2),
 			columns(3, "3 colunas", Columns3),
+			columns(2, "1/3 + 2/3", PanelLeft, "1fr 2fr"),
+			columns(2, "2/3 + 1/3", PanelRight, "2fr 1fr"),
 			simple("Spacer"),
 		],
 	},
@@ -132,7 +146,15 @@ export const TOOLBOX_GROUPS: { title: string; items: ToolboxItem[] }[] = [
 	},
 	{
 		title: "Básico",
-		items: ["Heading", "Text", "Button", "Divider"].map(simple),
+		items: [
+			"Heading",
+			"Text",
+			"Button",
+			"Icon",
+			"IconList",
+			"IconBox",
+			"Divider",
+		].map(simple),
 	},
 	{ title: "Mídia", items: ["Image", "Video"].map(simple) },
 	{

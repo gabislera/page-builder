@@ -17,6 +17,7 @@ import {
 	Gift,
 	Heart,
 	Instagram,
+	icons,
 	Linkedin,
 	Lock,
 	type LucideIcon,
@@ -40,7 +41,12 @@ import {
 	Zap,
 } from "lucide-react";
 
-/** Ícones disponíveis em botões, listas e redes sociais. Salvos por nome. */
+/**
+ * Ícones em destaque ("Populares" no seletor), com nome em português.
+ * As chaves são nomes já salvos em páginas: nunca renomear nem remover.
+ * Algumas são apelidos próprios (ex.: "whatsapp" → MessageCircle,
+ * "check-circle" → CheckCircle2) que diferem do nome do lucide.
+ */
 export const ICONS: Record<string, { label: string; Icon: LucideIcon }> = {
 	"arrow-right": { label: "Seta direita", Icon: ArrowRight },
 	"arrow-left": { label: "Seta esquerda", Icon: ArrowLeft },
@@ -82,23 +88,83 @@ export const ICONS: Record<string, { label: string; Icon: LucideIcon }> = {
 	twitter: { label: "X / Twitter", Icon: Twitter },
 };
 
+/* ------------------------------------------------------------------ */
+/* Biblioteca completa do lucide                                       */
+/* ------------------------------------------------------------------ */
+
+const LUCIDE = icons as Record<string, LucideIcon>;
+
+/** Nomes do lucide que a conversão genérica não acerta. */
+const KEBAB_EXCEPTIONS: Record<string, string> = {
+	ArrowDown01: "arrow-down-0-1",
+	ArrowDown10: "arrow-down-1-0",
+	ArrowDownAZ: "arrow-down-a-z",
+	ArrowDownZA: "arrow-down-z-a",
+	ArrowUp01: "arrow-up-0-1",
+	ArrowUp10: "arrow-up-1-0",
+	ArrowUpAZ: "arrow-up-a-z",
+	ArrowUpZA: "arrow-up-z-a",
+	CalendarX2: "calendar-x-2",
+	Grid2x2: "grid-2x2",
+	Grid2x2Check: "grid-2x2-check",
+	Grid2x2Plus: "grid-2x2-plus",
+	Grid2x2X: "grid-2x2-x",
+	Grid3x2: "grid-3x2",
+	Grid3x3: "grid-3x3",
+};
+
+/** "BadgePercent" → "badge-percent" (nome do lucide). */
+function toKebab(pascal: string): string {
+	return (
+		KEBAB_EXCEPTIONS[pascal] ??
+		pascal
+			.replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+			.replace(/([A-Z])([A-Z][a-z])/g, "$1-$2")
+			.replace(/([a-z])(\d)/g, "$1-$2")
+			.toLowerCase()
+	);
+}
+
+/** "badge-percent" → "BadgePercent". */
+const toPascal = (kebab: string) =>
+	kebab
+		.split("-")
+		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+		.join("");
+
+/** Todos os ícones do lucide, por nome kebab (para o seletor). */
+export const ALL_ICON_NAMES: string[] = Object.keys(LUCIDE).map(toKebab).sort();
+
+/** Nome legível: rótulo em português dos populares ou o nome do lucide. */
+export function iconLabel(name: string): string {
+	return ICONS[name]?.label ?? name.replace(/-/g, " ");
+}
+
+/** Componente de um ícone salvo: apelidos/populares, depois o lucide completo. */
+export function resolveIcon(name: string | undefined): LucideIcon | null {
+	if (!name) return null;
+	return ICONS[name]?.Icon ?? LUCIDE[toPascal(name)] ?? null;
+}
+
 export function IconView({
 	name,
 	size,
 	className,
+	strokeWidth,
 }: {
 	name: string;
 	size?: number | string;
 	className?: string;
+	strokeWidth?: number;
 }) {
-	const entry = ICONS[name];
-	if (!entry) return null;
-	const { Icon } = entry;
+	const Icon = resolveIcon(name);
+	if (!Icon) return null;
 	return (
 		<Icon
 			className={className}
 			width={size ?? "1em"}
 			height={size ?? "1em"}
+			strokeWidth={strokeWidth}
 			aria-hidden="true"
 		/>
 	);
