@@ -31,6 +31,11 @@ ul,ol{margin:0;padding-left:1.25em}
 /** CSS só do editor: contornos de seleção, placeholders e elementos ocultos. */
 export const EDITOR_CSS = `
 html{scroll-behavior:auto}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
+::-webkit-scrollbar-thumb{border:3px solid transparent;border-radius:999px;background-color:rgba(0,0,0,.18);background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background-color:rgba(0,0,0,.35)}
+@supports not selector(::-webkit-scrollbar){html{scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.25) transparent}}
 [data-pb-node]{cursor:default}
 .pb-hover{outline:1px dashed #60a5fa !important;outline-offset:-1px}
 .pb-selected{outline:2px solid #2563eb !important;outline-offset:-2px}
