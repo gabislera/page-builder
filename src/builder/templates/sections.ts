@@ -49,10 +49,14 @@ const card = (children: NodeSpec[]) =>
 const column = (children: NodeSpec[] = []) =>
 	h("Container", containerPresets.stack, children, "Coluna");
 
-const blankColumns = (n: number): SectionTemplate => ({
-	id: `blank-${n}`,
+const blankColumns = (
+	n: number,
+	template = "",
+	label = "",
+): SectionTemplate => ({
+	id: template ? `blank-${template.replace(/\s+/g, "-")}` : `blank-${n}`,
 	category: "Em branco",
-	name: n === 1 ? "1 coluna" : `${n} colunas`,
+	name: label || (n === 1 ? "1 coluna" : `${n} colunas`),
 	kind: "section",
 	build: () =>
 		h(
@@ -63,7 +67,7 @@ const blankColumns = (n: number): SectionTemplate => ({
 				: [
 						h(
 							"Container",
-							containerPresets.grid(n),
+							containerPresets.grid(n, template),
 							Array.from({ length: n }, () => column()),
 							"Colunas",
 						),
@@ -76,6 +80,9 @@ export const SECTION_TEMPLATES: SectionTemplate[] = [
 	blankColumns(2),
 	blankColumns(3),
 	blankColumns(4),
+	blankColumns(2, "1fr 2fr", "1/3 + 2/3"),
+	blankColumns(2, "2fr 1fr", "2/3 + 1/3"),
+	blankColumns(3, "1fr 2fr 1fr", "1/4 + 1/2 + 1/4"),
 	{
 		id: "hero-centered",
 		category: "Hero",

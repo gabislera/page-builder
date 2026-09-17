@@ -9,8 +9,9 @@ import {
 	Rows3,
 	Square,
 } from "lucide-react";
+import { cn } from "#/lib/utils";
 import { ActionField } from "../controls/action.tsx";
-import { Group } from "../controls/field.tsx";
+import { Field, Group } from "../controls/field.tsx";
 import {
 	BackgroundFields,
 	BorderFields,
@@ -20,6 +21,7 @@ import {
 	ShadowFields,
 } from "../controls/groups.tsx";
 import {
+	DebouncedInput,
 	NumberUnitField,
 	SegmentedField,
 	SelectField,
@@ -37,7 +39,12 @@ import {
 } from "../core/defaults.ts";
 import { nodeClassName, TOP_LEVEL_TYPES } from "../core/node-helpers.ts";
 import { useIsEditor, useRender } from "../core/render-context.tsx";
-import { type Responsive, responsive } from "../core/responsive.ts";
+import {
+	DEVICES,
+	type Responsive,
+	resolve,
+	responsive,
+} from "../core/responsive.ts";
 import {
 	applyBackground,
 	applyBorder,
@@ -73,6 +80,11 @@ export type ContainerProps = {
 	wrap: Responsive<boolean>;
 	gap: Responsive<Length>;
 	columns: Responsive<number>;
+	/**
+	 * Proporção das colunas da grade (ex.: "1fr 2fr"). Vazio = iguais. Só vale
+	 * quando o número de partes bate com o número de colunas do dispositivo.
+	 */
+	columnsTemplate: Responsive<string>;
 	htmlTag: "div" | "section" | "article" | "aside" | "nav" | "ul";
 	action: Action;
 	background: Background;
@@ -128,7 +140,7 @@ function ContainerSettings() {
 							]}
 						/>
 						{isGrid ? (
-							<NumberField path="columns" label="Colunas" min={1} max={12} />
+							<ColumnsLayoutField />
 						) : (
 							<>
 								<SegmentedField
@@ -234,6 +246,7 @@ const containerDefaults = (
 	wrap: responsive(false),
 	gap: responsive("16px"),
 	columns: responsive(2, undefined, 1),
+	columnsTemplate: responsive(""),
 	htmlTag: "div",
 	action: { type: "none" },
 	background: defaultBackground(),
@@ -269,15 +282,21 @@ export const Container: ComponentDefinition<ContainerProps> = {
 			.set("align-items", p.align)
 			.set("flex-wrap", p.wrap, (v) => (v ? "wrap" : "nowrap"))
 			.set("gap", p.gap)
-			.set(
-				"grid-template-columns",
-				p.columns,
-				(n) => `repeat(${n}, minmax(0, 1fr))`,
-			)
 			.set("position", "relative")
 			.set("list-style", p.htmlTag === "ul" ? "none" : undefined)
 			.set("box-shadow", shadowToCss(p.shadow))
 			.set("cursor", p.action.type !== "none" ? "pointer" : undefined);
+		// colunas por dispositivo: a proporção só vale se tiver o mesmo número de partes
+		let previous = "";
+		for (const device of DEVICES) {
+			const value = gridColumns(
+				resolve(p.columns, device),
+				resolve(p.columnsTemplate ?? responsive(""), device),
+			);
+			if (value !== previous)
+				root.setOn(device, "grid-template-columns", value);
+			previous = value;
+		}
 		applyBackground(root, p.background);
 		applyBorder(root, p.border);
 		applyHover(sheet, p.hover);
@@ -289,6 +308,95 @@ export const Container: ComponentDefinition<ContainerProps> = {
 	Settings: ContainerSettings,
 };
 
+/** Valor de grid-template-columns para `n` colunas com a proporção dada. */
+export function gridColumns(n: number, template: string): string {
+	const parts = template.trim().split(/\s+/).filter(Boolean);
+	if (parts.length === n) return parts.map((p) => `minmax(0, ${p})`).join(" ");
+	return `repeat(${n}, minmax(0, 1fr))`;
+}
+
+/** Proporções oferecidas por número de colunas ("" = colunas iguais). */
+const LAYOUT_PRESETS: Record<number, string[]> = {
+	2: ["", "1fr 2fr", "2fr 1fr", "1fr 3fr", "3fr 1fr"],
+	3: ["", "1fr 2fr 1fr", "2fr 1fr 1fr", "1fr 1fr 2fr"],
+	4: ["", "2fr 1fr 1fr 1fr", "1fr 1fr 1fr 2fr"],
+};
+
+const PRESET_LABEL: Record<string, string> = {
+	"1fr 2fr": "1/3 + 2/3",
+	"2fr 1fr": "2/3 + 1/3",
+	"1fr 3fr": "1/4 + 3/4",
+	"3fr 1fr": "3/4 + 1/4",
+	"1fr 2fr 1fr": "1/4 + 1/2 + 1/4",
+	"2fr 1fr 1fr": "1/2 + 1/4 + 1/4",
+	"1fr 1fr 2fr": "1/4 + 1/4 + 1/2",
+	"2fr 1fr 1fr 1fr": "2/5 + 1/5 + 1/5 + 1/5",
+	"1fr 1fr 1fr 2fr": "1/5 + 1/5 + 1/5 + 2/5",
+};
+
+/** Número de colunas + proporção visual (por dispositivo). */
+function ColumnsLayoutField() {
+	const columns = useField<number>("columns");
+	const template = useField<string>("columnsTemplate");
+	const n = columns.value ?? 2;
+	const current = (template.value ?? "").trim();
+	const presets = LAYOUT_PRESETS[n] ?? [""];
+	const isCustom = current !== "" && !presets.includes(current);
+	return (
+		<>
+			<NumberField path="columns" label="Colunas" min={1} max={12} />
+			{n > 1 ? (
+				<Field
+					label="Proporção"
+					responsive={template.responsive}
+					overridden={template.overridden}
+					onReset={template.reset}
+				>
+					<div className="grid grid-cols-3 gap-1.5">
+						{presets.map((preset) => {
+							const ratios = (preset || Array(n).fill("1fr").join(" "))
+								.split(" ")
+								.map((part) => Number.parseFloat(part));
+							const active =
+								preset === current ||
+								(preset === "" && current.split(/\s+/).length !== n);
+							return (
+								<button
+									key={preset || "equal"}
+									type="button"
+									title={PRESET_LABEL[preset] ?? "Iguais"}
+									onClick={() => template.set(preset)}
+									className={cn(
+										"flex h-9 items-stretch gap-0.5 rounded-md border p-1",
+										active && !isCustom
+											? "border-primary bg-primary/10"
+											: "border-border hover:border-muted-foreground/50",
+									)}
+								>
+									{ratios.map((r, i) => (
+										<span
+											// biome-ignore lint/suspicious/noArrayIndexKey: barras fixas da prévia
+											key={i}
+											className="rounded-sm bg-muted-foreground/40"
+											style={{ flex: r }}
+										/>
+									))}
+								</button>
+							);
+						})}
+					</div>
+					<DebouncedInput
+						className="mt-1.5 font-mono"
+						value={isCustom ? current : ""}
+						placeholder="Personalizado, ex.: 2fr 1fr"
+						onChange={(v) => template.set(v)}
+					/>
+				</Field>
+			) : null}
+		</>
+	);
+}
+
 /** Variações prontas oferecidas na Toolbox. */
 export const containerPresets = {
 	stack: containerDefaults(),
@@ -296,10 +404,11 @@ export const containerPresets = {
 		direction: responsive("row", undefined, "column"),
 		align: responsive("center"),
 	}),
-	grid: (columns: number) =>
+	grid: (columns: number, template = "") =>
 		containerDefaults({
 			display: responsive("grid"),
 			columns: responsive(columns, columns > 2 ? 2 : undefined, 1),
+			columnsTemplate: responsive(template),
 			gap: responsive("24px"),
 		}),
 };
