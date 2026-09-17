@@ -9,6 +9,7 @@ import { formScript } from "./features/form.ts";
 import { headerScript } from "./features/header.ts";
 import { menuScript } from "./features/menu.ts";
 import { modalScript } from "./features/modal.ts";
+import { motionScript } from "./features/motion.ts";
 import { progressScript } from "./features/progress.ts";
 import { videoScript } from "./features/video.ts";
 
@@ -50,6 +51,7 @@ export const FEATURE_SCRIPTS: Partial<
 > = {
 	header: headerScript,
 	menu: menuScript,
+	motion: motionScript,
 	form: formScript,
 	modal: modalScript,
 	floating: floatingScript,

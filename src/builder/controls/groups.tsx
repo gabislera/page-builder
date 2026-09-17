@@ -18,6 +18,7 @@ import { getPath } from "../core/path.ts";
 import type { Responsive } from "../core/responsive.ts";
 import type { Background, Corners, Sides } from "../core/style-types.ts";
 import { fontChoices } from "../core/theme.ts";
+import { CodeField } from "./code.tsx";
 import { ColorField } from "./color.tsx";
 import { Field, Group } from "./field.tsx";
 import {
@@ -57,11 +58,13 @@ function FourValues<K extends string>({
 	labels,
 	onChange,
 	units,
+	keywords = [],
 }: {
 	value: Record<K, string>;
 	labels: Record<K, string>;
 	onChange: (value: Record<K, string>, throttle?: boolean) => void;
 	units: Unit[];
+	keywords?: string[];
 }) {
 	const keys = Object.keys(labels) as K[];
 	const allEqual = keys.every((k) => value[k] === value[keys[0]]);
@@ -74,6 +77,7 @@ function FourValues<K extends string>({
 					<NumberUnitInput
 						value={value[keys[0]]}
 						units={units}
+						keywords={keywords}
 						onChange={(v, t) =>
 							onChange(
 								Object.fromEntries(keys.map((k) => [k, v])) as Record<
@@ -101,6 +105,7 @@ function FourValues<K extends string>({
 							slider={false}
 							value={value[k]}
 							units={units}
+							keywords={keywords}
 							onChange={(v, t) => onChange({ ...value, [k]: v }, t)}
 						/>
 					</div>
@@ -138,15 +143,20 @@ export function SidesField({
 	path,
 	label,
 	units = ["px", "%", "rem"],
+	keywords,
+	hint,
 }: {
 	path: string;
 	label: string;
 	units?: Unit[];
+	keywords?: string[];
+	hint?: string;
 }) {
 	const f = useField<Sides>(path);
 	return (
 		<Field
 			label={label}
+			hint={hint}
 			responsive={f.responsive}
 			overridden={f.overridden}
 			onReset={f.reset}
@@ -155,6 +165,7 @@ export function SidesField({
 				value={f.value ?? sides("0px")}
 				labels={SIDE_LABELS}
 				units={units}
+				keywords={keywords}
 				onChange={(v, t) => f.set(v, { throttle: t })}
 			/>
 		</Field>
@@ -634,6 +645,54 @@ export function BoxFields({
 					/>
 				</Group>
 			) : null}
+			<PositionGroup base={base} />
+			<Group title="Transformar" defaultOpen={false}>
+				<NumberField
+					path={join(base, "transform.rotate")}
+					label="Girar (°)"
+					min={-180}
+					max={180}
+				/>
+				<NumberField
+					path={join(base, "transform.scale")}
+					label="Escala"
+					min={0.1}
+					max={3}
+					step={0.05}
+				/>
+				<NumberUnitField
+					path={join(base, "transform.translateX")}
+					label="Mover na horizontal"
+					units={["px", "%"]}
+					min={-300}
+					max={300}
+				/>
+				<NumberUnitField
+					path={join(base, "transform.translateY")}
+					label="Mover na vertical"
+					units={["px", "%"]}
+					min={-300}
+					max={300}
+				/>
+			</Group>
+			<Group title="Efeitos" defaultOpen={false}>
+				<NumberField
+					path={join(base, "opacity")}
+					label="Opacidade"
+					max={1}
+					step={0.05}
+				/>
+				<SegmentedField
+					path={join(base, "overflow")}
+					label="Conteúdo que transborda"
+					options={[
+						{ value: "visible", label: "Mostrar" },
+						{ value: "hidden", label: "Cortar" },
+						{ value: "auto", label: "Rolar" },
+					]}
+				/>
+				<ScrollEffectFields base={base} />
+			</Group>
 			<Group title="Visibilidade e animação">
 				<VisibilityField path={join(base, "visible")} />
 				<SelectField
@@ -655,6 +714,95 @@ export function BoxFields({
 				/>
 				<TextField path={join(base, "cssClass")} label="Classe CSS" />
 			</Group>
+			<Group title="CSS personalizado" defaultOpen={false}>
+				<CodeField
+					path={join(base, "customCss")}
+					label="CSS"
+					language="css"
+					hint='Use "selector" para se referir a este elemento. Ex.: selector:hover { opacity: .8 }'
+				/>
+			</Group>
+		</>
+	);
+}
+
+const POSITIONS = [
+	{ value: "static", label: "Padrão (no fluxo)" },
+	{ value: "relative", label: "Relativa" },
+	{ value: "absolute", label: "Absoluta (livre dentro do pai)" },
+	{ value: "fixed", label: "Fixa na tela" },
+	{ value: "sticky", label: "Grudar ao rolar" },
+];
+
+const POSITION_HINT: Record<string, string> = {
+	relative: "Desloca o elemento sem afetar os vizinhos.",
+	absolute: "Sai do fluxo e se posiciona em relação ao container pai.",
+	fixed: "Fica parado na tela mesmo ao rolar a página.",
+	sticky: "Rola junto até encostar na borda definida e então gruda.",
+};
+
+function PositionGroup({ base }: { base: string }) {
+	const position = useField<string>(join(base, "position"));
+	const active = position.value && position.value !== "static";
+	return (
+		<Group title="Posição" defaultOpen={false}>
+			<SelectField
+				path={join(base, "position")}
+				label="Posição"
+				options={POSITIONS}
+			/>
+			{active ? (
+				<>
+					<p className="text-[11px] text-muted-foreground">
+						{POSITION_HINT[position.value]}
+					</p>
+					<SidesField
+						path={join(base, "offsets")}
+						label="Distância das bordas"
+						units={["px", "%", "vh", "vw"]}
+						keywords={["auto"]}
+						hint='Use "auto" nos lados que não devem ser fixados.'
+					/>
+				</>
+			) : null}
+			<NumberUnitField
+				path={join(base, "zIndex")}
+				label="Camada (z-index)"
+				unitless
+				min={-10}
+				max={100}
+				step={1}
+				keywords={[""]}
+				hint="Maior fica por cima. Vazio = automático."
+			/>
+		</Group>
+	);
+}
+
+function ScrollEffectFields({ base }: { base: string }) {
+	const type = useField<string>(join(base, "scrollEffect.type"));
+	return (
+		<>
+			<SelectField
+				path={join(base, "scrollEffect.type")}
+				label="Efeito ao rolar"
+				options={[
+					{ value: "none", label: "Nenhum" },
+					{
+						value: "parallax",
+						label: "Parallax (move mais devagar/rápido que a página)",
+					},
+				]}
+			/>
+			{type.value === "parallax" ? (
+				<NumberField
+					path={join(base, "scrollEffect.speed")}
+					label="Intensidade"
+					min={-1}
+					max={1}
+					step={0.05}
+				/>
+			) : null}
 		</>
 	);
 }

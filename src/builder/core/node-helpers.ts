@@ -9,6 +9,7 @@ export function nodeClassName(id: string, base: string, box?: Partial<Box>) {
 		box?.animation && box.animation !== "none"
 			? `pb-anim-${box.animation}`
 			: null,
+		box?.scrollEffect?.type === "parallax" ? "pb-parallax" : null,
 		box?.cssClass || null,
 	]
 		.filter(Boolean)

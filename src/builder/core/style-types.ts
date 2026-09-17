@@ -106,6 +106,39 @@ export type Box = {
 	animation: Animation;
 	anchorId: string;
 	cssClass: string;
+	/** Posicionamento (absoluto, fixo, grudado ao rolar...). */
+	position: Responsive<PositionType>;
+	/** Deslocamentos usados com posição relativa/absoluta/fixa/grudada. */
+	offsets: Responsive<Sides>;
+	/** Camada (z-index). Vazio = automático. */
+	zIndex: Responsive<string>;
+	transform: Transform;
+	opacity: Responsive<number>;
+	overflow: "visible" | "hidden" | "auto";
+	scrollEffect: ScrollEffect;
+	/** CSS livre. A palavra `selector` é trocada pelo seletor deste elemento. */
+	customCss: string;
+};
+
+export type PositionType =
+	| "static"
+	| "relative"
+	| "absolute"
+	| "fixed"
+	| "sticky";
+
+/** Transformações independentes do hover (usam rotate/scale/translate do CSS). */
+export type Transform = {
+	rotate: number;
+	scale: number;
+	translateX: Length;
+	translateY: Length;
+};
+
+export type ScrollEffect = {
+	type: "none" | "parallax";
+	/** Velocidade do parallax: negativo sobe, positivo desce (-1 a 1). */
+	speed: number;
 };
 
 /** Ação de clique (botões, imagens, links de menu, containers). */

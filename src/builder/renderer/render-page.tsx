@@ -46,6 +46,8 @@ export function renderBody({
 		css.push(def.css(id, props));
 		for (const f of def.fonts?.(props) ?? []) fonts.add(f);
 		for (const f of def.runtime ?? []) features.add(f);
+		// recursos que dependem da aba Avançado, não do tipo do componente
+		if (props.box?.scrollEffect?.type === "parallax") features.add("motion");
 		const children = (node.nodes ?? []).map(renderNode);
 		return (
 			<def.View key={id} id={id} props={props}>

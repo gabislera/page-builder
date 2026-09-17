@@ -12,6 +12,7 @@ import { AutosaveController, clearDraft, readDraft } from "./autosave.tsx";
 import { CanvasFrame } from "./canvas-frame.tsx";
 import { EditorContextProvider, type EditorContextValue } from "./context.tsx";
 import { LeftPanel } from "./left-panel.tsx";
+import { normalizeNodes } from "./normalize.ts";
 import type { PageMeta } from "./page-settings.tsx";
 import { RenderNode } from "./render-node.tsx";
 import { useSaveState } from "./save-store.ts";
@@ -58,7 +59,10 @@ export function EditorShell({
 		tracking: page.tracking,
 	});
 	const [canvasDoc, setCanvasDoc] = useState<Document | null>(null);
-	const initialJson = useMemo(() => JSON.stringify(nodes), [nodes]);
+	const initialJson = useMemo(
+		() => JSON.stringify(normalizeNodes(nodes)),
+		[nodes],
+	);
 
 	useEffect(() => {
 		useSaveState.setState({

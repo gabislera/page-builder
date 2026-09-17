@@ -4,8 +4,10 @@
  */
 import type { SerializedNode, SerializedNodes } from "@craftjs/core";
 import { COMPONENTS } from "../registry.ts";
-import { isResponsive } from "./responsive.ts";
+import { deepMerge } from "./merge.ts";
 import { newNodeId, ROOT_ID } from "./tree.ts";
+
+export { deepMerge };
 
 export type NodeSpec = {
 	type: string;
@@ -21,29 +23,6 @@ export const h = (
 	children: NodeSpec[] = [],
 	name?: string,
 ): NodeSpec => ({ type, props, children, name });
-
-function isPlainObject(v: unknown): v is Record<string, unknown> {
-	return typeof v === "object" && v !== null && !Array.isArray(v);
-}
-
-/**
- * Merge profundo: objetos se mesclam, o resto substitui. Valores responsivos
- * ({ desktop, tablet?, mobile? }) substituem por inteiro, senão um modelo que
- * define só o desktop herdaria o mobile do padrão.
- */
-export function deepMerge<T>(base: T, patch: unknown): T {
-	if (!isPlainObject(base) || !isPlainObject(patch) || isResponsive(patch)) {
-		return (patch === undefined ? base : patch) as T;
-	}
-	const out: Record<string, unknown> = { ...base };
-	for (const [k, v] of Object.entries(patch)) {
-		out[k] =
-			isPlainObject(v) && isPlainObject(out[k]) && !isResponsive(v)
-				? deepMerge(out[k], v)
-				: v;
-	}
-	return out as T;
-}
 
 export function buildTree(
 	spec: NodeSpec,

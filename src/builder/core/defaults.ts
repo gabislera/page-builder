@@ -37,6 +37,14 @@ export const defaultBox = (overrides: Partial<Box> = {}): Box => ({
 	animation: "none",
 	anchorId: "",
 	cssClass: "",
+	position: responsive("static"),
+	offsets: responsive(sides("auto")),
+	zIndex: responsive(""),
+	transform: { rotate: 0, scale: 1, translateX: "0px", translateY: "0px" },
+	opacity: responsive(1),
+	overflow: "visible",
+	scrollEffect: { type: "none", speed: 0.3 },
+	customCss: "",
 	...overrides,
 });
 

@@ -1,3 +1,4 @@
+import { css } from "@codemirror/lang-css";
 import { html } from "@codemirror/lang-html";
 import CodeMirror from "@uiw/react-codemirror";
 import { Maximize2 } from "lucide-react";
@@ -9,10 +10,11 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "#/components/ui/dialog";
+import { getPath } from "../core/path.ts";
 import { Field } from "./field.tsx";
 import { useNodeProps } from "./use-field.ts";
 
-const EXTENSIONS = [html()];
+const LANGUAGES = { html: [html()], css: [css()] };
 const DEBOUNCE_MS = 600;
 
 /**
@@ -24,13 +26,16 @@ export function CodeField({
 	path,
 	label,
 	hint,
+	language = "html",
 }: {
 	path: string;
 	label: string;
 	hint?: string;
+	language?: keyof typeof LANGUAGES;
 }) {
 	const { props, set } = useNodeProps<Record<string, unknown>>();
-	const value = String(props[path] ?? "");
+	const value = String(getPath(props, path) ?? "");
+	const extensions = LANGUAGES[language];
 	const [draft, setDraft] = useState(value);
 	const [fullscreen, setFullscreen] = useState(false);
 	// último valor enviado, para distinguir mudanças externas (undo/redo)
@@ -79,7 +84,7 @@ export function CodeField({
 					<CodeMirror
 						value={draft}
 						onChange={setDraft}
-						extensions={EXTENSIONS}
+						extensions={extensions}
 						theme="dark"
 						height="260px"
 						basicSetup={{ foldGutter: false, highlightActiveLine: false }}
@@ -111,7 +116,7 @@ export function CodeField({
 						<CodeMirror
 							value={draft}
 							onChange={setDraft}
-							extensions={EXTENSIONS}
+							extensions={extensions}
 							theme="dark"
 							height="100%"
 							style={{ height: "100%" }}

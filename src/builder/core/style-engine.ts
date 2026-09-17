@@ -10,8 +10,10 @@ import {
 	DEVICE_MEDIA,
 	DEVICES,
 	type Device,
+	hasOwn,
 	isResponsive,
 	type Responsive,
+	resolve,
 } from "./responsive.ts";
 import type {
 	Background,
@@ -75,8 +77,20 @@ export class StyleRule {
 
 export class StyleSheet {
 	private readonly rules: StyleRule[] = [];
+	private readonly extra: string[] = [];
 
 	constructor(private readonly base: string) {}
+
+	/** Seletor do nó (ex.: ".n-abc123"). */
+	get selector(): string {
+		return this.base;
+	}
+
+	/** CSS livre anexado depois das regras geradas (ex.: CSS personalizado). */
+	appendRaw(css: string): this {
+		if (css.trim()) this.extra.push(css);
+		return this;
+	}
 
 	/** Regra do próprio nó. */
 	root(): StyleRule {
@@ -116,7 +130,7 @@ export class StyleSheet {
 			const media = DEVICE_MEDIA[device];
 			out += media ? `@media ${media}{${block}}` : block;
 		}
-		return out;
+		return out + this.extra.join("");
 	}
 }
 
@@ -260,6 +274,37 @@ export function applyBox(
 		.set("min-height", box.minHeight, (v) => (v === "0px" ? undefined : v))
 		.set("align-self", box.alignSelf, (v) => (v === "auto" ? undefined : v));
 
+	setWithOverride(rule, "position", box.position, "static");
+	setWithOverride(rule, "z-index", box.zIndex, "", "auto");
+	setWithOverride(rule, "opacity", box.opacity, 1);
+	if (box.overflow && box.overflow !== "visible")
+		rule.set("overflow", box.overflow);
+
+	// deslocamentos só fazem sentido quando a posição não é estática
+	if (box.position && box.offsets) {
+		for (const device of DEVICES) {
+			const pos = resolve(box.position, device);
+			if (pos === "static" || !hasOwn(box.offsets, device)) continue;
+			const o = resolve(box.offsets, device);
+			rule
+				.setOn(device, "top", o.top)
+				.setOn(device, "right", o.right)
+				.setOn(device, "bottom", o.bottom)
+				.setOn(device, "left", o.left);
+		}
+	}
+
+	applyTransform(rule, box);
+
+	if (box.customCss?.trim()) {
+		// "selector" aponta para este elemento; "</" não pode fechar a tag <style>
+		sheet.appendRaw(
+			box.customCss
+				.replaceAll("selector", sheet.selector)
+				.replaceAll("</", "<\\/"),
+		);
+	}
+
 	if (box.visible) {
 		let previous = true;
 		for (const device of DEVICES) {
@@ -274,6 +319,57 @@ export function applyBox(
 			previous = own;
 		}
 	}
+}
+
+/**
+ * Define uma propriedade omitindo o valor padrão no desktop, mas mantendo-o
+ * nos dispositivos menores quando ele desfaz um valor herdado (ex.: posição
+ * relativa no desktop e padrão no celular).
+ */
+function setWithOverride<T>(
+	rule: StyleRule,
+	property: string,
+	value: T | Responsive<T> | undefined,
+	fallback: T,
+	cssForFallback?: string,
+) {
+	if (value === undefined) return;
+	const values = isResponsive<T>(value) ? value : { desktop: value as T };
+	// o navegador já começa no padrão; só escreve quando muda em relação ao herdado
+	let inherited = fallback;
+	for (const device of DEVICES) {
+		const own = values[device];
+		if (own === undefined) continue;
+		if (own !== inherited) {
+			rule.setOn(
+				device,
+				property,
+				own === fallback ? (cssForFallback ?? String(own)) : String(own),
+			);
+		}
+		inherited = own;
+	}
+}
+
+/**
+ * Rotação, escala e deslocamento usando as propriedades individuais do CSS
+ * (`rotate`, `scale`, `translate`), que não brigam com o `transform` do hover.
+ * O deslocamento soma a variável `--pb-py`, usada pelo efeito parallax.
+ */
+function applyTransform(rule: StyleRule, box: Partial<Box>) {
+	const t = box.transform;
+	if (t?.rotate) rule.set("rotate", `${t.rotate}deg`);
+	if (t && t.scale !== 1) rule.set("scale", String(t.scale));
+	const moved = t && (t.translateX !== "0px" || t.translateY !== "0px");
+	const parallax = box.scrollEffect?.type === "parallax";
+	if (moved || parallax) {
+		rule.set(
+			"translate",
+			`${t?.translateX ?? "0px"} calc(${t?.translateY ?? "0px"} + var(--pb-py, 0px))`,
+		);
+	}
+	if (parallax)
+		rule.set("--pb-parallax", String(box.scrollEffect?.speed ?? 0.3));
 }
 
 /* ------------------------------------------------------------------ */
