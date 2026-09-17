@@ -3,6 +3,7 @@
  * manual e visual. Uso: pnpm tsx --env-file=.env.local scripts/seed-showcase.ts <projectId>
  */
 import { and, eq } from "drizzle-orm";
+import { containerPresets } from "#/builder/components/container.tsx";
 import { buildRoot, buildTree, h } from "#/builder/core/build.ts";
 import { corners, defaultBackground } from "#/builder/core/defaults.ts";
 import { responsive } from "#/builder/core/responsive.ts";
@@ -71,6 +72,26 @@ const sections: SectionTree[] = [
 		]),
 		"section",
 		"Avançado",
+	),
+	section(
+		h("Section", { gap: responsive("32px") }, [
+			h("Heading", { text: "Ícones e colunas livres", typography: { textAlign: responsive("center") } }),
+			h("Container", containerPresets.grid(2, "1fr 2fr"), [
+				h("Container", containerPresets.stack, [
+					h("Icon", { icon: { name: "rocket" } }),
+					h("IconList"),
+				]),
+				h("Container", containerPresets.grid(2), [
+					h("IconBox"),
+					h("IconBox", {
+						title: "Com parallax",
+						box: { scrollEffect: { type: "parallax", speed: 0.25 } },
+					}),
+				]),
+			]),
+		]),
+		"section",
+		"Ícones",
 	),
 	section(tpl("cta-gradient").build(), "section", "CTA"),
 ];
