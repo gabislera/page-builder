@@ -3,14 +3,17 @@
  * HTML. Cada bloco só é incluído se algum componente da página precisar dele.
  */
 import type { RuntimeFeature } from "../core/types.ts";
+import { carouselScript } from "./features/carousel.ts";
 import { countdownScript } from "./features/countdown.ts";
 import { floatingScript } from "./features/floating.ts";
 import { formScript } from "./features/form.ts";
+import { galleryScript } from "./features/gallery.ts";
 import { headerScript } from "./features/header.ts";
 import { menuScript } from "./features/menu.ts";
 import { modalScript } from "./features/modal.ts";
 import { motionScript } from "./features/motion.ts";
 import { progressScript } from "./features/progress.ts";
+import { tabsScript } from "./features/tabs.ts";
 import { videoScript } from "./features/video.ts";
 
 type RuntimeConfig = { viewEndpoint: string; formEndpoint: string };
@@ -52,6 +55,9 @@ export const FEATURE_SCRIPTS: Partial<
 	header: headerScript,
 	menu: menuScript,
 	motion: motionScript,
+	gallery: galleryScript,
+	tabs: tabsScript,
+	carousel: carouselScript,
 	form: formScript,
 	modal: modalScript,
 	floating: floatingScript,

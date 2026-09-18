@@ -1,7 +1,10 @@
 import { Element, useEditor } from "@craftjs/core";
 import type { ComponentType, ReactElement } from "react";
+import { accordionSpec } from "../components/accordion.tsx";
+import { carouselSpec } from "../components/carousel.tsx";
 import { containerPresets } from "../components/container.tsx";
-import { deepMerge } from "../core/build.ts";
+import { tabsSpec } from "../components/tabs.tsx";
+import { deepMerge, type NodeSpec } from "../core/build.ts";
 import { responsive } from "../core/responsive.ts";
 import { COMPONENTS } from "../registry.ts";
 import { resolver } from "../resolver.ts";
@@ -143,6 +146,40 @@ function columnsGlyph(ratios: number[]): ToolboxIcon {
 	return ColumnsGlyph;
 }
 
+/** Converte um NodeSpec (usado nos modelos) em elementos do Craft. */
+function specToElement(spec: NodeSpec, key?: string): ReactElement {
+	const def = COMPONENTS[spec.type];
+	const props = deepMerge(
+		structuredClone(def.defaults),
+		spec.props ?? {},
+	) as Record<string, unknown>;
+	const children = (spec.children ?? []).map((child, i) =>
+		specToElement(child, `c${i}`),
+	);
+	return (
+		<Element
+			key={key}
+			is={C[spec.type]}
+			canvas={def.isCanvas}
+			{...props}
+			custom={spec.name ? { displayName: spec.name } : undefined}
+		>
+			{children.length ? children : undefined}
+		</Element>
+	);
+}
+
+/** Componente composto que já nasce com itens (Acordeão, Abas, Carrossel). */
+const composite = (type: string, spec: () => NodeSpec): ToolboxItem => {
+	const def = COMPONENTS[type];
+	return {
+		key: type,
+		label: def.displayName,
+		icon: def.icon,
+		create: () => specToElement(spec()),
+	};
+};
+
 export const TOOLBOX_GROUPS: { title: string; items: ToolboxItem[] }[] = [
 	{
 		title: "Layout",
@@ -153,6 +190,8 @@ export const TOOLBOX_GROUPS: { title: string; items: ToolboxItem[] }[] = [
 			columns(2, "Estreita + larga", columnsGlyph([1, 2]), "1fr 2fr"),
 			columns(2, "Larga + estreita", columnsGlyph([2, 1]), "2fr 1fr"),
 			simple("Spacer"),
+			composite("Accordion", accordionSpec),
+			composite("Tabs", tabsSpec),
 		],
 	},
 	{
@@ -168,13 +207,29 @@ export const TOOLBOX_GROUPS: { title: string; items: ToolboxItem[] }[] = [
 			"Icon",
 			"IconList",
 			"IconBox",
+			"Card",
 			"Divider",
 		].map(simple),
 	},
-	{ title: "Mídia", items: ["Image", "Video"].map(simple) },
+	{
+		title: "Mídia",
+		items: [
+			simple("Image"),
+			simple("Video"),
+			simple("Gallery"),
+			composite("Carousel", carouselSpec),
+		],
+	},
 	{
 		title: "Conversão",
-		items: ["Form", "Faq", "Countdown", "ProgressBar"].map(simple),
+		items: [
+			"Form",
+			"Faq",
+			"Countdown",
+			"ProgressBar",
+			"Testimonial",
+			"PricingTable",
+		].map(simple),
 	},
 	{
 		title: "Avançado",

@@ -18,7 +18,12 @@ import { buildRoot, buildTree } from "../core/build.ts";
 import { googleFontsHref } from "../core/style-engine.ts";
 import { ROOT_ID, type SitePart } from "../core/tree.ts";
 import { renderBody } from "../renderer/render-page.tsx";
+import { CONTENT_TEMPLATES } from "../templates/content.ts";
 import { HEADER_FOOTER_TEMPLATES } from "../templates/headers-footers.ts";
+import {
+	INTERACTIVE_CATEGORIES,
+	INTERACTIVE_TEMPLATES,
+} from "../templates/interactive.ts";
 import {
 	SECTION_CATEGORIES,
 	SECTION_TEMPLATES,
@@ -35,8 +40,20 @@ const GLOBAL_TAB = "Seções globais";
 const ALL_TEMPLATES: SectionTemplate[] = [
 	...HEADER_FOOTER_TEMPLATES,
 	...SECTION_TEMPLATES,
+	...CONTENT_TEMPLATES,
+	...INTERACTIVE_TEMPLATES,
 ];
-const CATEGORIES = ["Cabeçalho", ...SECTION_CATEGORIES, "Rodapé"];
+const CATEGORIES = [
+	"Cabeçalho",
+	...new Set([
+		...SECTION_CATEGORIES,
+		"Cards",
+		"Preços",
+		...INTERACTIVE_CATEGORIES,
+		"Galeria",
+	]),
+	"Rodapé",
+];
 
 /** Diálogo com modelos de seção e seções globais do projeto. */
 export function SectionLibraryDialog() {

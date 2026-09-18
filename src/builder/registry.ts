@@ -1,4 +1,7 @@
+import { Accordion, AccordionItem } from "./components/accordion.tsx";
 import { Button } from "./components/button.tsx";
+import { Card } from "./components/card.tsx";
+import { Carousel, CarouselSlide } from "./components/carousel.tsx";
 import { Container } from "./components/container.tsx";
 import { Countdown } from "./components/countdown.tsx";
 import { Divider } from "./components/divider.tsx";
@@ -6,6 +9,7 @@ import { Faq } from "./components/faq.tsx";
 import { FloatingButtons } from "./components/floating-buttons.tsx";
 import { Footer } from "./components/footer.tsx";
 import { Form } from "./components/form.tsx";
+import { Gallery } from "./components/gallery.tsx";
 import { Header } from "./components/header.tsx";
 import { Heading } from "./components/heading.tsx";
 import { Html } from "./components/html.tsx";
@@ -17,10 +21,13 @@ import { Logo } from "./components/logo.tsx";
 import { Menu } from "./components/menu.tsx";
 import { Modal } from "./components/modal.tsx";
 import { Page } from "./components/page.tsx";
+import { PricingTable } from "./components/pricing-table.tsx";
 import { ProgressBar } from "./components/progress-bar.tsx";
 import { Section } from "./components/section.tsx";
 import { SocialIcons } from "./components/social-icons.tsx";
 import { Spacer } from "./components/spacer.tsx";
+import { TabItem, Tabs } from "./components/tabs.tsx";
+import { Testimonial } from "./components/testimonial.tsx";
 import { Text } from "./components/text.tsx";
 import { Video } from "./components/video.tsx";
 import type { AnyComponentDefinition } from "./core/types.ts";
@@ -54,6 +61,16 @@ export const COMPONENTS: Record<string, AnyComponentDefinition> =
 			Logo,
 			Menu,
 			SocialIcons,
+			Card,
+			Testimonial,
+			PricingTable,
+			Gallery,
+			Accordion,
+			AccordionItem,
+			Tabs,
+			TabItem,
+			Carousel,
+			CarouselSlide,
 		].map((def) => [def.type, def]),
 	);
 

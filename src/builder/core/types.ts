@@ -31,7 +31,10 @@ export type RuntimeFeature =
 	| "video"
 	| "progress"
 	| "menu"
-	| "motion";
+	| "motion"
+	| "gallery"
+	| "tabs"
+	| "carousel";
 
 type CraftRules = {
 	canDrag?: (node: Node, helpers: NodeHelpersType) => boolean;
