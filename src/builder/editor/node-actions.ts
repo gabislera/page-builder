@@ -32,10 +32,11 @@ export function insertTree(
 	tree: { rootNodeId: string; nodes: SerializedNodes },
 	parentId: string = ROOT_ID,
 	index?: number,
+	select = true,
 ) {
 	const nodeTree = toNodeTree(editor.query, tree.nodes, tree.rootNodeId);
 	editor.actions.addNodeTree(nodeTree, parentId, index);
-	editor.actions.selectNode(tree.rootNodeId);
+	if (select) editor.actions.selectNode(tree.rootNodeId);
 }
 
 /** Duplica o nó com todos os filhos logo abaixo dele. */
