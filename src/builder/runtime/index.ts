@@ -3,6 +3,7 @@
  * HTML. Cada bloco só é incluído se algum componente da página precisar dele.
  */
 import type { RuntimeFeature } from "../core/types.ts";
+import { accordionScript } from "./features/accordion.ts";
 import { carouselScript } from "./features/carousel.ts";
 import { countdownScript } from "./features/countdown.ts";
 import { floatingScript } from "./features/floating.ts";
@@ -58,6 +59,7 @@ export const FEATURE_SCRIPTS: Partial<
 	gallery: galleryScript,
 	tabs: tabsScript,
 	carousel: carouselScript,
+	accordion: accordionScript,
 	form: formScript,
 	modal: modalScript,
 	floating: floatingScript,

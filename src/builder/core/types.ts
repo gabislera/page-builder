@@ -34,7 +34,8 @@ export type RuntimeFeature =
 	| "motion"
 	| "gallery"
 	| "tabs"
-	| "carousel";
+	| "carousel"
+	| "accordion";
 
 type CraftRules = {
 	canDrag?: (node: Node, helpers: NodeHelpersType) => boolean;

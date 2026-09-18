@@ -1,20 +1,28 @@
 /**
- * Acordeão composto: cada item é um nó de verdade (AccordionItem) e o corpo
+ * Acordeão composto: cada item (AccordionItem) é um nó de verdade e o corpo
  * dele é um canvas onde qualquer elemento pode ser arrastado.
  *
- * Usa <details>/<summary> nativos (abre e fecha sem JS). "Só um aberto por
- * vez" usa o atributo `name` compartilhado pelos itens. O estilo fica no
- * acordeão (pai) e chega aos itens por seletores descendentes, então todos
- * os itens ficam iguais; o item só cuida da própria caixa (aba Avançado).
+ * Marcação: <details><summary>…</summary><div class="pb-acc-panel">…</div>.
+ * Sem JS, o <details> nativo abre e fecha normalmente. Com o runtime (ou no
+ * editor), o acordeão ganha a classe `pb-acc-js` e a altura do painel anima
+ * com `grid-template-rows: 0fr → 1fr`, tanto ao abrir quanto ao fechar.
  */
 import { ListCollapse, PanelTopOpen } from "lucide-react";
-import { createContext, isValidElement, useContext, useState } from "react";
+import {
+	createContext,
+	isValidElement,
+	useCallback,
+	useContext,
+	useState,
+} from "react";
+import { cn } from "#/lib/utils";
 import { ChildItemsField } from "../controls/child-items.tsx";
 import { ColorField } from "../controls/color.tsx";
-import { Group } from "../controls/field.tsx";
+import { Field, Group } from "../controls/field.tsx";
 import {
 	BorderFields,
 	BoxFields,
+	NumberField,
 	ShadowFields,
 	SidesField,
 	TypographyFields,
@@ -28,7 +36,7 @@ import {
 	TextField,
 } from "../controls/inputs.tsx";
 import { SettingsTabs } from "../controls/settings-layout.tsx";
-import { useField } from "../controls/use-field.ts";
+import { useField, useNodeProps } from "../controls/use-field.ts";
 import { h, type NodeSpec } from "../core/build.ts";
 import { flattenChildren } from "../core/children.ts";
 import {
@@ -70,45 +78,122 @@ import { RevealOnSelect } from "./shared/editor-reveal.tsx";
 /* Acordeão (pai)                                                      */
 /* ------------------------------------------------------------------ */
 
+export type AccordionVariant = "list" | "cards" | "bordered";
+
 export type AccordionProps = {
-	/** Abrir um item fecha os outros (atributo `name` do <details>). */
+	/** Estilo pronto escolhido (os demais campos podem ser ajustados depois). */
+	variant: AccordionVariant;
+	/** Abrir um item fecha os outros. */
 	exclusive: boolean;
 	firstOpen: boolean;
-	/** Só no editor: mostra todos os itens abertos para receber elementos. */
-	editorExpandAll: boolean;
-	iconStyle: "chevron" | "plus" | "none";
+	/** Duração da animação de abrir/fechar (ms). */
+	duration: number;
+	iconStyle: "plus-circle" | "plus" | "chevron" | "none";
 	iconPosition: "left" | "right";
-	iconSize: Length;
 	iconColor: string;
+	iconBackground: string;
 	activeIconColor: string;
+	activeIconBackground: string;
 	titleTypography: Typography;
+	/** Cor do título ao passar o mouse e quando aberto. */
 	activeTitleColor: string;
-	titleBackground: string;
-	activeTitleBackground: string;
 	titlePadding: Responsive<Sides>;
 	bodyPadding: Responsive<Sides>;
-	bodyBackground: string;
 	bodyGap: Responsive<Length>;
 	itemBackground: string;
+	openItemBackground: string;
 	border: Border;
 	shadow: Shadow;
+	openShadow: Shadow;
 	gap: Responsive<Length>;
-	/** Linha entre um item e outro (estilo lista). */
+	/** Linha entre os itens (estilo lista de perguntas). */
 	dividerStyle: BorderStyle;
 	dividerColor: string;
 	dividerWidth: Length;
 	box: Box;
 };
 
-const ACCORDION_DEFAULTS: AccordionProps = {
+/** Cada estilo pronto é um conjunto de valores aplicado de uma vez. */
+const VARIANTS: Record<AccordionVariant, Partial<AccordionProps>> = {
+	list: {
+		gap: responsive("0px"),
+		itemBackground: "",
+		openItemBackground: "",
+		border: defaultBorder({ radius: responsive(corners("0px")) }),
+		shadow: defaultShadow(),
+		openShadow: defaultShadow(),
+		dividerStyle: "solid",
+		titlePadding: responsive(
+			sides("22px", "0px"),
+			undefined,
+			sides("18px", "0px"),
+		),
+		bodyPadding: responsive(
+			sides("0px", "48px", "24px", "0px"),
+			undefined,
+			sides("0px", "0px", "20px"),
+		),
+		iconStyle: "plus-circle",
+	},
+	cards: {
+		gap: responsive("12px"),
+		itemBackground: C.surface,
+		openItemBackground: C.background,
+		border: defaultBorder({ radius: responsive(corners("16px")) }),
+		shadow: defaultShadow(),
+		openShadow: defaultShadow({
+			enabled: true,
+			y: 12,
+			blur: 32,
+			spread: -12,
+			color: "#00000026",
+		}),
+		dividerStyle: "none",
+		titlePadding: responsive(
+			sides("20px", "24px"),
+			undefined,
+			sides("16px", "18px"),
+		),
+		bodyPadding: responsive(
+			sides("0px", "24px", "22px"),
+			undefined,
+			sides("0px", "18px", "18px"),
+		),
+		iconStyle: "plus-circle",
+	},
+	bordered: {
+		gap: responsive("12px"),
+		itemBackground: C.background,
+		openItemBackground: C.background,
+		border: defaultBorder({
+			style: "solid",
+			color: C.border,
+			radius: responsive(corners("12px")),
+		}),
+		shadow: defaultShadow(),
+		openShadow: defaultShadow(),
+		dividerStyle: "none",
+		titlePadding: responsive(sides("18px", "20px"), undefined, sides("16px")),
+		bodyPadding: responsive(
+			sides("0px", "20px", "20px"),
+			undefined,
+			sides("0px", "16px", "16px"),
+		),
+		iconStyle: "chevron",
+	},
+};
+
+const ACCORDION_DEFAULTS = {
+	variant: "list",
 	exclusive: true,
 	firstOpen: true,
-	editorExpandAll: true,
-	iconStyle: "chevron",
+	duration: 350,
+	iconStyle: "plus-circle",
 	iconPosition: "right",
-	iconSize: "20px",
-	iconColor: "",
-	activeIconColor: "",
+	iconColor: C.text,
+	iconBackground: C.surface,
+	activeIconColor: "#ffffff",
+	activeIconBackground: C.primary,
 	titleTypography: defaultTypography({
 		fontFamily: FONT_HEADING,
 		fontSize: responsive("18px", undefined, "16px"),
@@ -117,36 +202,29 @@ const ACCORDION_DEFAULTS: AccordionProps = {
 		color: C.text,
 	}),
 	activeTitleColor: C.primary,
-	titleBackground: "",
-	activeTitleBackground: "",
-	titlePadding: responsive(sides("18px", "20px"), undefined, sides("16px")),
-	bodyPadding: responsive(
-		sides("0px", "20px", "20px"),
-		undefined,
-		sides("0px", "16px", "16px"),
-	),
-	bodyBackground: "",
 	bodyGap: responsive("12px"),
-	itemBackground: C.background,
-	border: defaultBorder({
-		style: "solid",
-		color: C.border,
-		radius: responsive(corners("10px")),
-	}),
-	shadow: defaultShadow(),
-	gap: responsive("12px"),
-	dividerStyle: "none",
 	dividerColor: C.border,
 	dividerWidth: "1px",
+	...VARIANTS.list,
 	box: defaultBox({ width: responsive("100%") }),
-};
+} as AccordionProps;
 
-/** O item lê a aparência e o comportamento do acordeão por contexto. */
-const AccordionContext = createContext<{
-	parentId: string;
+type AccordionContextValue = {
 	props: AccordionProps;
 	index: number;
-} | null>(null);
+	/** Só no editor: abertura controlada pela view do acordeão. */
+	isOpen?: (index: number, initial: boolean) => boolean;
+	toggle?: (index: number, initial: boolean) => void;
+	reveal?: (index: number) => void;
+};
+
+const AccordionContext = createContext<AccordionContextValue | null>(null);
+
+const initiallyOpen = (
+	p: AccordionProps,
+	index: number,
+	openByDefault: boolean,
+) => openByDefault || (p.firstOpen && index === 0);
 
 function AccordionView({
 	id,
@@ -156,16 +234,46 @@ function AccordionView({
 }: NodeViewProps<AccordionProps>) {
 	const isEditor = useIsEditor();
 	const items = flattenChildren(children);
+	// no editor, quem está aberto fica aqui (fora do histórico de desfazer)
+	const [openMap, setOpenMap] = useState<Record<number, boolean>>({});
+	const isOpen = useCallback(
+		(index: number, initial: boolean) => openMap[index] ?? initial,
+		[openMap],
+	);
+	const setOpen = useCallback(
+		(index: number, open: boolean) =>
+			setOpenMap((prev) => {
+				const next: Record<number, boolean> = { ...prev, [index]: open };
+				if (open && props.exclusive) {
+					for (let i = 0; i < items.length; i++)
+						if (i !== index) next[i] = false;
+				}
+				return next;
+			}),
+		[props.exclusive, items.length],
+	);
 	return (
 		<div
 			ref={rootRef as React.Ref<HTMLDivElement>}
-			className={nodeClassName(id, "pb-acc", props.box)}
+			className={cn(
+				nodeClassName(id, "pb-acc", props.box),
+				isEditor && "pb-acc-js",
+			)}
 			data-pb-node={id}
+			data-pb-exclusive={props.exclusive ? "" : undefined}
 		>
 			{items.map((child, index) => (
 				<AccordionContext.Provider
 					key={isValidElement(child) && child.key !== null ? child.key : index}
-					value={{ parentId: id, props, index }}
+					value={{
+						props,
+						index,
+						isOpen: isEditor ? isOpen : undefined,
+						toggle: isEditor
+							? (i, initial) => setOpen(i, !isOpen(i, initial))
+							: undefined,
+						reveal: isEditor ? (i) => setOpen(i, true) : undefined,
+					}}
 				>
 					{child}
 				</AccordionContext.Provider>
@@ -174,6 +282,69 @@ function AccordionView({
 				<div className="pb-placeholder">Adicione itens no painel</div>
 			) : null}
 		</div>
+	);
+}
+
+/** Miniaturas dos estilos prontos. */
+function VariantPreview({ variant }: { variant: AccordionVariant }) {
+	const row = {
+		list: "h-3 border-b border-muted-foreground/30",
+		cards: "h-2.5 rounded-sm bg-muted-foreground/20 px-1",
+		bordered: "h-2.5 rounded-sm border border-muted-foreground/40 px-1",
+	}[variant];
+	return (
+		<span
+			className={cn("flex w-full flex-col", variant !== "list" && "gap-0.5")}
+		>
+			{[0, 1, 2].map((i) => (
+				<span key={i} className={cn("flex items-center justify-between", row)}>
+					<span className="h-1 w-7 rounded bg-muted-foreground/50" />
+					<span className="size-1.5 rounded-full bg-muted-foreground/50" />
+				</span>
+			))}
+		</span>
+	);
+}
+
+function VariantPicker() {
+	const { props, update } = useNodeProps<AccordionProps>();
+	const options: { value: AccordionVariant; label: string }[] = [
+		{ value: "list", label: "Lista" },
+		{ value: "cards", label: "Cards" },
+		{ value: "bordered", label: "Bordas" },
+	];
+	return (
+		<Field
+			label="Estilo"
+			hint="Aplica um visual pronto; depois dá para ajustar cada detalhe."
+		>
+			<div className="grid grid-cols-3 gap-1.5">
+				{options.map((o) => (
+					<button
+						key={o.value}
+						type="button"
+						onClick={() =>
+							update((draft) => {
+								Object.assign(draft, structuredClone(VARIANTS[o.value]), {
+									variant: o.value,
+								});
+							})
+						}
+						className={cn(
+							"flex flex-col items-center gap-1.5 rounded-md border p-2 text-[11px]",
+							props.variant === o.value
+								? "border-primary bg-primary/10"
+								: "border-border text-muted-foreground hover:border-muted-foreground/50",
+						)}
+					>
+						<span className="flex h-10 w-full items-center px-1">
+							<VariantPreview variant={o.value} />
+						</span>
+						{o.label}
+					</button>
+				))}
+			</div>
+		</Field>
 	);
 }
 
@@ -191,50 +362,36 @@ function AccordionSettings() {
 							itemLabel={(p) => String(p.title ?? "")}
 							addLabel="Adicionar item"
 							create={(i) =>
-								h("AccordionItem", { title: `Item ${i + 1}` }, [
-									h("Text", { html: "<p>Conteúdo do item.</p>" }),
+								h("AccordionItem", { title: `Pergunta ${i + 1}` }, [
+									h("Text", { html: "<p>Escreva aqui a resposta.</p>" }),
 								])
 							}
 							min={1}
 						/>
 					</Group>
 					<Group title="Comportamento">
-						<SwitchField
-							path="exclusive"
-							label="Só um aberto por vez"
-							hint="Abrir um item fecha os outros."
-						/>
+						<SwitchField path="exclusive" label="Só um aberto por vez" />
 						<SwitchField path="firstOpen" label="Primeiro item aberto" />
-						<SwitchField
-							path="editorExpandAll"
-							label="Mostrar todos abertos no editor"
-							hint="Só no editor, para arrastar elementos para dentro dos itens."
+						<NumberField
+							path="duration"
+							label="Duração da animação (ms)"
+							min={0}
+							max={1000}
+							step={50}
 						/>
 					</Group>
 				</>
 			}
 			style={
 				<>
-					<Group title="Itens">
-						<NumberUnitField
-							path="gap"
-							label="Espaço entre itens"
-							units={["px", "rem"]}
-							max={80}
-						/>
-						<ColorField path="itemBackground" label="Fundo" allowEmpty />
+					<Group title="Estilo pronto">
+						<VariantPicker />
 					</Group>
 					<Group title="Título" defaultOpen={false}>
-						<TypographyFields base="titleTypography" />
+						<TypographyFields base="titleTypography" withAlign={false} />
 						<ColorField
 							path="activeTitleColor"
-							label="Cor quando aberto"
-							allowEmpty
-						/>
-						<ColorField path="titleBackground" label="Fundo" allowEmpty />
-						<ColorField
-							path="activeTitleBackground"
-							label="Fundo quando aberto"
+							label="Cor ao passar o mouse / aberto"
 							allowEmpty
 						/>
 						<SidesField
@@ -244,12 +401,13 @@ function AccordionSettings() {
 						/>
 					</Group>
 					<Group title="Ícone" defaultOpen={false}>
-						<SegmentedField
+						<SelectField
 							path="iconStyle"
 							label="Estilo"
 							options={[
+								{ value: "plus-circle", label: "Mais em círculo (vira ×)" },
+								{ value: "plus", label: "Mais (vira ×)" },
 								{ value: "chevron", label: "Seta" },
-								{ value: "plus", label: "Mais" },
 								{ value: "none", label: "Nenhum" },
 							]}
 						/>
@@ -263,37 +421,38 @@ function AccordionSettings() {
 										{ value: "right", label: "Direita" },
 									]}
 								/>
-								<NumberUnitField
-									path="iconSize"
-									label="Tamanho"
-									units={["px", "em"]}
-									max={64}
-								/>
-								<ColorField path="iconColor" label="Cor" allowEmpty />
-								<ColorField
-									path="activeIconColor"
-									label="Cor quando aberto"
-									allowEmpty
-								/>
+								<ColorField path="iconColor" label="Cor" />
+								<ColorField path="activeIconColor" label="Cor quando aberto" />
+								{iconStyle === "plus-circle" ? (
+									<>
+										<ColorField
+											path="iconBackground"
+											label="Fundo do círculo"
+										/>
+										<ColorField
+											path="activeIconBackground"
+											label="Fundo quando aberto"
+										/>
+									</>
+								) : null}
 							</>
 						) : null}
 					</Group>
-					<Group title="Conteúdo" defaultOpen={false}>
-						<SidesField
-							path="bodyPadding"
-							label="Espaço interno"
-							units={["px", "rem"]}
-						/>
+					<Group title="Itens" defaultOpen={false}>
 						<NumberUnitField
-							path="bodyGap"
-							label="Espaço entre elementos"
+							path="gap"
+							label="Espaço entre itens"
 							units={["px", "rem"]}
 							max={80}
 						/>
-						<ColorField path="bodyBackground" label="Fundo" allowEmpty />
-					</Group>
-					<Group title="Borda" defaultOpen={false}>
+						<ColorField path="itemBackground" label="Fundo" allowEmpty />
+						<ColorField
+							path="openItemBackground"
+							label="Fundo quando aberto"
+							allowEmpty
+						/>
 						<BorderFields base="border" />
+						<ShadowFields base="shadow" />
 					</Group>
 					<Group title="Divisória" defaultOpen={false}>
 						<SelectField
@@ -318,8 +477,18 @@ function AccordionSettings() {
 							</>
 						) : null}
 					</Group>
-					<Group title="Sombra" defaultOpen={false}>
-						<ShadowFields base="shadow" />
+					<Group title="Conteúdo" defaultOpen={false}>
+						<SidesField
+							path="bodyPadding"
+							label="Espaço interno"
+							units={["px", "rem"]}
+						/>
+						<NumberUnitField
+							path="bodyGap"
+							label="Espaço entre elementos"
+							units={["px", "rem"]}
+							max={80}
+						/>
 					</Group>
 				</>
 			}
@@ -336,6 +505,7 @@ export const Accordion: ComponentDefinition<AccordionProps> = {
 	isCanvas: true,
 	inToolbox: true,
 	defaults: ACCORDION_DEFAULTS,
+	runtime: ["accordion"],
 	rules: {
 		canMoveIn: (incoming) =>
 			incoming.every((n) => n.data.name === "AccordionItem"),
@@ -343,46 +513,61 @@ export const Accordion: ComponentDefinition<AccordionProps> = {
 	View: AccordionView,
 	css: (id, p) => {
 		const sheet = createSheet(id);
+		const S = nodeSelector(id);
+		const ease = "cubic-bezier(.4,0,.2,1)";
+		const ms = `${Math.max(0, p.duration)}ms`;
 		sheet
 			.root()
 			.set("display", "flex")
 			.set("flex-direction", "column")
-			.set("gap", p.gap)
-			// permite animar a altura até "auto" onde houver suporte
-			.set("interpolate-size", "allow-keywords");
+			.set("gap", p.gap);
 
 		const I = " > .pb-acc-item";
+		// "aberto": classe is-open com JS; atributo [open] sem JS
+		const open = (suffix = "") =>
+			`${S}${I}.is-open${suffix}, ${S}:not(.pb-acc-js)${I}[open]${suffix}`;
+
 		const item = sheet.rule(I);
 		item
 			.set("background-color", p.itemBackground)
 			.set("box-shadow", shadowToCss(p.shadow))
-			.set("overflow", "hidden");
+			.set("overflow", "hidden")
+			.set(
+				"transition",
+				`background-color ${ms} ${ease}, box-shadow ${ms} ${ease}`,
+			);
 		applyBorder(item, p.border);
+		sheet
+			.raw(open())
+			.set("background-color", p.openItemBackground)
+			.set("box-shadow", shadowToCss(p.openShadow));
 		if (p.dividerStyle !== "none") {
-			sheet
-				.rule(`${I}:not(:last-of-type)`)
-				.set(
-					"border-bottom",
-					`${p.dividerWidth} ${p.dividerStyle} ${p.dividerColor}`,
-				);
+			const line = `${p.dividerWidth} ${p.dividerStyle} ${p.dividerColor}`;
+			sheet.rule(I).set("border-bottom", line);
+			sheet.rule(`${I}:first-child`).set("border-top", line);
 		}
 
+		// título
 		const title = sheet.rule(`${I} > .pb-acc-title`);
 		title
 			.set("display", "flex")
 			.set("align-items", "center")
-			.set("gap", "12px")
+			.set("gap", "16px")
 			.set("cursor", "pointer")
 			.set("list-style", "none")
 			.set("padding", p.titlePadding, sidesToCss)
-			.set("background-color", p.titleBackground)
-			.set("transition", "color .2s ease, background-color .2s ease");
+			.set("transition", `color .2s ${ease}`);
 		applyTypography(title, p.titleTypography);
+		sheet.rule(`${I} > .pb-acc-title:hover`).set("color", p.activeTitleColor);
+		sheet.raw(open(" > .pb-acc-title")).set("color", p.activeTitleColor);
 		sheet
-			.rule(`${I}[open] > .pb-acc-title`)
-			.set("color", p.activeTitleColor)
-			.set("background-color", p.activeTitleBackground);
-		sheet.rule(`${I} > .pb-acc-title::marker`).set("content", '""');
+			.rule(`${I} > .pb-acc-title::-webkit-details-marker`)
+			.set("display", "none");
+		sheet
+			.rule(`${I} > .pb-acc-title:focus-visible`)
+			.set("outline", `2px solid ${C.primary}`)
+			.set("outline-offset", "2px")
+			.set("border-radius", "6px");
 		sheet
 			.rule(`${I} > .pb-acc-title > .pb-acc-title-text`)
 			.set("flex", "1")
@@ -393,50 +578,80 @@ export const Accordion: ComponentDefinition<AccordionProps> = {
 			.set("width", "1.15em")
 			.set("height", "1.15em");
 
+		// indicador: "+" que gira e vira "×", ou seta que vira para cima
 		const ind = `${I} > .pb-acc-title > .pb-acc-ind`;
 		sheet
 			.rule(ind)
 			.set("flex-shrink", "0")
-			.set("width", p.iconSize)
-			.set("height", p.iconSize)
-			.set("fill", "none")
-			.set("stroke", p.iconColor || "currentColor")
-			.set("stroke-width", "2")
-			.set("stroke-linecap", "round")
-			.set("stroke-linejoin", "round")
-			.set("transition", "transform .25s ease");
-		sheet
-			.rule(`${I}[open] > .pb-acc-title > .pb-acc-ind`)
-			.set("stroke", p.activeIconColor);
-		sheet
-			.rule(`${I}[open] > .pb-acc-title > .pb-acc-chevron`)
-			.set("transform", "rotate(180deg)");
-		sheet
-			.rule(`${ind} .pb-acc-v`)
-			.set("transform-origin", "center")
-			.set("transition", "transform .25s ease");
-		sheet
-			.rule(`${I}[open] > .pb-acc-title > .pb-acc-ind .pb-acc-v`)
-			.set("transform", "rotate(90deg)");
+			.set("display", "inline-flex")
+			.set("align-items", "center")
+			.set("justify-content", "center")
+			.set("color", p.iconColor)
+			.set(
+				"transition",
+				`transform ${ms} ${ease}, background-color ${ms} ${ease}, color ${ms} ${ease}`,
+			);
+		sheet.rule(`${ind} > svg`).set("width", "18px").set("height", "18px");
+		const indOpen = sheet.raw(open(" > .pb-acc-title > .pb-acc-ind"));
+		indOpen.set("color", p.activeIconColor);
+		if (p.iconStyle === "plus-circle") {
+			sheet
+				.rule(ind)
+				.set("width", "32px")
+				.set("height", "32px")
+				.set("border-radius", "999px")
+				.set("background-color", p.iconBackground);
+			sheet.rule(`${ind} > svg`).set("width", "16px").set("height", "16px");
+			indOpen
+				.set("background-color", p.activeIconBackground)
+				.set("transform", "rotate(45deg)");
+		} else {
+			indOpen.set(
+				"transform",
+				p.iconStyle === "plus" ? "rotate(45deg)" : "rotate(180deg)",
+			);
+		}
 
+		// painel: altura anima de 0fr a 1fr (fechar também anima)
 		sheet
-			.rule(`${I} > .pb-acc-body`)
+			.rule(`${I} > .pb-acc-panel`)
+			.set("display", "grid")
+			.set("grid-template-rows", "1fr");
+		sheet
+			.raw(`${S}.pb-acc-js${I} > .pb-acc-panel`)
+			.set("grid-template-rows", "0fr")
+			.set("transition", `grid-template-rows ${ms} ${ease}`);
+		sheet
+			.raw(`${S}.pb-acc-js${I}.is-open > .pb-acc-panel`)
+			.set("grid-template-rows", "1fr");
+		sheet
+			.rule(`${I} > .pb-acc-panel > .pb-acc-clip`)
+			.set("min-height", "0")
+			.set("overflow", "hidden");
+		sheet
+			.rule(`${I} > .pb-acc-panel > .pb-acc-clip > .pb-acc-body`)
 			.set("display", "flex")
 			.set("flex-direction", "column")
 			.set("gap", p.bodyGap)
-			.set("padding", p.bodyPadding, sidesToCss)
-			.set("background-color", p.bodyBackground);
+			.set("padding", p.bodyPadding, sidesToCss);
+		// conteúdo aparece com um leve fade enquanto o painel abre
+		sheet
+			.raw(`${S}.pb-acc-js${I} > .pb-acc-panel > .pb-acc-clip > .pb-acc-body`)
+			.set("opacity", "0")
+			.set("transform", "translateY(-6px)")
+			.set("transition", `opacity ${ms} ${ease}, transform ${ms} ${ease}`);
+		sheet
+			.raw(
+				`${S}.pb-acc-js${I}.is-open > .pb-acc-panel > .pb-acc-clip > .pb-acc-body`,
+			)
+			.set("opacity", "1")
+			.set("transform", "none");
 
 		applyBox(sheet, p.box, "flex");
-
-		// abertura suave onde houver ::details-content; nos demais abre direto
-		const s = `${nodeSelector(id)}${I}`;
-		const motion =
-			`${s} > .pb-acc-title::-webkit-details-marker{display:none}` +
-			`${s}::details-content{block-size:0;overflow:hidden;transition:block-size .3s ease,content-visibility .3s allow-discrete}` +
-			`${s}[open]::details-content{block-size:auto}` +
-			`@media (prefers-reduced-motion:reduce){${s}::details-content,${s} > .pb-acc-title > .pb-acc-ind,${s} .pb-acc-v{transition:none}}`;
-		return sheet.toString() + motion;
+		sheet.appendRaw(
+			`@media (prefers-reduced-motion:reduce){${S} *{transition:none !important}}`,
+		);
+		return sheet.toString();
 	},
 	Settings: AccordionSettings,
 	fonts: (p) => [p.titleTypography.fontFamily],
@@ -456,26 +671,23 @@ export type AccordionItemProps = {
 
 function Indicator({ style }: { style: AccordionProps["iconStyle"] }) {
 	if (style === "none") return null;
-	if (style === "plus") {
-		return (
-			<svg
-				className="pb-acc-ind pb-acc-plus"
-				viewBox="0 0 24 24"
-				aria-hidden="true"
-			>
-				<path d="M5 12h14" />
-				<path className="pb-acc-v" d="M12 5v14" />
-			</svg>
-		);
-	}
 	return (
-		<svg
-			className="pb-acc-ind pb-acc-chevron"
-			viewBox="0 0 24 24"
-			aria-hidden="true"
-		>
-			<path d="m6 9 6 6 6-6" />
-		</svg>
+		<span className="pb-acc-ind" aria-hidden="true">
+			<svg
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth={2}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			>
+				{style === "chevron" ? (
+					<path d="m6 9 6 6 6-6" />
+				) : (
+					<path d="M12 5v14M5 12h14" />
+				)}
+			</svg>
+		</span>
 	);
 }
 
@@ -489,33 +701,36 @@ function AccordionItemView({
 	const isEditor = useIsEditor();
 	const ctx = useContext(AccordionContext);
 	const parent = ctx?.props ?? ACCORDION_DEFAULTS;
-	// no editor, selecionar o item (ou algo dentro dele) abre o painel
-	const [revealed, setRevealed] = useState(false);
+	const index = ctx?.index ?? 0;
+	const initial = initiallyOpen(parent, index, props.openByDefault);
+	const open = ctx?.isOpen ? ctx.isOpen(index, initial) : initial;
 	const title = useInlineEdit(
 		props.title,
 		onPropChange && ((v) => onPropChange("title", v)),
 	);
 	const empty = !children || (Array.isArray(children) && children.length === 0);
-	const open =
-		props.openByDefault ||
-		(parent.firstOpen && ctx?.index === 0) ||
-		(isEditor && (parent.editorExpandAll || revealed));
-	// no editor o `name` fecharia os outros itens abertos
-	const name =
-		!isEditor && ctx && parent.exclusive ? `acc-${ctx.parentId}` : undefined;
 	const indicator = <Indicator style={parent.iconStyle} />;
 	return (
 		<details
 			ref={rootRef as React.Ref<HTMLDetailsElement>}
-			className={nodeClassName(id, "pb-acc-item", props.box)}
+			className={cn(
+				nodeClassName(id, "pb-acc-item", props.box),
+				open && "is-open",
+			)}
 			data-pb-node={id}
-			name={name}
-			open={open || undefined}
+			// no editor fica sempre "open": quem mostra/esconde é a classe is-open
+			open={isEditor || open || undefined}
 		>
 			<summary
 				className="pb-acc-title"
-				// no editor o clique seleciona o item em vez de abrir/fechar
-				onClick={isEditor ? (e) => e.preventDefault() : undefined}
+				onClick={
+					isEditor
+						? (e) => {
+								e.preventDefault();
+								if (!title.editing) ctx?.toggle?.(index, initial);
+							}
+						: undefined
+				}
 			>
 				{parent.iconPosition === "left" ? indicator : null}
 				{props.icon ? (
@@ -530,13 +745,26 @@ function AccordionItemView({
 				</span>
 				{parent.iconPosition === "right" ? indicator : null}
 			</summary>
-			<div className="pb-acc-body">
-				{children}
-				{isEditor && empty ? (
-					<div className="pb-placeholder">Arraste elementos para este item</div>
-				) : null}
+			<div className="pb-acc-panel">
+				<div className="pb-acc-clip">
+					<div className="pb-acc-body">
+						{children}
+						{isEditor && empty ? (
+							<div className="pb-placeholder">
+								Arraste elementos para este item
+							</div>
+						) : null}
+					</div>
+				</div>
 			</div>
-			{isEditor ? <RevealOnSelect id={id} onReveal={setRevealed} /> : null}
+			{isEditor ? (
+				<RevealOnSelect
+					id={id}
+					onReveal={(selected) => {
+						if (selected && !open) ctx?.reveal?.(index);
+					}}
+				/>
+			) : null}
 		</details>
 	);
 }
@@ -547,11 +775,11 @@ function AccordionItemSettings() {
 			content={
 				<Group title="Item">
 					<TextField path="title" label="Título" />
-					<IconField path="icon" label="Ícone" allowNone />
+					<IconField path="icon" label="Ícone antes do título" allowNone />
 					<SwitchField
 						path="openByDefault"
 						label="Aberto ao carregar"
-						hint="A aparência é definida no acordeão."
+						hint="A aparência de todos os itens fica nas configurações do acordeão."
 					/>
 				</Group>
 			}
@@ -571,7 +799,7 @@ export const AccordionItem: ComponentDefinition<AccordionItemProps> = {
 	isCanvas: true,
 	inToolbox: false,
 	defaults: {
-		title: "Item do acordeão",
+		title: "Pergunta",
 		icon: "",
 		openByDefault: false,
 		box: defaultBox(),
@@ -593,14 +821,22 @@ export const AccordionItem: ComponentDefinition<AccordionItemProps> = {
 	Settings: AccordionItemSettings,
 };
 
-/** Acordeão inicial (Toolbox): 3 itens com texto. */
+/** Acordeão inicial (Toolbox): 3 perguntas com resposta. */
 export const accordionSpec = (): NodeSpec =>
 	h(
 		"Accordion",
 		{},
-		["Primeiro item", "Segundo item", "Terceiro item"].map((title) =>
-			h("AccordionItem", { title }, [
-				h("Text", { html: "<p>Conteúdo do item.</p>" }),
-			]),
+		[
+			[
+				"Como funciona?",
+				"Explique em poucas linhas como o cliente usa o produto.",
+			],
+			[
+				"Quanto tempo leva?",
+				"Diga em quanto tempo o cliente vê os primeiros resultados.",
+			],
+			["Tem garantia?", "Descreva a garantia e como pedir o reembolso."],
+		].map(([title, answer]) =>
+			h("AccordionItem", { title }, [h("Text", { html: `<p>${answer}</p>` })]),
 		),
 	);
