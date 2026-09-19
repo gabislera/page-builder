@@ -124,16 +124,16 @@ const VARIANTS: Record<AccordionVariant, Partial<AccordionProps>> = {
 		openShadow: defaultShadow(),
 		dividerStyle: "solid",
 		titlePadding: responsive(
-			sides("22px", "0px"),
+			sides("20px", "20px"),
 			undefined,
-			sides("18px", "0px"),
+			sides("16px", "16px"),
 		),
 		bodyPadding: responsive(
-			sides("0px", "48px", "24px", "0px"),
+			sides("0px", "20px", "20px"),
 			undefined,
-			sides("0px", "0px", "20px"),
+			sides("0px", "16px", "16px"),
 		),
-		iconStyle: "plus-circle",
+		iconStyle: "chevron",
 	},
 	cards: {
 		gap: responsive("12px"),
@@ -159,7 +159,7 @@ const VARIANTS: Record<AccordionVariant, Partial<AccordionProps>> = {
 			undefined,
 			sides("0px", "18px", "18px"),
 		),
-		iconStyle: "plus-circle",
+		iconStyle: "chevron",
 	},
 	bordered: {
 		gap: responsive("12px"),
@@ -188,7 +188,7 @@ const ACCORDION_DEFAULTS = {
 	exclusive: true,
 	firstOpen: true,
 	duration: 350,
-	iconStyle: "plus-circle",
+	iconStyle: "chevron",
 	iconPosition: "right",
 	iconColor: C.text,
 	iconBackground: C.surface,
@@ -405,9 +405,9 @@ function AccordionSettings() {
 							path="iconStyle"
 							label="Estilo"
 							options={[
+								{ value: "chevron", label: "Seta" },
 								{ value: "plus-circle", label: "Mais em círculo (vira ×)" },
 								{ value: "plus", label: "Mais (vira ×)" },
-								{ value: "chevron", label: "Seta" },
 								{ value: "none", label: "Nenhum" },
 							]}
 						/>
@@ -422,9 +422,12 @@ function AccordionSettings() {
 									]}
 								/>
 								<ColorField path="iconColor" label="Cor" />
-								<ColorField path="activeIconColor" label="Cor quando aberto" />
 								{iconStyle === "plus-circle" ? (
 									<>
+										<ColorField
+											path="activeIconColor"
+											label="Cor quando aberto"
+										/>
 										<ColorField
 											path="iconBackground"
 											label="Fundo do círculo"
@@ -593,7 +596,11 @@ export const Accordion: ComponentDefinition<AccordionProps> = {
 			);
 		sheet.rule(`${ind} > svg`).set("width", "18px").set("height", "18px");
 		const indOpen = sheet.raw(open(" > .pb-acc-title > .pb-acc-ind"));
-		indOpen.set("color", p.activeIconColor);
+		// seta/"+" simples acompanham a cor do título aberto; no círculo, a cor própria
+		indOpen.set(
+			"color",
+			p.iconStyle === "plus-circle" ? p.activeIconColor : p.activeTitleColor,
+		);
 		if (p.iconStyle === "plus-circle") {
 			sheet
 				.rule(ind)
@@ -840,4 +847,32 @@ export const accordionSpec = (): NodeSpec =>
 		].map(([title, answer]) =>
 			h("AccordionItem", { title }, [h("Text", { html: `<p>${answer}</p>` })]),
 		),
+	);
+
+/** "Perguntas frequentes" da Toolbox: o acordeão já com perguntas e respostas. */
+export const faqSpec = (): NodeSpec =>
+	h(
+		"Accordion",
+		{},
+		[
+			[
+				"Por quanto tempo terei acesso?",
+				"O acesso é vitalício. Você pode assistir quando e quantas vezes quiser.",
+			],
+			[
+				"Tem garantia?",
+				"Sim! Você tem 7 dias de garantia incondicional. Se não gostar, devolvemos 100% do valor.",
+			],
+			[
+				"Quais são as formas de pagamento?",
+				"Cartão de crédito em até 12x, Pix ou boleto.",
+			],
+			[
+				"Como recebo o acesso?",
+				"Logo após a confirmação do pagamento, você recebe o acesso por e-mail.",
+			],
+		].map(([title, answer]) =>
+			h("AccordionItem", { title }, [h("Text", { html: `<p>${answer}</p>` })]),
+		),
+		"Perguntas frequentes",
 	);
