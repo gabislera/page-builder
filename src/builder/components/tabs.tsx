@@ -140,7 +140,7 @@ const VARIANTS: Record<TabsVariant, Partial<TabsProps>> = {
 };
 
 const TABS_DEFAULTS = {
-	variant: "segmented",
+	variant: "underline",
 	orientation: "horizontal",
 	justify: "center",
 	navWidth: responsive("240px"),
@@ -153,7 +153,7 @@ const TABS_DEFAULTS = {
 		color: C.textMuted,
 	}),
 	indicatorColor: C.primary,
-	...VARIANTS.segmented,
+	...VARIANTS.underline,
 	panelPadding: responsive(sides("0px")),
 	panelGap: responsive("16px"),
 	panelBackground: defaultBackground(),
@@ -400,8 +400,8 @@ function VariantPreview({ variant }: { variant: TabsVariant }) {
 function VariantPicker() {
 	const { props, update } = useNodeProps<TabsProps>();
 	const options: { value: TabsVariant; label: string }[] = [
-		{ value: "segmented", label: "Segmentado" },
 		{ value: "underline", label: "Sublinhado" },
+		{ value: "segmented", label: "Segmentado" },
 		{ value: "pills", label: "Pílulas" },
 	];
 	return (
