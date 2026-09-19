@@ -1,8 +1,7 @@
 /**
- * Abas: clique troca a aba ativa (classe `pb-tab-active` no botão e no
- * painel); setas do teclado, Home e End navegam entre as abas (tabindex
- * móvel + aria-selected). Botões e painéis são filhos diretos de
- * [data-pb-tabs], na mesma ordem (o N-ésimo botão abre o N-ésimo painel).
+ * Abas: clique troca a aba ativa (`pb-tab-active` no botão e no painel);
+ * setas, Home e End navegam entre as abas (tabindex móvel + aria-selected).
+ * O N-ésimo botão da barra abre o N-ésimo painel.
  */
 export const tabsScript = (_cfg: {
 	viewEndpoint: string;
@@ -11,9 +10,10 @@ export const tabsScript = (_cfg: {
 (function(){
   var ts=document.querySelectorAll('[data-pb-tabs]');
   if(!ts.length)return;
-  function kids(el,cls){return Array.prototype.filter.call(el.children,function(c){return c.classList.contains(cls);});}
+  function kids(el,cls){return el?[].filter.call(el.children,function(c){return c.classList.contains(cls);}):[];}
   ts.forEach(function(t){
-    var btns=kids(t,'pb-tab-btn'),panels=kids(t,'pb-tab-panel');
+    var nav=kids(t,'pb-tabs-nav')[0],list=nav&&kids(nav,'pb-tabs-list')[0];
+    var btns=kids(list,'pb-tab-btn'),panels=kids(kids(t,'pb-tabs-panels')[0],'pb-tab-panel');
     if(!btns.length)return;
     function act(i,focus){
       btns.forEach(function(b,j){
@@ -23,7 +23,12 @@ export const tabsScript = (_cfg: {
         b.tabIndex=on?0:-1;
         if(panels[j])panels[j].classList.toggle('pb-tab-active',on);
       });
-      if(focus)btns[i].focus();
+      // mantém a aba ativa visível quando a barra rola na horizontal
+      var b=btns[i];
+      if(list.scrollWidth>list.clientWidth){
+        list.scrollTo({left:b.offsetLeft-(list.clientWidth-b.offsetWidth)/2,behavior:'smooth'});
+      }
+      if(focus)b.focus();
     }
     btns.forEach(function(b,i){
       b.addEventListener('click',function(){act(i,false);});
