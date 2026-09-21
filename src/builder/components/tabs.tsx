@@ -243,10 +243,9 @@ function TabsEditor({
 			tabs={tabs}
 			active={active}
 			items={items}
-			onSelect={(i) => {
-				setActive(i);
-				actions.selectNode(tabs[i]?.id);
-			}}
+			// clicar na barra troca a aba e mantém as Abas selecionadas
+			// (o conteúdo de cada aba é selecionado clicando dentro dele)
+			onSelect={setActive}
 			onRename={(i, label) =>
 				actions.setProp(tabs[i].id, (p: { label: string }) => {
 					p.label = label;
