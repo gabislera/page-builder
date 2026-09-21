@@ -49,6 +49,7 @@ const CATEGORIES = [
 		...SECTION_CATEGORIES,
 		"Cards",
 		"Preços",
+		"Números",
 		...INTERACTIVE_CATEGORIES,
 		"Galeria",
 	]),

@@ -26,6 +26,7 @@ import { ProgressBar } from "./components/progress-bar.tsx";
 import { Section } from "./components/section.tsx";
 import { SocialIcons } from "./components/social-icons.tsx";
 import { Spacer } from "./components/spacer.tsx";
+import { StatCounter } from "./components/stat-counter.tsx";
 import { TabItem, Tabs } from "./components/tabs.tsx";
 import { Testimonial } from "./components/testimonial.tsx";
 import { Text } from "./components/text.tsx";
@@ -52,6 +53,7 @@ export const COMPONENTS: Record<string, AnyComponentDefinition> =
 			Faq,
 			Countdown,
 			ProgressBar,
+			StatCounter,
 			Modal,
 			FloatingButtons,
 			Html,

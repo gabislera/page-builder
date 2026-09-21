@@ -453,6 +453,37 @@ const galleryMasonry = (): NodeSpec =>
 		true,
 	);
 
+/* ------------------------------------------------------------------ */
+/* Números                                                             */
+/* ------------------------------------------------------------------ */
+
+const STATS = [
+	{ value: 12000, prefix: "+", suffix: "", label: "clientes atendidos" },
+	{ value: 98, prefix: "", suffix: "%", label: "de satisfação" },
+	{ value: 4.9, prefix: "", suffix: "/5", label: "nota média", decimals: 1 },
+	{ value: 15, prefix: "", suffix: " anos", label: "de experiência" },
+];
+
+const stats4 = (): NodeSpec =>
+	section(
+		[
+			...intro("Resultados que falam por si"),
+			grid(
+				4,
+				STATS.map((s) =>
+					h("StatCounter", { decimals: 0, ...s }, [], "Contador"),
+				),
+				"Números",
+				{
+					columns: responsive(4, 2, 2),
+					box: { maxWidth: responsive("1120px") },
+				},
+			),
+		],
+		"Números",
+		true,
+	);
+
 export const CONTENT_TEMPLATES: SectionTemplate[] = [
 	{
 		id: "pricing-3",
@@ -509,5 +540,12 @@ export const CONTENT_TEMPLATES: SectionTemplate[] = [
 		name: "Galeria mosaico",
 		kind: "section",
 		build: galleryMasonry,
+	},
+	{
+		id: "stats-4",
+		category: "Números",
+		name: "4 números com contagem",
+		kind: "section",
+		build: stats4,
 	},
 ];

@@ -208,6 +208,7 @@ export const TOOLBOX_GROUPS: { title: string; items: ToolboxItem[] }[] = [
 			"Icon",
 			"IconList",
 			"IconBox",
+			"StatCounter",
 			"Card",
 			"Divider",
 		].map(simple),
