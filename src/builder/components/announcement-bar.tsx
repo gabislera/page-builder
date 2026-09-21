@@ -37,6 +37,7 @@ import {
 	applyBox,
 	applyTypography,
 	createSheet,
+	nodeSelector,
 	sidesToCss,
 } from "../core/style-engine.ts";
 import type {
@@ -93,6 +94,7 @@ function AnnouncementBarView({
 			className={nodeClassName(id, "pb-bar", props.box)}
 			data-pb-node={id}
 			data-pb-live={isEditor ? undefined : ""}
+			data-pb-sticky={props.sticky ? "" : undefined}
 			data-pb-bar={props.dismissible ? storageKey(id) : undefined}
 			data-pb-remember={props.dismissible ? props.rememberDays : undefined}
 			aria-label="Aviso"
@@ -336,6 +338,11 @@ export const AnnouncementBar: ComponentDefinition<AnnouncementBarProps> = {
 				.set("position", "sticky")
 				.set("top", "0")
 				.set("z-index", "55");
+		// cabeçalho fixo gruda logo abaixo da barra (altura medida no runtime)
+		if (p.sticky)
+			sheet.appendRaw(
+				`${nodeSelector(id)}[data-pb-live]:not([hidden]) ~ .pb-header[data-pb-live]{top:var(--pb-bar-h,0px)}`,
+			);
 		return sheet.toString();
 	},
 	Settings: AnnouncementBarSettings,
