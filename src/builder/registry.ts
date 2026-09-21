@@ -1,4 +1,5 @@
 import { Accordion, AccordionItem } from "./components/accordion.tsx";
+import { AnnouncementBar } from "./components/announcement-bar.tsx";
 import { Button } from "./components/button.tsx";
 import { Card } from "./components/card.tsx";
 import { Carousel, CarouselSlide } from "./components/carousel.tsx";
@@ -54,6 +55,7 @@ export const COMPONENTS: Record<string, AnyComponentDefinition> =
 			Countdown,
 			ProgressBar,
 			StatCounter,
+			AnnouncementBar,
 			Modal,
 			FloatingButtons,
 			Html,

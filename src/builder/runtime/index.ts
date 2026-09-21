@@ -4,6 +4,7 @@
  */
 import type { RuntimeFeature } from "../core/types.ts";
 import { accordionScript } from "./features/accordion.ts";
+import { announcementScript } from "./features/announcement.ts";
 import { carouselScript } from "./features/carousel.ts";
 import { countdownScript } from "./features/countdown.ts";
 import { counterScript } from "./features/counter.ts";
@@ -62,6 +63,7 @@ export const FEATURE_SCRIPTS: Partial<
 	carousel: carouselScript,
 	accordion: accordionScript,
 	counter: counterScript,
+	announcement: announcementScript,
 	form: formScript,
 	modal: modalScript,
 	floating: floatingScript,
