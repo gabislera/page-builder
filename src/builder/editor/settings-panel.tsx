@@ -1,5 +1,11 @@
-import { NodeProvider, useEditor } from "@craftjs/core";
-import { Globe, MousePointer2, Unlink } from "lucide-react";
+import { type Node, NodeProvider, useEditor } from "@craftjs/core";
+import {
+	ArrowUpToLine,
+	ChevronRight,
+	Globe,
+	MousePointer2,
+	Unlink,
+} from "lucide-react";
 import { createElement } from "react";
 import { Button } from "#/components/ui/button";
 import { Switch } from "#/components/ui/switch";
@@ -8,6 +14,20 @@ import { ROOT_ID } from "../core/tree.ts";
 import { COMPONENTS } from "../registry.ts";
 import { unlinkGlobal } from "./node-actions.ts";
 import { SitePartCard } from "./site-parts.tsx";
+
+/** Componentes compostos: o filho selecionado ganha atalho para o pai. */
+const COMPOUND_PARENTS = new Set(["Tabs", "Accordion", "Carousel"]);
+
+/** Ids da seção (filho da Página) até o nó, em ordem. */
+function ancestors(nodes: Record<string, Node>, id: string): string[] {
+	const out: string[] = [];
+	let current: string | null | undefined = id;
+	while (current && current !== ROOT_ID && nodes[current]) {
+		out.unshift(current);
+		current = nodes[current].data.parent;
+	}
+	return out;
+}
 
 /** Painel direito: configurações do nó selecionado. */
 export function SettingsPanel() {
@@ -26,6 +46,15 @@ export function SettingsPanel() {
 				sitePart: node.data.custom?.sitePart as string | undefined,
 				isSiteBlock: node.data.name === "Header" || node.data.name === "Footer",
 				settings: node.related?.settings,
+				// caminho da página até o nó (sem a Página): Seção › Abas › Aba
+				path: ancestors(state.nodes, id).map((ancestorId) => {
+					const n = state.nodes[ancestorId];
+					return {
+						id: ancestorId,
+						name: (n.data.custom?.displayName as string) || n.data.displayName,
+						type: n.data.name,
+					};
+				}),
 			},
 		};
 	});
@@ -43,9 +72,52 @@ export function SettingsPanel() {
 	const def = COMPONENTS[selected.type];
 	const Icon = def?.icon;
 
+	const parent = selected.path.at(-2);
+	const compound = parent && COMPOUND_PARENTS.has(parent.type) ? parent : null;
+
 	return (
 		<div className="flex flex-col">
 			<div className="flex flex-col gap-3 border-b border-border p-4">
+				{selected.path.length > 1 ? (
+					<nav
+						aria-label="Caminho do elemento"
+						className="flex flex-wrap items-center gap-0.5 text-[11px]"
+					>
+						{selected.path.map((item, i) => {
+							const last = i === selected.path.length - 1;
+							return (
+								<span key={item.id} className="flex items-center gap-0.5">
+									<button
+										type="button"
+										disabled={last}
+										onClick={() => actions.selectNode(item.id)}
+										className={
+											last
+												? "rounded px-1 py-0.5 font-medium text-foreground"
+												: "rounded px-1 py-0.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+										}
+									>
+										{item.name}
+									</button>
+									{last ? null : (
+										<ChevronRight className="size-3 text-muted-foreground/60" />
+									)}
+								</span>
+							);
+						})}
+					</nav>
+				) : null}
+				{compound ? (
+					<Button
+						size="sm"
+						variant="outline"
+						className="h-8 justify-start text-xs"
+						onClick={() => actions.selectNode(compound.id)}
+					>
+						<ArrowUpToLine className="size-3.5" />
+						Editar {compound.name} (elemento principal)
+					</Button>
+				) : null}
 				<div className="flex items-center gap-2">
 					{Icon ? <Icon className="size-4 text-primary" /> : null}
 					<span className="text-xs font-semibold">{selected.displayName}</span>
