@@ -349,7 +349,7 @@ export const Faq: ComponentDefinition<FaqProps> = {
 	displayName: "Perguntas frequentes",
 	category: "conversion",
 	icon: MessageCircleQuestion,
-	inToolbox: true,
+	inToolbox: false,
 	defaults: {
 		items: [
 			{

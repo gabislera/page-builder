@@ -1,6 +1,7 @@
 import { Element, useEditor } from "@craftjs/core";
+import { CircleHelp } from "lucide-react";
 import type { ComponentType, ReactElement } from "react";
-import { accordionSpec } from "../components/accordion.tsx";
+import { accordionSpec, faqSpec } from "../components/accordion.tsx";
 import { carouselSpec } from "../components/carousel.tsx";
 import { containerPresets } from "../components/container.tsx";
 import { tabsSpec } from "../components/tabs.tsx";
@@ -223,13 +224,17 @@ export const TOOLBOX_GROUPS: { title: string; items: ToolboxItem[] }[] = [
 	{
 		title: "Conversão",
 		items: [
-			"Form",
-			"Faq",
-			"Countdown",
-			"ProgressBar",
-			"Testimonial",
-			"PricingTable",
-		].map(simple),
+			simple("Form"),
+			{
+				key: "faq",
+				label: "Perguntas frequentes",
+				icon: CircleHelp,
+				create: () => specToElement(faqSpec()),
+			},
+			...["Countdown", "ProgressBar", "Testimonial", "PricingTable"].map(
+				simple,
+			),
+		],
 	},
 	{
 		title: "Avançado",
