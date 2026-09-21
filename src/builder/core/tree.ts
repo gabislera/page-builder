@@ -42,6 +42,12 @@ export const newNodeId = customAlphabet(
 export const typeOf = (node: SerializedNode) =>
 	typeof node.type === "string" ? node.type : node.type.resolvedName;
 
+/** A seção é uma barra de aviso (vai antes do cabeçalho). */
+export const isTopBar = (s: Pick<SectionTree, "rootNodeId" | "nodes">) => {
+	const node = s.nodes[s.rootNodeId];
+	return Boolean(node) && typeOf(node) === "AnnouncementBar";
+};
+
 /** Todos os ids da subárvore de `id`, incluindo ele mesmo. */
 export function descendants(nodes: SerializedNodes, id: string): string[] {
 	const out: string[] = [];

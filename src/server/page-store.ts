@@ -6,6 +6,7 @@
 import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { normalizeSiteSettings, type SiteSettings } from "#/builder/core/theme";
 import {
+	isTopBar,
 	mergePage,
 	type SectionTree,
 	type SitePart,
@@ -63,7 +64,13 @@ export async function loadPageSections(row: PageRow, settings: SiteSettings) {
 			? loadSitePart(row.projectId, settings.footerSectionId, "footer")
 			: null,
 	]);
-	return [...(header ? [header] : []), ...own, ...(footer ? [footer] : [])];
+	// barras de aviso ficam acima do cabeçalho do site
+	return [
+		...own.filter(isTopBar),
+		...(header ? [header] : []),
+		...own.filter((s) => !isTopBar(s)),
+		...(footer ? [footer] : []),
+	];
 }
 
 /** Página inicial do projeto: slug "home"/"inicio" ou a mais antiga. */

@@ -2,8 +2,12 @@
  * Espaço no canvas quando a página não tem cabeçalho/rodapé: convida a
  * adicionar, oferecendo o do site (se existir) ou um modelo. Só no editor.
  */
+import { useEditor } from "@craftjs/core";
 import { Plus } from "lucide-react";
-import type { SitePart } from "../core/tree.ts";
+import type { ReactNode } from "react";
+import { flattenChildren } from "../core/children.ts";
+import { TOP_BAR_TYPE } from "../core/node-helpers.ts";
+import { ROOT_ID, type SitePart } from "../core/tree.ts";
 import { useSectionPicker } from "./section-picker-store.ts";
 import { PART_CATEGORY, PART_LABEL, useSitePart } from "./site-parts.tsx";
 
@@ -61,5 +65,33 @@ export function SitePartSlot({ part }: { part: SitePart }) {
 				{stored ? "Escolher outro modelo" : `Adicionar ${label}`}
 			</button>
 		</div>
+	);
+}
+
+/**
+ * Filhos da página no editor, com os espaços de cabeçalho e rodapé no lugar
+ * certo: barras de aviso primeiro (ficam sempre no topo), depois o cabeçalho.
+ */
+export function EditorPageBody({
+	children,
+	placeholder,
+}: {
+	children: ReactNode;
+	placeholder: ReactNode;
+}) {
+	const { bars } = useEditor((state) => ({
+		bars: (state.nodes[ROOT_ID]?.data.nodes ?? []).filter(
+			(id) => state.nodes[id]?.data.name === TOP_BAR_TYPE,
+		).length,
+	}));
+	const kids = flattenChildren(children);
+	return (
+		<>
+			{kids.slice(0, bars)}
+			<SitePartSlot part="header" />
+			{kids.slice(bars)}
+			{placeholder}
+			<SitePartSlot part="footer" />
+		</>
 	);
 }

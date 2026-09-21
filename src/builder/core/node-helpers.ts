@@ -16,5 +16,13 @@ export function nodeClassName(id: string, base: string, box?: Partial<Box>) {
 		.join(" ");
 }
 
+/** Barra de aviso: filho direto da página e sempre antes do cabeçalho. */
+export const TOP_BAR_TYPE = "AnnouncementBar";
+
 /** Tipos que só podem ser filhos diretos da página. */
-export const TOP_LEVEL_TYPES = new Set(["Section", "Header", "Footer"]);
+export const TOP_LEVEL_TYPES = new Set([
+	"Section",
+	"Header",
+	"Footer",
+	TOP_BAR_TYPE,
+]);

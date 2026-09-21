@@ -4,7 +4,7 @@ import { Group } from "../controls/field.tsx";
 import { BackgroundFields } from "../controls/groups.tsx";
 import { NumberUnitField, SelectField } from "../controls/inputs.tsx";
 import { defaultBackground } from "../core/defaults.ts";
-import { TOP_LEVEL_TYPES } from "../core/node-helpers.ts";
+import { TOP_BAR_TYPE, TOP_LEVEL_TYPES } from "../core/node-helpers.ts";
 import { useIsEditor } from "../core/render-context.tsx";
 import { type Responsive, responsive } from "../core/responsive.ts";
 import {
@@ -16,7 +16,7 @@ import {
 import type { Background, Length } from "../core/style-types.ts";
 import { C, FONT_BODY, FONT_HEADING, fontChoices } from "../core/theme.ts";
 import type { ComponentDefinition } from "../core/types.ts";
-import { SitePartSlot } from "../editor/site-part-slot.tsx";
+import { EditorPageBody } from "../editor/site-part-slot.tsx";
 
 export type PageProps = {
 	contentWidth: Length;
@@ -40,17 +40,24 @@ function PageView({
 			className={`pb-page ${nodeClass(id)}`}
 			data-pb-node={id}
 		>
-			{isEditor ? <SitePartSlot part="header" /> : null}
-			{children}
-			{isEditor && empty ? (
-				<div
-					className="pb-placeholder"
-					style={{ margin: 24, width: "auto", minHeight: 200 }}
+			{isEditor ? (
+				<EditorPageBody
+					placeholder={
+						empty ? (
+							<div
+								className="pb-placeholder"
+								style={{ margin: 24, width: "auto", minHeight: 200 }}
+							>
+								Página vazia. Adicione uma seção pelo painel "Adicionar".
+							</div>
+						) : null
+					}
 				>
-					Página vazia. Adicione uma seção pelo painel "Adicionar".
-				</div>
-			) : null}
-			{isEditor ? <SitePartSlot part="footer" /> : null}
+					{children}
+				</EditorPageBody>
+			) : (
+				children
+			)}
 		</div>
 	);
 }
@@ -116,11 +123,11 @@ export const Page: ComponentDefinition<PageProps> = {
 		canMoveIn: (incoming, current, helpers) => {
 			if (!incoming.every((n) => TOP_LEVEL_TYPES.has(n.data.name)))
 				return false;
-			// no máximo um cabeçalho e um rodapé por página
+			// no máximo um cabeçalho, um rodapé e uma barra de aviso por página
 			const children = (current.data.nodes ?? []).map((id) =>
 				helpers(id).get(),
 			);
-			for (const kind of ["Header", "Footer"]) {
+			for (const kind of ["Header", "Footer", TOP_BAR_TYPE]) {
 				const adding = incoming.filter((n) => n.data.name === kind);
 				if (!adding.length) continue;
 				const existing = children.filter(

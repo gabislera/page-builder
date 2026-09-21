@@ -17,6 +17,7 @@ import {
 	useState,
 } from "react";
 import { createPortal } from "react-dom";
+import { TOP_BAR_TYPE } from "../core/node-helpers.ts";
 import { ROOT_ID } from "../core/tree.ts";
 import { duplicateNode, moveSection } from "./node-actions.ts";
 import { useSectionPicker } from "./section-picker-store.ts";
@@ -182,6 +183,8 @@ function NodeBar({
 		fn();
 	};
 
+	// a barra de aviso tem lugar fixo (topo): sem mover nem inserir abaixo
+	const isTopBar = editor.query.node(id).get()?.data.name === TOP_BAR_TYPE;
 	const indexInRoot = isTopLevel
 		? editor.query.node(ROOT_ID).get().data.nodes.indexOf(id)
 		: -1;
@@ -230,7 +233,7 @@ function NodeBar({
 								<ArrowUpToLine size={13} />
 							</button>
 						) : null}
-						{isTopLevel ? (
+						{isTopLevel && !isTopBar ? (
 							<>
 								<button
 									type="button"
@@ -273,7 +276,7 @@ function NodeBar({
 					</>
 				) : null}
 			</div>
-			{isTopLevel && selected ? (
+			{isTopLevel && selected && !isTopBar ? (
 				<button
 					type="button"
 					title="Adicionar seção abaixo"

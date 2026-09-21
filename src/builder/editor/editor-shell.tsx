@@ -22,6 +22,7 @@ import { KeyboardShortcuts } from "./shortcuts.tsx";
 import { useSiteStore } from "./site-store.ts";
 import { SiteSettingsController } from "./theme-panel.tsx";
 import { TopBar } from "./top-bar.tsx";
+import { TopBarOrder } from "./top-bar-order.tsx";
 
 export type EditorPageData = {
 	id: string;
@@ -124,6 +125,7 @@ export function EditorShell({
 						</div>
 						<SectionLibraryDialog />
 						<AutosaveController />
+						<TopBarOrder />
 						<SiteSettingsController />
 						<KeyboardShortcuts canvasDoc={canvasDoc} />
 						<DraftRecovery

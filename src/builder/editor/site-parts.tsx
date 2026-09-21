@@ -8,6 +8,7 @@ import { useEditor } from "@craftjs/core";
 import { Files, FileText, LayoutTemplate, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "#/lib/utils";
+import { TOP_BAR_TYPE } from "../core/node-helpers.ts";
 import {
 	ROOT_ID,
 	type SectionTree,
@@ -50,8 +51,14 @@ export function useSitePart(part: SitePart) {
 	});
 	const label = PART_LABEL[part];
 
-	const indexFor = () =>
-		part === "header" ? 0 : editor.query.node(ROOT_ID).get().data.nodes.length;
+	/** Cabeçalho logo depois das barras de aviso; rodapé no fim. */
+	const indexFor = () => {
+		const ids = editor.query.node(ROOT_ID).get().data.nodes;
+		if (part === "footer") return ids.length;
+		return ids.filter(
+			(id) => editor.query.node(id).get().data.name === TOP_BAR_TYPE,
+		).length;
+	};
 
 	/** Guarda a versão do site antes de tirá-la da página, para poder voltar. */
 	const stash = (id: string) => {

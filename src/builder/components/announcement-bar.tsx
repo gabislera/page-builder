@@ -1,5 +1,6 @@
 /**
  * Barra de aviso: faixa fina de destaque ("Promoção termina hoje →").
+ * Fica direto na página, sempre acima do cabeçalho.
  * Pode ficar fixa no topo ao rolar e pode ser fechada pelo visitante; o site
  * lembra por alguns dias (localStorage). Um script de uma linha logo depois
  * da barra a esconde já na leitura do HTML, sem piscar.
@@ -20,7 +21,6 @@ import { SegmentedField, SwitchField, TextField } from "../controls/inputs.tsx";
 import { SettingsTabs } from "../controls/settings-layout.tsx";
 import { useField } from "../controls/use-field.ts";
 import { actionLink } from "../core/actions.ts";
-import { h, type NodeSpec } from "../core/build.ts";
 import {
 	defaultBackground,
 	defaultBox,
@@ -37,7 +37,6 @@ import {
 	applyBox,
 	applyTypography,
 	createSheet,
-	nodeClass,
 	sidesToCss,
 } from "../core/style-engine.ts";
 import type {
@@ -228,7 +227,14 @@ export const AnnouncementBar: ComponentDefinition<AnnouncementBarProps> = {
 	category: "conversion",
 	icon: Megaphone,
 	inToolbox: true,
+	notDuplicable: true,
 	runtime: ["announcement"],
+	// só direto na página, e sempre no topo (ver editor/top-bar-order)
+	rules: {
+		canDrop: (target) => target.data.name === "Page",
+		canDrag: () => false,
+		canMoveIn: () => false,
+	},
 	defaults: {
 		text: "Oferta de lançamento: 50% de desconto só até domingo.",
 		icon: "sparkles",
@@ -323,28 +329,15 @@ export const AnnouncementBar: ComponentDefinition<AnnouncementBarProps> = {
 			.set("opacity", "1")
 			.set("background", "rgba(255,255,255,.12)");
 		applyBox(sheet, { ...p.box, padding: undefined }, "block");
-		// fixa no topo: quem gruda é a seção que contém a barra (senão ela só
-		// grudaria dentro da própria seção). Só na página publicada.
+		// fixa no topo só na página publicada; no editor fica no lugar
 		if (p.sticky)
-			sheet.appendRaw(
-				`.pb-section:has(.${nodeClass(id)}[data-pb-live]){position:sticky;top:0;z-index:45}`,
-			);
+			sheet
+				.rule("[data-pb-live]")
+				.set("position", "sticky")
+				.set("top", "0")
+				.set("z-index", "55");
 		return sheet.toString();
 	},
 	Settings: AnnouncementBarSettings,
 	fonts: (p) => [p.typography.fontFamily],
 };
-
-/** Seção em largura total e sem espaçamento, com a barra dentro. É assim que
- * ela entra pela barra de ferramentas: normalmente no topo da página. */
-export const announcementSpec = (): NodeSpec =>
-	h(
-		"Section",
-		{
-			fullWidth: true,
-			padding: responsive(sides("0px", "0px")),
-			gap: responsive("0px"),
-		},
-		[h("AnnouncementBar", {}, [], "Barra de aviso")],
-		"Barra de aviso",
-	);

@@ -1,23 +1,30 @@
 import { Element, useEditor } from "@craftjs/core";
-import { CircleHelp, Megaphone } from "lucide-react";
+import { CircleHelp } from "lucide-react";
 import type { ComponentType, ReactElement } from "react";
+import { toast } from "sonner";
 import { accordionSpec, faqSpec } from "../components/accordion.tsx";
-import { announcementSpec } from "../components/announcement-bar.tsx";
 import { carouselSpec } from "../components/carousel.tsx";
 import { containerPresets } from "../components/container.tsx";
 import { tabsSpec } from "../components/tabs.tsx";
 import { deepMerge, type NodeSpec } from "../core/build.ts";
+import { TOP_BAR_TYPE } from "../core/node-helpers.ts";
 import { responsive } from "../core/responsive.ts";
+import { ROOT_ID } from "../core/tree.ts";
 import { COMPONENTS } from "../registry.ts";
 import { resolver } from "../resolver.ts";
 
 type ToolboxIcon = ComponentType<{ className?: string }>;
+
+type EditorApi = ReturnType<typeof useEditor>;
 
 type ToolboxItem = {
 	key: string;
 	label: string;
 	icon: ToolboxIcon;
 	create: () => ReactElement;
+	/** Clique no item (além de arrastar), para elementos de lugar fixo. */
+	onClick?: (editor: EditorApi) => void;
+	hint?: string;
 };
 
 const C = resolver as Record<
@@ -39,6 +46,30 @@ const simple = (type: string): ToolboxItem => {
 			),
 	};
 };
+
+/** Barra de aviso: só existe um lugar (topo), então um clique já adiciona. */
+const topBarItem = (): ToolboxItem => ({
+	...simple(TOP_BAR_TYPE),
+	hint: "Clique para adicionar no topo da página",
+	onClick: ({ actions, query }) => {
+		const existing = query
+			.node(ROOT_ID)
+			.get()
+			.data.nodes.find((id) => query.node(id).get().data.name === TOP_BAR_TYPE);
+		if (existing) {
+			actions.selectNode(existing);
+			toast("A página já tem uma barra de aviso", {
+				description: "Ela está selecionada para você editar.",
+			});
+			return;
+		}
+		const tree = query
+			.parseReactElement(simple(TOP_BAR_TYPE).create())
+			.toNodeTree();
+		actions.addNodeTree(tree, ROOT_ID, 0);
+		actions.selectNode(tree.rootNodeId);
+	},
+});
 
 const columns = (
 	n: number,
@@ -233,12 +264,7 @@ export const TOOLBOX_GROUPS: { title: string; items: ToolboxItem[] }[] = [
 				icon: CircleHelp,
 				create: () => specToElement(faqSpec()),
 			},
-			{
-				key: "announcement",
-				label: "Barra de aviso",
-				icon: Megaphone,
-				create: () => specToElement(announcementSpec()),
-			},
+			topBarItem(),
 			...["Countdown", "ProgressBar", "Testimonial", "PricingTable"].map(
 				simple,
 			),
@@ -251,7 +277,8 @@ export const TOOLBOX_GROUPS: { title: string; items: ToolboxItem[] }[] = [
 ];
 
 export function Toolbox() {
-	const { connectors } = useEditor();
+	const editor = useEditor();
+	const { connectors } = editor;
 	return (
 		<div className="flex flex-col gap-5 p-4">
 			<p className="text-[11px] text-muted-foreground">
@@ -271,6 +298,10 @@ export function Toolbox() {
 									ref={(el) => {
 										if (el) connectors.create(el, item.create());
 									}}
+									title={item.hint}
+									onClick={
+										item.onClick ? () => item.onClick?.(editor) : undefined
+									}
 									className="flex aspect-square cursor-grab flex-col items-center justify-center gap-1.5 rounded-lg border border-border bg-card text-center transition-colors select-none hover:border-primary hover:bg-primary/10 active:cursor-grabbing"
 								>
 									<Icon className="size-5 text-muted-foreground" />

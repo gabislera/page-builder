@@ -4,7 +4,6 @@
  */
 import { and, eq } from "drizzle-orm";
 import { buildRoot, buildTree, h } from "#/builder/core/build.ts";
-import { announcementSpec } from "#/builder/components/announcement-bar.tsx";
 import { ROOT_ID, type SectionTree } from "#/builder/core/tree.ts";
 import { CONTENT_TEMPLATES } from "#/builder/templates/content.ts";
 import { db } from "#/db/index.ts";
@@ -18,15 +17,10 @@ const toSection = (spec: ReturnType<typeof h>, name: string): SectionTree => {
 	const tree = buildTree(spec, ROOT_ID);
 	return { rootNodeId: tree.rootNodeId, kind: "section", name, isGlobal: false, nodes: tree.nodes };
 };
-const withSticky = (spec: ReturnType<typeof h>) => {
-	const bar = spec.children?.[0];
-	if (bar) bar.props = { ...bar.props, sticky: true };
-	return spec;
-};
 const stats = CONTENT_TEMPLATES.find((t) => t.id === "stats-4");
 if (!stats) throw new Error("stats-4");
 const sections: SectionTree[] = [
-	toSection(withSticky(announcementSpec()), "Barra de aviso"),
+	toSection(h("AnnouncementBar", { sticky: true }, [], "Barra de aviso"), "Barra de aviso"),
 	toSection(stats.build(), "Números"),
 	toSection(h("Section", { minHeight: { desktop: "120vh" } }, [h("Heading", { text: "Role para ver a barra fixa" })], "Espaço"), "Espaço"),
 ];
