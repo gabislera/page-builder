@@ -37,6 +37,33 @@ export type SiteSettings = {
 	headerSectionId: string | null;
 	/** Seção usada como rodapé padrão do site. */
 	footerSectionId: string | null;
+	cookieBanner: CookieBanner;
+};
+
+/** Aviso de cookies (LGPD), igual em todas as páginas do site. */
+export type CookieBanner = {
+	enabled: boolean;
+	/** "block": pixels e scripts só carregam depois de aceitar. */
+	mode: "block" | "notice";
+	text: string;
+	acceptText: string;
+	rejectText: string;
+	policyText: string;
+	policyUrl: string;
+	position: "bottom" | "bottom-left" | "bottom-right";
+	appearance: "light" | "dark";
+};
+
+export const DEFAULT_COOKIE_BANNER: CookieBanner = {
+	enabled: false,
+	mode: "block",
+	text: "Usamos cookies para melhorar sua experiência e medir o resultado dos nossos anúncios. Você pode aceitar ou recusar os cookies não essenciais.",
+	acceptText: "Aceitar",
+	rejectText: "Recusar",
+	policyText: "Política de privacidade",
+	policyUrl: "",
+	position: "bottom-left",
+	appearance: "light",
 };
 
 export const DEFAULT_THEME: SiteTheme = {
@@ -64,6 +91,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
 	identity: DEFAULT_IDENTITY,
 	headerSectionId: null,
 	footerSectionId: null,
+	cookieBanner: DEFAULT_COOKIE_BANNER,
 };
 
 /** Completa configurações salvas com os padrões (projetos antigos, campos novos). */
@@ -87,6 +115,7 @@ export function normalizeSiteSettings(
 		identity: { ...DEFAULT_IDENTITY, ...input?.identity },
 		headerSectionId: input?.headerSectionId ?? null,
 		footerSectionId: input?.footerSectionId ?? null,
+		cookieBanner: { ...DEFAULT_COOKIE_BANNER, ...input?.cookieBanner },
 	};
 }
 

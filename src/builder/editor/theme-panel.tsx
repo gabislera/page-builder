@@ -3,16 +3,18 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
+import { Switch } from "#/components/ui/switch";
+import { Textarea } from "#/components/ui/textarea";
 import { ColorInput } from "../controls/color.tsx";
 import { Field, Group } from "../controls/field.tsx";
-import { SelectInput } from "../controls/inputs.tsx";
+import { SegmentedInput, SelectInput } from "../controls/inputs.tsx";
 import { MediaInput } from "../controls/media.tsx";
 import {
 	FONT_OPTIONS,
 	fontStack,
 	googleFontsHref,
 } from "../core/style-engine.ts";
-import type { SiteTheme, ThemeColor } from "../core/theme.ts";
+import type { CookieBanner, SiteTheme, ThemeColor } from "../core/theme.ts";
 import { useEditorContext } from "./context.tsx";
 import { useSiteStore } from "./site-store.ts";
 
@@ -26,12 +28,17 @@ export function SiteSettingsController() {
 	const dirty = useSiteStore((s) => s.dirty);
 	const theme = useSiteStore((s) => s.settings.theme);
 	const identity = useSiteStore((s) => s.settings.identity);
+	const cookieBanner = useSiteStore((s) => s.settings.cookieBanner);
 
 	useEffect(() => {
 		if (!dirty) return;
 		const t = setTimeout(async () => {
 			try {
-				const saved = await services.updateSiteSettings({ theme, identity });
+				const saved = await services.updateSiteSettings({
+					theme,
+					identity,
+					cookieBanner,
+				});
 				useSiteStore.getState().markSaved(saved);
 			} catch (e) {
 				toast.error(
@@ -40,7 +47,7 @@ export function SiteSettingsController() {
 			}
 		}, 800);
 		return () => clearTimeout(t);
-	}, [dirty, theme, identity, services]);
+	}, [dirty, theme, identity, cookieBanner, services]);
 
 	return null;
 }
@@ -53,8 +60,8 @@ export function ThemePanel() {
 	return (
 		<div className="flex flex-col">
 			<p className="px-4 pt-3 text-[11px] text-muted-foreground">
-				Identidade, cores e fontes do site. Valem para todas as páginas do
-				projeto.
+				Identidade, cores, fontes e aviso de cookies do site. Valem para todas
+				as páginas do projeto.
 			</p>
 			<RepublishBanner />
 			<Group title="Identidade">
@@ -65,6 +72,9 @@ export function ThemePanel() {
 			</Group>
 			<Group title="Fontes globais">
 				<FontsEditor />
+			</Group>
+			<Group title="Aviso de cookies (LGPD)" defaultOpen={false}>
+				<CookieBannerFields />
 			</Group>
 		</div>
 	);
@@ -112,6 +122,99 @@ function RepublishBanner() {
 				Republicar páginas publicadas
 			</Button>
 		</div>
+	);
+}
+
+/* ------------------------------------------------------------------ */
+/* Aviso de cookies                                                    */
+/* ------------------------------------------------------------------ */
+
+function CookieBannerFields() {
+	const cb = useSiteStore((s) => s.settings.cookieBanner);
+	const setCookieBanner = useSiteStore((s) => s.setCookieBanner);
+	const set = (patch: Partial<CookieBanner>) =>
+		setCookieBanner({ ...cb, ...patch });
+	const text = (key: keyof CookieBanner, label: string, hint?: string) => (
+		<Field label={label} hint={hint}>
+			<Input
+				className="h-8 text-xs"
+				value={String(cb[key] ?? "")}
+				onChange={(e) => set({ [key]: e.target.value })}
+			/>
+		</Field>
+	);
+	return (
+		<>
+			<Field label="Mostrar aviso de cookies" inline>
+				<Switch
+					checked={cb.enabled}
+					onCheckedChange={(enabled) => set({ enabled })}
+				/>
+			</Field>
+			{cb.enabled ? (
+				<>
+					<Field
+						label="Pixels e scripts"
+						hint={
+							cb.mode === "block"
+								? "Pixels (Meta, Google, TikTok) e scripts das páginas só carregam depois que o visitante aceita. É o recomendado pela LGPD."
+								: "O aviso só informa: pixels e scripts carregam normalmente."
+						}
+					>
+						<SegmentedInput
+							value={cb.mode}
+							onChange={(mode) => set({ mode })}
+							options={[
+								{ value: "block", label: "Só após aceitar" },
+								{ value: "notice", label: "Apenas avisar" },
+							]}
+						/>
+					</Field>
+					<Field label="Texto">
+						<Textarea
+							className="min-h-20 text-xs"
+							value={cb.text}
+							onChange={(e) => set({ text: e.target.value })}
+						/>
+					</Field>
+					{text("acceptText", "Botão de aceitar")}
+					{cb.mode === "block" ? text("rejectText", "Botão de recusar") : null}
+					{text("policyText", "Texto do link da política")}
+					{text(
+						"policyUrl",
+						"Link da política de privacidade",
+						"Endereço da página com a política. Vazio: o link não aparece.",
+					)}
+					<Field label="Posição">
+						<SegmentedInput
+							value={cb.position}
+							onChange={(position) => set({ position })}
+							options={[
+								{ value: "bottom-left", label: "Canto esq." },
+								{ value: "bottom", label: "Faixa" },
+								{ value: "bottom-right", label: "Canto dir." },
+							]}
+						/>
+					</Field>
+					<Field label="Aparência">
+						<SegmentedInput
+							value={cb.appearance}
+							onChange={(appearance) => set({ appearance })}
+							options={[
+								{ value: "light", label: "Claro" },
+								{ value: "dark", label: "Escuro" },
+							]}
+						/>
+					</Field>
+					<p className="text-[11px] leading-relaxed text-muted-foreground">
+						Para o visitante mudar a escolha depois, crie um link para{" "}
+						<code className="rounded bg-muted px-1">#cookies</code> (por
+						exemplo, no rodapé). O aviso aparece na página publicada e na
+						prévia.
+					</p>
+				</>
+			) : null}
+		</>
 	);
 }
 

@@ -14,6 +14,11 @@ import { ROOT_ID, typeOf } from "../core/tree.ts";
 import type { RuntimeFeature } from "../core/types.ts";
 import { getDefinition } from "../registry.ts";
 import { buildRuntime } from "../runtime/index.ts";
+import {
+	COOKIE_BANNER_CSS,
+	cookieBannerHtml,
+	gatedTracking,
+} from "./cookie-banner.ts";
 
 export type RenderInput = {
 	pageId: string;
@@ -87,6 +92,15 @@ const esc = (s: string) =>
 export function renderPageHtml(input: RenderPageInput): string {
 	const { html, css, fonts, features } = renderBody(input);
 	const { seo, tracking } = input;
+	const cb = input.site.cookieBanner;
+	const banner = cb?.enabled ? cb : null;
+	// escolha do visitante vale para o site todo (todas as páginas do projeto)
+	const siteKey = input.homeUrl;
+	const trackingHtml = [trackingHead(tracking), tracking.headScripts ?? ""]
+		.filter(Boolean)
+		.join("\n");
+	const bodyScripts = tracking.bodyScripts ?? "";
+	const gated = banner?.mode === "block";
 	const fontsHref = googleFontsHref(fonts);
 	const runtime = buildRuntime(features, {
 		formEndpoint: input.formEndpoint,
@@ -112,9 +126,8 @@ export function renderPageHtml(input: RenderPageInput): string {
 		fontsHref
 			? `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="${esc(fontsHref)}">`
 			: "",
-		`<style>${BASE_CSS}${css}</style>`,
-		trackingHead(tracking),
-		tracking.headScripts ?? "",
+		`<style>${BASE_CSS}${css}${banner ? COOKIE_BANNER_CSS : ""}</style>`,
+		gated ? gatedTracking(siteKey, trackingHtml, bodyScripts) : trackingHtml,
 	]
 		.filter(Boolean)
 		.join("\n");
@@ -127,7 +140,8 @@ ${head}
 <body>
 ${html}
 <script>${runtime}</script>
-${tracking.bodyScripts ?? ""}
+${gated ? "" : bodyScripts}
+${banner ? cookieBannerHtml(banner, siteKey) : ""}
 </body>
 </html>`;
 }

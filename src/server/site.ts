@@ -29,7 +29,19 @@ const identityInput = z.object({
 	logoLightUrl: z.string().max(1000),
 });
 
-/** Atualiza tema e/ou identidade do site. Cabeçalho/rodapé mudam pelo editor. */
+const cookieBannerInput = z.object({
+	enabled: z.boolean(),
+	mode: z.enum(["block", "notice"]),
+	text: z.string().trim().max(600),
+	acceptText: z.string().trim().max(40),
+	rejectText: z.string().trim().max(40),
+	policyText: z.string().trim().max(60),
+	policyUrl: z.string().trim().max(1000),
+	position: z.enum(["bottom", "bottom-left", "bottom-right"]),
+	appearance: z.enum(["light", "dark"]),
+});
+
+/** Atualiza tema, identidade e/ou aviso de cookies do site. Cabeçalho/rodapé mudam pelo editor. */
 export const updateSiteSettings = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
 	.validator(
@@ -37,6 +49,7 @@ export const updateSiteSettings = createServerFn({ method: "POST" })
 			projectId: z.string(),
 			theme: themeInput.optional(),
 			identity: identityInput.optional(),
+			cookieBanner: cookieBannerInput.optional(),
 		}),
 	)
 	.handler(async ({ data, context }) => {
@@ -46,6 +59,7 @@ export const updateSiteSettings = createServerFn({ method: "POST" })
 			...settings,
 			...(data.theme ? { theme: data.theme } : {}),
 			...(data.identity ? { identity: data.identity } : {}),
+			...(data.cookieBanner ? { cookieBanner: data.cookieBanner } : {}),
 		};
 		await db
 			.update(project)

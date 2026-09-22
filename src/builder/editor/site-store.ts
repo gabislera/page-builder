@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import {
+	type CookieBanner,
 	DEFAULT_SITE_SETTINGS,
 	type SiteIdentity,
 	type SiteSettings,
@@ -18,6 +19,7 @@ type SiteState = {
 	init: (settings: SiteSettings, siteParts: SiteState["siteParts"]) => void;
 	setTheme: (theme: SiteTheme) => void;
 	setIdentity: (identity: SiteIdentity) => void;
+	setCookieBanner: (cookieBanner: CookieBanner) => void;
 	markSaved: (settings: SiteSettings) => void;
 	markRepublished: () => void;
 };
@@ -41,6 +43,12 @@ export const useSiteStore = create<SiteState>((set) => ({
 			dirty: true,
 			needsRepublish: true,
 		})),
+	setCookieBanner: (cookieBanner) =>
+		set((s) => ({
+			settings: { ...s.settings, cookieBanner },
+			dirty: true,
+			needsRepublish: true,
+		})),
 	markSaved: (settings) =>
 		set((s) => ({
 			// preserva edições feitas enquanto o save estava em andamento
@@ -48,6 +56,7 @@ export const useSiteStore = create<SiteState>((set) => ({
 				...settings,
 				theme: s.settings.theme,
 				identity: s.settings.identity,
+				cookieBanner: s.settings.cookieBanner,
 			},
 			dirty: false,
 		})),

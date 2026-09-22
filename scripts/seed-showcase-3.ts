@@ -40,7 +40,7 @@ if (existing) {
 const created = await db.transaction(async (tx) => {
 	const [row] = await tx
 		.insert(page)
-		.values({ projectId, name: "Vitrine 3: números e aviso", slug: "vitrine-3", root: buildRoot(), seo: { title: "Vitrine 3" } })
+		.values({ projectId, name: "Vitrine 3: números e aviso", slug: "vitrine-3", root: buildRoot(), seo: { title: "Vitrine 3" }, tracking: { facebookPixelId: "000000000000001", bodyScripts: "<script>window.__pbBodyScript=1</script>" } })
 		.returning({ id: page.id });
 	await insertSections(tx, projectId, row.id, sections);
 	return row;
