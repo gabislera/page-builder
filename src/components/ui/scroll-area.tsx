@@ -13,9 +13,12 @@ function ScrollArea({
       className={cn("relative", className)}
       {...props}
     >
+      {/* [&>div]:!block: o Radix envolve o conteúdo num div display:table, que
+          cresce até a largura mínima do conteúdo (um texto com truncate
+          empurraria o painel para fora da tela) */}
       <ScrollAreaPrimitive.Viewport
         data-slot="scroll-area-viewport"
-        className="size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1"
+        className="size-full rounded-[inherit] [&>div]:!block transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1"
       >
         {children}
       </ScrollAreaPrimitive.Viewport>
