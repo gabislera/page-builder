@@ -24,6 +24,21 @@ const sections: SectionTree[] = [
 	toSection(h("AnnouncementBar", { sticky: true }, [], "Barra de aviso"), "Barra de aviso"),
 	toSection(stats.build(), "Números"),
 	toSection(
+		h(
+			"Section",
+			{},
+			[
+				h("Heading", { text: "Antes e depois, mapa e compartilhar" }),
+				h("BeforeAfter", {}, [], "Antes e depois"),
+				h("ShareButtons", {}, [], "Compartilhar"),
+				h("ShareButtons", { layout: "buttons", label: "", shape: "rounded", items: [{ id: "a", network: "whatsapp" }, { id: "b", network: "copy" }, { id: "c", network: "native" }] }, [], "Compartilhar (botões)"),
+				h("Map", {}, [], "Mapa"),
+			],
+			"Mídia e compartilhar",
+		),
+		"Mídia e compartilhar",
+	),
+	toSection(
 		h("Section", {}, [h("Form", { ...multiStepFormProps(), box: { maxWidth: { desktop: "560px" } } }, [], "Formulário em etapas")], "Formulário em etapas"),
 		"Formulário em etapas",
 	),

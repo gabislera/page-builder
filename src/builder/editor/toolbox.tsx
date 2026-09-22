@@ -253,6 +253,7 @@ export const TOOLBOX_GROUPS: { title: string; items: ToolboxItem[] }[] = [
 			simple("Image"),
 			simple("Video"),
 			simple("Gallery"),
+			simple("BeforeAfter"),
 			simple("Map"),
 			composite("Carousel", carouselSpec),
 		],
