@@ -2,13 +2,13 @@
  * Página "vitrine-3" com barra de aviso, contadores e formulário em etapas.
  * Uso: pnpm tsx --env-file=.env.local scripts/seed-showcase-3.ts <projectId>
  */
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { buildRoot, buildTree, h } from "#/builder/core/build.ts";
 import { multiStepFormProps } from "#/builder/components/form.tsx";
 import { ROOT_ID, type SectionTree } from "#/builder/core/tree.ts";
 import { CONTENT_TEMPLATES } from "#/builder/templates/content.ts";
 import { db } from "#/db/index.ts";
-import { page, pageSection } from "#/db/schema/index.ts";
+import { page, pageSection, section } from "#/db/schema/index.ts";
 import { insertSections, publishPageById } from "#/server/page-store.ts";
 
 const projectId = process.argv[2];
@@ -28,8 +28,7 @@ const sections: SectionTree[] = [
 			"Section",
 			{},
 			[
-				h("Heading", { text: "Antes e depois, mapa e compartilhar" }),
-				h("BeforeAfter", {}, [], "Antes e depois"),
+				h("Heading", { text: "Mapa e compartilhar" }),
 				h("ShareButtons", {}, [], "Compartilhar"),
 				h("ShareButtons", { layout: "buttons", label: "", shape: "rounded", items: [{ id: "a", network: "whatsapp" }, { id: "b", network: "copy" }, { id: "c", network: "native" }] }, [], "Compartilhar (botões)"),
 				h("Map", {}, [], "Mapa"),
@@ -49,8 +48,18 @@ const existing = await db.query.page.findFirst({
 	where: and(eq(page.projectId, projectId), eq(page.slug, "vitrine-3")),
 });
 if (existing) {
+	// seções próprias da página antiga (não globais) saem junto
+	const links = await db
+		.select({ sectionId: pageSection.sectionId })
+		.from(pageSection)
+		.where(eq(pageSection.pageId, existing.id));
 	await db.delete(pageSection).where(eq(pageSection.pageId, existing.id));
 	await db.delete(page).where(eq(page.id, existing.id));
+	const ids = links.map((l) => l.sectionId);
+	if (ids.length)
+		await db
+			.delete(section)
+			.where(and(inArray(section.id, ids), eq(section.isGlobal, false)));
 }
 const created = await db.transaction(async (tx) => {
 	const [row] = await tx

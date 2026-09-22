@@ -38,8 +38,7 @@ export type RuntimeFeature =
 	| "accordion"
 	| "counter"
 	| "announcement"
-	| "share"
-	| "compare";
+	| "share";
 
 type CraftRules = {
 	canDrag?: (node: Node, helpers: NodeHelpersType) => boolean;

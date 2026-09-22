@@ -1,6 +1,5 @@
 import { Accordion, AccordionItem } from "./components/accordion.tsx";
 import { AnnouncementBar } from "./components/announcement-bar.tsx";
-import { BeforeAfter } from "./components/before-after.tsx";
 import { Button } from "./components/button.tsx";
 import { Card } from "./components/card.tsx";
 import { Carousel, CarouselSlide } from "./components/carousel.tsx";
@@ -61,7 +60,6 @@ export const COMPONENTS: Record<string, AnyComponentDefinition> =
 			AnnouncementBar,
 			ShareButtons,
 			MapEmbed,
-			BeforeAfter,
 			Modal,
 			FloatingButtons,
 			Html,
