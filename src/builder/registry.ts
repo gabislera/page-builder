@@ -25,6 +25,7 @@ import { Page } from "./components/page.tsx";
 import { PricingTable } from "./components/pricing-table.tsx";
 import { ProgressBar } from "./components/progress-bar.tsx";
 import { Section } from "./components/section.tsx";
+import { ShareButtons } from "./components/share-buttons.tsx";
 import { SocialIcons } from "./components/social-icons.tsx";
 import { Spacer } from "./components/spacer.tsx";
 import { StatCounter } from "./components/stat-counter.tsx";
@@ -56,6 +57,7 @@ export const COMPONENTS: Record<string, AnyComponentDefinition> =
 			ProgressBar,
 			StatCounter,
 			AnnouncementBar,
+			ShareButtons,
 			Modal,
 			FloatingButtons,
 			Html,

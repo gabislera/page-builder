@@ -16,6 +16,7 @@ import { menuScript } from "./features/menu.ts";
 import { modalScript } from "./features/modal.ts";
 import { motionScript } from "./features/motion.ts";
 import { progressScript } from "./features/progress.ts";
+import { shareScript } from "./features/share.ts";
 import { tabsScript } from "./features/tabs.ts";
 import { videoScript } from "./features/video.ts";
 
@@ -64,6 +65,7 @@ export const FEATURE_SCRIPTS: Partial<
 	accordion: accordionScript,
 	counter: counterScript,
 	announcement: announcementScript,
+	share: shareScript,
 	form: formScript,
 	modal: modalScript,
 	floating: floatingScript,
