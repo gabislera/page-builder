@@ -8,7 +8,11 @@ import {
 	type SectionTree,
 	type SitePart,
 } from "#/builder/core/tree";
-import { blankPage } from "#/builder/templates/pages";
+import {
+	blankPage,
+	buildPageTemplate,
+	PAGE_TEMPLATES,
+} from "#/builder/templates/pages";
 import { db } from "#/db";
 import { page, pageSection, project, section } from "#/db/schema";
 import { isValidSlug, slugify } from "#/lib/slug";
@@ -22,6 +26,7 @@ import {
 	loadSitePart,
 	loadSiteSettings,
 	publishPageById,
+	renderTemplatePreview,
 	uniqueSlug,
 	upsertSections,
 } from "./page-store.ts";
@@ -58,6 +63,28 @@ export const listPages = createServerFn({ method: "GET" })
 			.orderBy(desc(page.updatedAt));
 	});
 
+/** Modelos de página disponíveis (para todos os usuários). */
+export const listPageTemplates = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
+	.handler(async () =>
+		PAGE_TEMPLATES.map(({ id, name, description }) => ({
+			id,
+			name,
+			description,
+		})),
+	);
+
+/** Prévia (HTML) de um modelo com o tema do projeto. */
+export const previewPageTemplate = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
+	.validator(z.object({ projectId: z.string(), templateId: z.string() }))
+	.handler(async ({ data, context }) => {
+		await requireProjectAccess(context.user.id, data.projectId);
+		const template = PAGE_TEMPLATES.find((t) => t.id === data.templateId);
+		if (!template) throw new Error("Modelo não encontrado");
+		return renderTemplatePreview(data.projectId, template);
+	});
+
 export const createPage = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
 	.validator(
@@ -65,6 +92,8 @@ export const createPage = createServerFn({ method: "POST" })
 			projectId: z.string(),
 			name: z.string().trim().min(1).max(120),
 			slug: z.string().trim().optional(),
+			/** Modelo de página (vazio: página em branco com um hero). */
+			templateId: z.string().optional(),
 		}),
 	)
 	.handler(async ({ data, context }) => {
@@ -73,7 +102,8 @@ export const createPage = createServerFn({ method: "POST" })
 			data.projectId,
 			slugify(data.slug || data.name) || "pagina",
 		);
-		const tree = blankPage();
+		const template = PAGE_TEMPLATES.find((t) => t.id === data.templateId);
+		const tree = template ? buildPageTemplate(template) : blankPage();
 		return db.transaction(async (tx) => {
 			const [created] = await tx
 				.insert(page)
@@ -83,6 +113,12 @@ export const createPage = createServerFn({ method: "POST" })
 					slug,
 					root: tree.root,
 					seo: { title: data.name },
+					...(template
+						? {
+								headerMode: template.headerMode,
+								footerMode: template.footerMode,
+							}
+						: {}),
 				})
 				.returning({ id: page.id });
 			await insertSections(tx, data.projectId, created.id, tree.sections);

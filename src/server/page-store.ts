@@ -12,6 +12,10 @@ import {
 	type SitePart,
 } from "#/builder/core/tree";
 import { renderPageHtml } from "#/builder/renderer/render-page";
+import {
+	buildPageTemplate,
+	type PageTemplate,
+} from "#/builder/templates/pages";
 import { db } from "#/db";
 import { page, pageSection, project, section } from "#/db/schema";
 
@@ -71,6 +75,48 @@ export async function loadPageSections(row: PageRow, settings: SiteSettings) {
 		...own.filter((s) => !isTopBar(s)),
 		...(footer ? [footer] : []),
 	];
+}
+
+/**
+ * HTML de prévia de um modelo de página com o tema, a identidade e o
+ * cabeçalho/rodapé do projeto (sem salvar nada).
+ */
+export async function renderTemplatePreview(
+	projectId: string,
+	template: PageTemplate,
+) {
+	const { project: proj, settings } = await loadSiteSettings(projectId);
+	const tree = buildPageTemplate(template);
+	const [header, footer] = await Promise.all([
+		template.headerMode === "site"
+			? loadSitePart(projectId, settings.headerSectionId, "header")
+			: null,
+		template.footerMode === "site"
+			? loadSitePart(projectId, settings.footerSectionId, "footer")
+			: null,
+	]);
+	const own = tree.sections;
+	const sections = [
+		...own.filter(isTopBar),
+		...(header ? [header] : []),
+		...own.filter((s) => !isTopBar(s)),
+		...(footer ? [footer] : []),
+	];
+	return renderPageHtml({
+		pageId: "preview",
+		nodes: mergePage(tree.root, sections),
+		seo: { title: template.name },
+		tracking: {},
+		// a prévia não mostra o aviso de cookies
+		site: {
+			...settings,
+			cookieBanner: { ...settings.cookieBanner, enabled: false },
+		},
+		homeUrl: `/p/${proj.slug}`,
+		pageUrl: () => "#",
+		formEndpoint: "#",
+		viewEndpoint: "#",
+	});
 }
 
 /** Página inicial do projeto: slug "home"/"inicio" ou a mais antiga. */

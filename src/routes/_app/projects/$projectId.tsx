@@ -1,16 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
 	Copy,
 	ExternalLink,
-	FilePlus2,
 	Loader2,
 	MoreHorizontal,
 	Pencil,
 	Trash2,
 } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
+import { NewPageDialog } from "#/components/new-page-dialog";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import {
@@ -19,13 +18,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "#/components/ui/dropdown-menu";
-import { Input } from "#/components/ui/input";
-import {
-	createPage,
-	deletePage,
-	duplicatePage,
-	listPages,
-} from "#/server/pages";
+import { deletePage, duplicatePage, listPages } from "#/server/pages";
 import { listProjects } from "#/server/projects";
 
 export const Route = createFileRoute("/_app/projects/$projectId")({
@@ -35,8 +28,6 @@ export const Route = createFileRoute("/_app/projects/$projectId")({
 function ProjectPages() {
 	const { projectId } = Route.useParams();
 	const queryClient = useQueryClient();
-	const navigate = useNavigate();
-	const [name, setName] = useState("");
 	const projects = useQuery({
 		queryKey: ["projects"],
 		queryFn: () => listProjects(),
@@ -49,12 +40,6 @@ function ProjectPages() {
 	const refresh = () =>
 		queryClient.invalidateQueries({ queryKey: ["pages", projectId] });
 
-	const create = useMutation({
-		mutationFn: () => createPage({ data: { projectId, name } }),
-		onSuccess: (p) =>
-			navigate({ to: "/editor/$pageId", params: { pageId: p.id } }),
-		onError: (e) => toast.error(e.message),
-	});
 	const duplicate = useMutation({
 		mutationFn: (pageId: string) => duplicatePage({ data: { pageId } }),
 		onSuccess: refresh,
@@ -78,28 +63,7 @@ function ProjectPages() {
 					</Link>
 					<h1 className="text-2xl font-semibold">{project?.name ?? "..."}</h1>
 				</div>
-				<form
-					className="flex gap-2"
-					onSubmit={(e) => {
-						e.preventDefault();
-						if (name.trim()) create.mutate();
-					}}
-				>
-					<Input
-						placeholder="Nome da nova página"
-						value={name}
-						onChange={(e) => setName(e.target.value)}
-						className="w-64"
-					/>
-					<Button type="submit" disabled={create.isPending || !name.trim()}>
-						{create.isPending ? (
-							<Loader2 className="size-4 animate-spin" />
-						) : (
-							<FilePlus2 className="size-4" />
-						)}
-						Nova página
-					</Button>
-				</form>
+				<NewPageDialog projectId={projectId} />
 			</div>
 			{pages.isLoading ? (
 				<Loader2 className="size-5 animate-spin text-muted-foreground" />
