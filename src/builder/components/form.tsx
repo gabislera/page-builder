@@ -33,6 +33,7 @@ import {
 	defaultShadow,
 	defaultTypography,
 } from "../core/defaults.ts";
+import { useEditorPreview } from "../core/editor-preview.ts";
 import { IconView } from "../core/icons.tsx";
 import { nodeClassName } from "../core/node-helpers.ts";
 import { useIsEditor, useRender } from "../core/render-context.tsx";
@@ -43,6 +44,7 @@ import {
 	applyBox,
 	applyTypography,
 	createSheet,
+	nodeSelector,
 	shadowToCss,
 } from "../core/style-engine.ts";
 import type {
@@ -69,7 +71,9 @@ export type FormFieldType =
 	| "textarea"
 	| "select"
 	| "checkbox"
-	| "hidden";
+	| "hidden"
+	/** Não é um campo: começa uma nova etapa (o rótulo é o título dela). */
+	| "step";
 
 export type FormField = {
 	id: string;
@@ -123,6 +127,11 @@ export type FormProps = {
 	errorMessage: string;
 	redirect: Action;
 	appendQuery: boolean;
+	/** Etapas: como mostrar o progresso. */
+	stepProgress: "bar" | "steps" | "none";
+	nextText: string;
+	prevText: string;
+	progressColor: string;
 	background: Background;
 	border: Border;
 	shadow: Shadow;
@@ -137,7 +146,26 @@ const TYPE_LABEL: Record<FormFieldType, string> = {
 	select: "Seleção",
 	checkbox: "Caixa de seleção",
 	hidden: "Oculto",
+	step: "Nova etapa",
 };
+
+type Step = { title: string; fields: { f: FormField; index: number }[] };
+
+/** Divide os campos em etapas a cada "Nova etapa". Etapas vazias somem. */
+export function splitSteps(fields: FormField[]): Step[] {
+	const steps: Step[] = [{ title: "", fields: [] }];
+	fields.forEach((f, index) => {
+		if (f.type === "hidden") return;
+		if (f.type === "step") {
+			const last = steps[steps.length - 1];
+			if (last.fields.length) steps.push({ title: f.label, fields: [] });
+			else last.title = f.label;
+			return;
+		}
+		steps[steps.length - 1].fields.push({ f, index });
+	});
+	return steps.filter((s) => s.fields.length);
+}
 
 const COUNTRIES = [
 	{ code: "55", label: "BR +55" },
@@ -191,6 +219,13 @@ const HONEYPOT_STYLE: CSSProperties = {
 function FormView({ id, props, rootRef }: NodeViewProps<FormProps>) {
 	const isEditor = useIsEditor();
 	const ctx = useRender();
+	const steps = splitSteps(props.fields);
+	const multi = steps.length > 1;
+	// no editor, a etapa visível vem do painel/canvas; publicado começa na 1ª
+	const previewStep = useEditorPreview((s) => s.formStep[id] ?? 0);
+	const setPreviewStep = useEditorPreview((s) => s.setFormStep);
+	const active = isEditor ? Math.min(previewStep, steps.length - 1) : 0;
+	const last = steps.length - 1;
 	const redirect =
 		props.afterSubmit === "redirect" ? actionLink(props.redirect, ctx) : null;
 	// no editor os campos não recebem foco nem clique: o clique seleciona o nó
@@ -206,6 +241,7 @@ function FormView({ id, props, rootRef }: NodeViewProps<FormProps>) {
 		) : null;
 
 	const renderField = (f: FormField, index: number) => {
+		if (f.type === "step") return null;
 		const name = fieldName(f, index);
 		if (f.type === "hidden")
 			return <input key={f.id} type="hidden" name={name} value={f.value} />;
@@ -362,6 +398,9 @@ function FormView({ id, props, rootRef }: NodeViewProps<FormProps>) {
 			data-pb-append-query={props.appendQuery ? "1" : undefined}
 			data-pb-utm={props.captureUtm ? "1" : undefined}
 			data-pb-loading={props.loadingText || undefined}
+			// com etapas, a validação é feita por etapa no runtime; a nativa
+			// barraria o Enter por causa dos campos das etapas escondidas
+			noValidate={multi || undefined}
 			onSubmit={isEditor ? (e) => e.preventDefault() : undefined}
 		>
 			<input
@@ -380,18 +419,62 @@ function FormView({ id, props, rootRef }: NodeViewProps<FormProps>) {
 			{props.tags.trim() ? (
 				<input type="hidden" name="tags" value={props.tags.trim()} />
 			) : null}
-			<div className="pb-form-fields" style={lockStyle}>
-				{props.fields.map(renderField)}
-			</div>
-			<button
-				type="submit"
-				className="pb-btn pb-form-submit"
-				style={lockStyle}
-				{...lock}
-			>
-				<span className="pb-form-submit-text">{props.submitText}</span>
-				{props.submitIcon ? <IconView name={props.submitIcon} /> : null}
-			</button>
+			{multi ? (
+				<>
+					{props.fields.map((f, i) =>
+						f.type === "hidden" ? renderField(f, i) : null,
+					)}
+					<StepProgress props={props} steps={steps} active={active} />
+					{steps.map((step, i) => (
+						<fieldset
+							// biome-ignore lint/suspicious/noArrayIndexKey: etapas não têm id próprio
+							key={i}
+							className="pb-form-step"
+							data-pb-step={i}
+							data-pb-title={step.title || undefined}
+							aria-label={step.title || `Etapa ${i + 1}`}
+							hidden={i !== active}
+						>
+							<div className="pb-form-fields" style={lockStyle}>
+								{step.fields.map(({ f, index }) => renderField(f, index))}
+							</div>
+						</fieldset>
+					))}
+					<div className="pb-form-nav">
+						<button
+							type="button"
+							className="pb-form-prev"
+							data-pb-prev=""
+							hidden={active === 0}
+							onClick={
+								isEditor ? () => setPreviewStep(id, active - 1) : undefined
+							}
+						>
+							{props.prevText}
+						</button>
+						<button
+							type="button"
+							className="pb-btn pb-form-next"
+							data-pb-next=""
+							hidden={active === last}
+							onClick={
+								isEditor ? () => setPreviewStep(id, active + 1) : undefined
+							}
+						>
+							<span>{props.nextText}</span>
+							<IconView name="arrow-right" />
+						</button>
+						<SubmitButton props={props} hidden={active !== last} lock={lock} />
+					</div>
+				</>
+			) : (
+				<>
+					<div className="pb-form-fields" style={lockStyle}>
+						{props.fields.map(renderField)}
+					</div>
+					<SubmitButton props={props} lock={lock} style={lockStyle} />
+				</>
+			)}
 			<output className="pb-form-msg pb-form-ok" data-pb-ok="" hidden>
 				{props.successMessage}
 			</output>
@@ -407,6 +490,86 @@ function FormView({ id, props, rootRef }: NodeViewProps<FormProps>) {
 	);
 }
 
+function SubmitButton({
+	props,
+	hidden,
+	lock,
+	style,
+}: {
+	props: FormProps;
+	hidden?: boolean;
+	lock: { tabIndex?: number };
+	style?: CSSProperties;
+}) {
+	return (
+		<button
+			type="submit"
+			className="pb-btn pb-form-submit"
+			hidden={hidden}
+			style={style}
+			{...lock}
+		>
+			<span className="pb-form-submit-text">{props.submitText}</span>
+			{props.submitIcon ? <IconView name={props.submitIcon} /> : null}
+		</button>
+	);
+}
+
+/** Progresso das etapas. O runtime atualiza texto, barra e passos. */
+function StepProgress({
+	props,
+	steps,
+	active,
+}: {
+	props: FormProps;
+	steps: Step[];
+	active: number;
+}) {
+	if (props.stepProgress === "none") return null;
+	const total = steps.length;
+	if (props.stepProgress === "steps") {
+		return (
+			<ol className="pb-form-progress pb-form-dots" aria-hidden="true">
+				{steps.map((s, i) => (
+					<li
+						// biome-ignore lint/suspicious/noArrayIndexKey: etapas não têm id próprio
+						key={i}
+						data-pb-dot={i}
+						className={
+							i === active ? "pb-active" : i < active ? "pb-done" : undefined
+						}
+					>
+						<span className="pb-form-dot">{i + 1}</span>
+						{s.title ? (
+							<span className="pb-form-dot-label">{s.title}</span>
+						) : null}
+					</li>
+				))}
+			</ol>
+		);
+	}
+	return (
+		<div
+			className="pb-form-progress pb-form-bar"
+			style={
+				{ "--pb-progress": `${((active + 1) / total) * 100}%` } as CSSProperties
+			}
+		>
+			<div className="pb-form-bar-head">
+				<span data-pb-step-count="">
+					Etapa {active + 1} de {total}
+				</span>
+				<span className="pb-form-bar-title" data-pb-step-title="">
+					{steps[active]?.title}
+				</span>
+			</div>
+			<div className="pb-form-bar-track">
+				<div className="pb-form-bar-fill" />
+			</div>
+		</div>
+	);
+}
+
 /* ------------------------------------------------------------------ */
 /* Configurações                                                       */
 /* ------------------------------------------------------------------ */
@@ -418,6 +581,27 @@ function FieldItem({
 	itemPath: string;
 	field: FormField;
 }) {
+	const typeSelect = (
+		<SelectField
+			path={`${itemPath}.type`}
+			label="Tipo"
+			options={(Object.keys(TYPE_LABEL) as FormFieldType[]).map((t) => ({
+				value: t,
+				label: TYPE_LABEL[t],
+			}))}
+		/>
+	);
+	if (field.type === "step")
+		return (
+			<>
+				{typeSelect}
+				<TextField
+					path={`${itemPath}.label`}
+					label="Título da etapa"
+					hint="Os campos abaixo deste, até a próxima etapa, aparecem juntos."
+				/>
+			</>
+		);
 	return (
 		<>
 			<SelectField
@@ -504,6 +688,38 @@ function RedirectField() {
 	);
 }
 
+function StepsGroup() {
+	const fields = useField<FormField[]>("fields").value ?? [];
+	const multi = splitSteps(fields).length > 1;
+	return (
+		<Group title="Etapas" defaultOpen={multi}>
+			{multi ? (
+				<>
+					<SegmentedField
+						path="stepProgress"
+						label="Progresso"
+						options={[
+							{ value: "steps", label: "Passos" },
+							{ value: "bar", label: "Barra" },
+							{ value: "none", label: "Nenhum" },
+						]}
+					/>
+					<TextField path="nextText" label="Botão de avançar" />
+					<TextField path="prevText" label="Botão de voltar" />
+					<p className="text-[11px] leading-relaxed text-muted-foreground">
+						No canvas, use os botões do formulário para ver cada etapa.
+					</p>
+				</>
+			) : (
+				<p className="text-[11px] leading-relaxed text-muted-foreground">
+					Para dividir em etapas, adicione um campo do tipo "Nova etapa" na
+					lista de campos. Cada etapa só avança com os campos preenchidos.
+				</p>
+			)}
+		</Group>
+	);
+}
+
 function FormSettings() {
 	const after = useField<FormProps["afterSubmit"]>("afterSubmit");
 	const showLabels = useField<boolean>("showLabels");
@@ -535,13 +751,16 @@ function FormSettings() {
 								country: "55",
 							})}
 							itemLabel={(item) =>
-								`${item.label || item.name} · ${TYPE_LABEL[item.type]}`
+								item.type === "step"
+									? `⎯ Etapa: ${item.label || "sem título"}`
+									: `${item.label || item.name} · ${TYPE_LABEL[item.type]}`
 							}
 							renderItem={(itemPath, item) => (
 								<FieldItem itemPath={itemPath} field={item} />
 							)}
 						/>
 					</Group>
+					<StepsGroup />
 					<Group title="Botão de envio">
 						<TextField path="submitText" label="Texto" />
 						<IconField path="submitIcon" label="Ícone" />
@@ -644,6 +863,9 @@ function FormSettings() {
 					<Group title="Campos: borda" defaultOpen={false}>
 						<BorderFields base="inputBorder" />
 					</Group>
+					<Group title="Etapas" defaultOpen={false}>
+						<ColorField path="progressColor" label="Cor do progresso" />
+					</Group>
 					<ButtonStyleGroups base="submit" />
 					<Group title="Fundo do formulário" defaultOpen={false}>
 						<BackgroundFields base="background" />
@@ -654,6 +876,162 @@ function FormSettings() {
 			}
 			advanced={<BoxFields />}
 		/>
+	);
+}
+
+/** Etapas: navegação, barra de progresso e passos numerados. */
+function stepsCss(
+	sheet: ReturnType<typeof createSheet>,
+	id: string,
+	p: FormProps,
+) {
+	const accent = p.progressColor || "var(--pb-c-primary)";
+	sheet
+		.rule(" .pb-form-step")
+		.set("min-width", "0")
+		.set("margin", "0")
+		.set("padding", "0")
+		.set("border", "0")
+		.set("animation", "pb-form-step-in .25s ease both");
+	sheet.appendRaw(
+		"@keyframes pb-form-step-in{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}@media (prefers-reduced-motion:reduce){.pb-form-step{animation:none!important}}",
+	);
+	sheet
+		.rule(" .pb-form-nav")
+		.set("display", "flex")
+		.set("align-items", "center")
+		.set("gap", "12px");
+	for (const btn of [
+		" .pb-form-nav > .pb-form-next",
+		" .pb-form-nav > .pb-form-submit",
+	])
+		sheet
+			.rule(btn)
+			.set("width", "auto")
+			.set("margin-left", "auto")
+			.set("flex", p.submitAlign, (a) =>
+				a === "stretch" ? "1 1 auto" : "0 1 auto",
+			);
+	sheet
+		.rule(" .pb-form-prev")
+		.set("display", "inline-flex")
+		.set("align-items", "center")
+		.set("height", "100%")
+		.set("min-height", "44px")
+		.set("padding", "0 18px")
+		.set("border", "1px solid currentColor")
+		.set("border-radius", "999px")
+		.set("background", "transparent")
+		.set("color", p.labelTypography.color || "#3f3f46")
+		.set("font", "inherit")
+		.set("font-size", p.labelTypography.fontSize)
+		.set("font-weight", "600")
+		.set("opacity", ".75")
+		.set("cursor", "pointer")
+		.set("transition", "opacity .15s ease");
+	sheet.rule(" .pb-form-prev:hover").set("opacity", "1");
+
+	// barra
+	sheet
+		.rule(" .pb-form-bar")
+		.set("display", "flex")
+		.set("flex-direction", "column")
+		.set("gap", "8px");
+	sheet
+		.rule(" .pb-form-bar-head")
+		.set("display", "flex")
+		.set("justify-content", "space-between")
+		.set("gap", "12px")
+		.set("font-size", p.labelTypography.fontSize)
+		.set("color", p.labelTypography.color || "#3f3f46");
+	sheet.rule(" .pb-form-bar-title").set("font-weight", "600");
+	sheet
+		.rule(" .pb-form-bar-track")
+		.set("height", "6px")
+		.set("border-radius", "999px")
+		.set("background", `color-mix(in srgb, ${accent} 15%, transparent)`)
+		.set("overflow", "hidden");
+	sheet
+		.rule(" .pb-form-bar-fill")
+		.set("width", "var(--pb-progress, 0%)")
+		.set("height", "100%")
+		.set("border-radius", "inherit")
+		.set("background", accent)
+		.set("transition", "width .35s ease");
+
+	// passos numerados, ligados por uma linha
+	sheet
+		.rule(" .pb-form-dots")
+		.set("display", "flex")
+		.set("margin", "0")
+		.set("padding", "0")
+		.set("list-style", "none");
+	sheet
+		.rule(" .pb-form-dots > li")
+		.set("position", "relative")
+		.set("flex", "1 1 0")
+		.set("display", "flex")
+		.set("flex-direction", "column")
+		.set("align-items", "center")
+		.set("gap", "6px")
+		.set("min-width", "0")
+		.set("text-align", "center");
+	sheet
+		.rule(" .pb-form-dots > li + li::before")
+		.set("content", '""')
+		.set("position", "absolute")
+		.set("top", "15px")
+		.set("right", "calc(50% + 22px)")
+		.set("left", "calc(-50% + 22px)")
+		.set("height", "2px")
+		.set("border-radius", "2px")
+		.set("background", `color-mix(in srgb, ${accent} 18%, transparent)`)
+		.set("transition", "background .3s ease");
+	sheet
+		.rule(" .pb-form-dots > li.pb-done + li::before")
+		.set("background", accent);
+	sheet
+		.rule(" .pb-form-dot")
+		.set("display", "grid")
+		.set("place-items", "center")
+		.set("width", "32px")
+		.set("height", "32px")
+		.set("border-radius", "999px")
+		.set("border", `2px solid color-mix(in srgb, ${accent} 25%, transparent)`)
+		.set("background", "#ffffff")
+		.set("color", `color-mix(in srgb, ${accent} 55%, #52525b)`)
+		.set("font-size", "14px")
+		.set("font-weight", "700")
+		.set("transition", "all .25s ease");
+	sheet
+		.rule(" .pb-form-dots > li.pb-active .pb-form-dot")
+		.set("border-color", accent)
+		.set("color", accent)
+		.set(
+			"box-shadow",
+			`0 0 0 4px color-mix(in srgb, ${accent} 15%, transparent)`,
+		);
+	sheet
+		.rule(" .pb-form-dots > li.pb-done .pb-form-dot")
+		.set("border-color", accent)
+		.set("background", accent)
+		.set("color", "#ffffff");
+	sheet
+		.rule(" .pb-form-dot-label")
+		.set("font-size", "12px")
+		.set("font-weight", "500")
+		.set("color", p.labelTypography.color || "#3f3f46")
+		.set("opacity", ".7")
+		.set("overflow", "hidden")
+		.set("text-overflow", "ellipsis")
+		.set("white-space", "nowrap")
+		.set("max-width", "100%");
+	sheet
+		.rule(" .pb-form-dots > li.pb-active .pb-form-dot-label")
+		.set("opacity", "1");
+	// no celular os títulos dos passos ocupariam espaço demais
+	sheet.appendRaw(
+		`@media (max-width: 600px){${nodeSelector(id)} .pb-form-dot-label{display:none}}`,
 	);
 }
 
@@ -754,6 +1132,10 @@ export const Form: ComponentDefinition<FormProps> = {
 			"Não foi possível enviar. Verifique sua conexão e tente novamente.",
 		redirect: { type: "url", url: "", newTab: false },
 		appendQuery: true,
+		stepProgress: "steps",
+		nextText: "Continuar",
+		prevText: "Voltar",
+		progressColor: "var(--pb-c-primary)",
 		background: defaultBackground(),
 		border: defaultBorder(),
 		shadow: defaultShadow(),
@@ -874,9 +1256,16 @@ export const Form: ComponentDefinition<FormProps> = {
 		if (p.hideOnSuccess) {
 			sheet.rule(".pb-sent .pb-form-fields").set("display", "none");
 			sheet.rule(".pb-sent .pb-form-submit").set("display", "none");
+			sheet.rule(".pb-sent .pb-form-nav").set("display", "none");
+			sheet.rule(".pb-sent .pb-form-progress").set("display", "none");
 		}
+		stepsCss(sheet, id, p);
 		applyBox(sheet, p.box, "flex");
-		return sheet.toString() + buttonStyleCss(id, ".pb-form-submit", p.submit);
+		return (
+			sheet.toString() +
+			buttonStyleCss(id, ".pb-form-submit", p.submit) +
+			buttonStyleCss(id, ".pb-form-next", p.submit)
+		);
 	},
 	Settings: FormSettings,
 	fonts: (p) => [
@@ -885,3 +1274,56 @@ export const Form: ComponentDefinition<FormProps> = {
 		p.submit.typography.fontFamily,
 	],
 };
+
+/** Modelo "Formulário em etapas": 3 etapas curtas, com passos numerados. */
+export const multiStepFormProps = (): Partial<FormProps> => ({
+	formName: "Formulário em etapas",
+	stepProgress: "steps",
+	fields: [
+		field({ type: "step", label: "Sobre você" }),
+		field({
+			type: "text",
+			label: "Nome",
+			name: "nome",
+			placeholder: "Seu nome",
+			required: true,
+		}),
+		field({
+			type: "email",
+			label: "E-mail",
+			name: "email",
+			placeholder: "seu@email.com",
+			required: true,
+		}),
+		field({ type: "step", label: "Contato" }),
+		field({
+			type: "tel",
+			label: "WhatsApp",
+			name: "whatsapp",
+			placeholder: "(11) 99999-9999",
+			required: true,
+		}),
+		field({
+			type: "select",
+			label: "Como podemos ajudar?",
+			name: "interesse",
+			placeholder: "Selecione...",
+			options: "Quero um orçamento\nTenho uma dúvida\nOutro assunto",
+			required: true,
+		}),
+		field({ type: "step", label: "Finalizar" }),
+		field({
+			type: "textarea",
+			label: "Mensagem",
+			name: "mensagem",
+			placeholder: "Conte um pouco mais (opcional)",
+		}),
+		field({
+			type: "checkbox",
+			label: "Aceito receber contato por WhatsApp e e-mail.",
+			name: "aceite",
+			required: true,
+		}),
+	],
+	submitText: "Enviar",
+});

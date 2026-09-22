@@ -1,9 +1,10 @@
 /**
- * Página "vitrine-3" com barra de aviso e contadores numéricos.
+ * Página "vitrine-3" com barra de aviso, contadores e formulário em etapas.
  * Uso: pnpm tsx --env-file=.env.local scripts/seed-showcase-3.ts <projectId>
  */
 import { and, eq } from "drizzle-orm";
 import { buildRoot, buildTree, h } from "#/builder/core/build.ts";
+import { multiStepFormProps } from "#/builder/components/form.tsx";
 import { ROOT_ID, type SectionTree } from "#/builder/core/tree.ts";
 import { CONTENT_TEMPLATES } from "#/builder/templates/content.ts";
 import { db } from "#/db/index.ts";
@@ -22,6 +23,10 @@ if (!stats) throw new Error("stats-4");
 const sections: SectionTree[] = [
 	toSection(h("AnnouncementBar", { sticky: true }, [], "Barra de aviso"), "Barra de aviso"),
 	toSection(stats.build(), "Números"),
+	toSection(
+		h("Section", {}, [h("Form", { ...multiStepFormProps(), box: { maxWidth: { desktop: "560px" } } }, [], "Formulário em etapas")], "Formulário em etapas"),
+		"Formulário em etapas",
+	),
 	toSection(h("Section", { minHeight: { desktop: "120vh" } }, [h("Heading", { text: "Role para ver a barra fixa" })], "Espaço"), "Espaço"),
 ];
 

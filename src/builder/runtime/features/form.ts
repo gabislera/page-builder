@@ -1,6 +1,7 @@
 /**
- * Runtime dos formulários: máscara de telefone, validação nativa, envio via
- * fetch para o endpoint da página e ação pós-envio (mensagem ou redirect).
+ * Runtime dos formulários: máscara de telefone, validação nativa, etapas
+ * (só avança com a etapa válida), envio via fetch para o endpoint da página
+ * e ação pós-envio (mensagem ou redirect).
  * Configuração vem dos data-atributos do <form data-pb-form>.
  */
 export const formScript = (cfg: {
@@ -40,6 +41,41 @@ document.addEventListener('change',function(e){
   var t=e.target;if(!(t instanceof Element))return;
   if(t.hasAttribute('data-pb-ddi')){var w=t.closest('[data-pb-tel]');if(w)telSync(w);}
 });
+function steps(f){return f.querySelectorAll('[data-pb-step]');}
+function cur(f){return +(f.getAttribute('data-pb-current')||0);}
+function go(f,i,focus){
+  var st=steps(f),n=st.length;if(!n)return;
+  i=Math.max(0,Math.min(n-1,i));
+  st.forEach(function(s,k){s.hidden=k!==i;});
+  f.setAttribute('data-pb-current',String(i));
+  var prev=f.querySelector('[data-pb-prev]'),next=f.querySelector('[data-pb-next]'),sub=f.querySelector('[type=submit]');
+  if(prev)prev.hidden=i===0;if(next)next.hidden=i===n-1;if(sub)sub.hidden=i!==n-1;
+  var bar=f.querySelector('.pb-form-bar');
+  if(bar)bar.style.setProperty('--pb-progress',((i+1)/n*100)+'%');
+  var c=f.querySelector('[data-pb-step-count]');if(c)c.textContent='Etapa '+(i+1)+' de '+n;
+  var t=f.querySelector('[data-pb-step-title]');if(t)t.textContent=st[i].getAttribute('data-pb-title')||'';
+  f.querySelectorAll('[data-pb-dot]').forEach(function(d,k){d.classList.toggle('pb-active',k===i);d.classList.toggle('pb-done',k<i);});
+  if(focus){
+    var r=f.getBoundingClientRect();if(r.top<0)f.scrollIntoView({behavior:'smooth',block:'start'});
+    var first=st[i].querySelector('input:not([type=hidden]),select,textarea');
+    if(first)try{first.focus({preventScroll:true});}catch(x){}
+  }
+}
+/** Valida só os campos da etapa visível; mostra o aviso do 1º inválido. */
+function stepValid(f){
+  var s=steps(f)[cur(f)];if(!s)return true;
+  s.querySelectorAll('[data-pb-tel]').forEach(function(w){telSync(w,false);});
+  var els=s.querySelectorAll('input,select,textarea');
+  for(var k=0;k<els.length;k++){if(!els[k].checkValidity()){els[k].reportValidity();return false;}}
+  return true;
+}
+document.addEventListener('click',function(e){
+  var t=e.target instanceof Element?e.target.closest('[data-pb-next],[data-pb-prev]'):null;if(!t)return;
+  var f=t.closest('form[data-pb-form]');if(!f)return;
+  e.preventDefault();
+  if(t.hasAttribute('data-pb-prev')){go(f,cur(f)-1,true);return;}
+  if(stepValid(f))go(f,cur(f)+1,true);
+});
 function withQuery(url){
   try{var u=new URL(url,location.href);new URLSearchParams(location.search).forEach(function(v,k){if(!u.searchParams.has(k))u.searchParams.set(k,v);});return u.toString();}
   catch(x){return url;}
@@ -49,6 +85,9 @@ document.addEventListener('submit',function(e){
   if(!(f instanceof HTMLFormElement)||!f.hasAttribute('data-pb-form'))return;
   e.preventDefault();
   if(f.getAttribute('data-pb-busy'))return;
+  // Enter numa etapa intermediária: avança em vez de enviar
+  var n=steps(f).length;
+  if(n&&cur(f)<n-1){if(stepValid(f))go(f,cur(f)+1,true);return;}
   f.querySelectorAll('[data-pb-tel]').forEach(function(w){telSync(w,false);});
   if(f.reportValidity&&!f.reportValidity())return;
   var btn=f.querySelector('[type=submit]'),label=btn&&btn.querySelector('.pb-form-submit-text');
@@ -82,6 +121,7 @@ document.addEventListener('submit',function(e){
     }
     done();f.reset();
     f.querySelectorAll('[data-pb-tel-value]').forEach(function(h){h.value='';});
+    if(n)go(f,0,false);
     f.classList.add('pb-sent');
     if(ok){ok.hidden=false;}
   })

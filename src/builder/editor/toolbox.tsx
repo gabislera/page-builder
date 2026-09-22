@@ -1,10 +1,11 @@
 import { Element, useEditor } from "@craftjs/core";
-import { CircleHelp } from "lucide-react";
+import { CircleHelp, ListOrdered } from "lucide-react";
 import type { ComponentType, ReactElement } from "react";
 import { toast } from "sonner";
 import { accordionSpec, faqSpec } from "../components/accordion.tsx";
 import { carouselSpec } from "../components/carousel.tsx";
 import { containerPresets } from "../components/container.tsx";
+import { multiStepFormProps } from "../components/form.tsx";
 import { tabsSpec } from "../components/tabs.tsx";
 import { deepMerge, type NodeSpec } from "../core/build.ts";
 import { TOP_BAR_TYPE } from "../core/node-helpers.ts";
@@ -258,6 +259,13 @@ export const TOOLBOX_GROUPS: { title: string; items: ToolboxItem[] }[] = [
 		title: "Conversão",
 		items: [
 			simple("Form"),
+			{
+				key: "form-steps",
+				label: "Formulário em etapas",
+				icon: ListOrdered,
+				create: () =>
+					specToElement({ type: "Form", props: multiStepFormProps() }),
+			},
 			{
 				key: "faq",
 				label: "Perguntas frequentes",
