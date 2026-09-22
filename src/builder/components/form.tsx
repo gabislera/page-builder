@@ -1,5 +1,7 @@
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, ListOrdered } from "lucide-react";
 import type { CSSProperties } from "react";
+import { Button } from "#/components/ui/button";
+import { Input } from "#/components/ui/input";
 import { ActionDetails } from "../controls/action.tsx";
 import { ColorField } from "../controls/color.tsx";
 import { Field, Group } from "../controls/field.tsx";
@@ -21,9 +23,9 @@ import {
 	TextAreaField,
 	TextField,
 } from "../controls/inputs.tsx";
-import { ListField, newItemId } from "../controls/list.tsx";
+import { ListEditor, ListField, newItemId } from "../controls/list.tsx";
 import { SettingsTabs } from "../controls/settings-layout.tsx";
-import { useField } from "../controls/use-field.ts";
+import { useField, useNodeProps } from "../controls/use-field.ts";
 import { actionLink } from "../core/actions.ts";
 import {
 	corners,
@@ -581,36 +583,14 @@ function FieldItem({
 	itemPath: string;
 	field: FormField;
 }) {
-	const typeSelect = (
-		<SelectField
-			path={`${itemPath}.type`}
-			label="Tipo"
-			options={(Object.keys(TYPE_LABEL) as FormFieldType[]).map((t) => ({
-				value: t,
-				label: TYPE_LABEL[t],
-			}))}
-		/>
-	);
-	if (field.type === "step")
-		return (
-			<>
-				{typeSelect}
-				<TextField
-					path={`${itemPath}.label`}
-					label="Título da etapa"
-					hint="Os campos abaixo deste, até a próxima etapa, aparecem juntos."
-				/>
-			</>
-		);
 	return (
 		<>
 			<SelectField
 				path={`${itemPath}.type`}
 				label="Tipo"
-				options={(Object.keys(TYPE_LABEL) as FormFieldType[]).map((t) => ({
-					value: t,
-					label: TYPE_LABEL[t],
-				}))}
+				options={(Object.keys(TYPE_LABEL) as FormFieldType[])
+					.filter((t) => t !== "step")
+					.map((t) => ({ value: t, label: TYPE_LABEL[t] }))}
 			/>
 			<TextField
 				path={`${itemPath}.label`}
@@ -690,10 +670,10 @@ function RedirectField() {
 
 function StepsGroup() {
 	const fields = useField<FormField[]>("fields").value ?? [];
-	const multi = splitSteps(fields).length > 1;
+	if (!fields.some((f) => f.type === "step")) return null;
 	return (
-		<Group title="Etapas" defaultOpen={multi}>
-			{multi ? (
+		<Group title="Opções das etapas">
+			{
 				<>
 					<SegmentedField
 						path="stepProgress"
@@ -706,17 +686,214 @@ function StepsGroup() {
 					/>
 					<TextField path="nextText" label="Botão de avançar" />
 					<TextField path="prevText" label="Botão de voltar" />
-					<p className="text-[11px] leading-relaxed text-muted-foreground">
-						No canvas, use os botões do formulário para ver cada etapa.
-					</p>
 				</>
-			) : (
-				<p className="text-[11px] leading-relaxed text-muted-foreground">
-					Para dividir em etapas, adicione um campo do tipo "Nova etapa" na
-					lista de campos. Cada etapa só avança com os campos preenchidos.
-				</p>
-			)}
+			}
 		</Group>
+	);
+}
+
+/* ------------------------------------------------------------------ */
+/* Campos e etapas                                                     */
+/* ------------------------------------------------------------------ */
+
+const newField = (): FormField =>
+	field({ type: "text", label: "Novo campo", options: "Opção 1\nOpção 2" });
+
+const stepMarker = (label: string) => field({ type: "step", label });
+
+/** Uma etapa na tela de edição: o marcador (título) e os campos dela. */
+type StepGroup = {
+	id: string;
+	marker: FormField | null;
+	markerIndex: number;
+	items: { f: FormField; index: number }[];
+};
+
+/** Agrupa a lista plana (campos + marcadores "step") por etapa. */
+function groupSteps(fields: FormField[]): StepGroup[] {
+	const groups: StepGroup[] = [];
+	fields.forEach((f, index) => {
+		if (f.type === "step") {
+			groups.push({ id: f.id, marker: f, markerIndex: index, items: [] });
+			return;
+		}
+		// campos antes do primeiro marcador formam a 1ª etapa
+		if (!groups.length)
+			groups.push({ id: "__first", marker: null, markerIndex: -1, items: [] });
+		groups[groups.length - 1].items.push({ f, index });
+	});
+	return groups;
+}
+
+/** Volta para a lista plana salva nas props. */
+const flatten = (groups: StepGroup[]) =>
+	groups.flatMap((g, i) => [
+		g.marker ?? stepMarker(`Etapa ${i + 1}`),
+		...g.items.map((it) => it.f),
+	]);
+
+const fieldLabel = (item: FormField) =>
+	`${item.label || item.name} · ${TYPE_LABEL[item.type]}`;
+
+/**
+ * Lista de campos. Sem etapas: uma lista simples. Com etapas: uma lista de
+ * etapas, cada uma abre com o título e os campos dela.
+ */
+function FieldsEditor() {
+	const { id, props, update } = useNodeProps<FormProps>();
+	const fields = props.fields ?? [];
+	const setFields = (next: FormField[]) =>
+		update((draft) => {
+			draft.fields = next;
+		});
+	const multi = fields.some((f) => f.type === "step");
+
+	if (!multi)
+		return (
+			<>
+				<ListField<FormField>
+					path="fields"
+					label="Campos"
+					addLabel="Adicionar campo"
+					min={1}
+					create={newField}
+					itemLabel={fieldLabel}
+					renderItem={(itemPath, item) => (
+						<FieldItem itemPath={itemPath} field={item} />
+					)}
+				/>
+				<Button
+					type="button"
+					size="sm"
+					variant="ghost"
+					className="h-8 justify-start text-xs text-muted-foreground"
+					onClick={() =>
+						setFields([stepMarker("Etapa 1"), ...fields, stepMarker("Etapa 2")])
+					}
+				>
+					<ListOrdered className="size-3.5" /> Dividir em etapas
+				</Button>
+			</>
+		);
+
+	return <StepsEditor nodeId={id} fields={fields} setFields={setFields} />;
+}
+
+function StepsEditor({
+	nodeId,
+	fields,
+	setFields,
+}: {
+	nodeId: string;
+	fields: FormField[];
+	setFields: (next: FormField[]) => void;
+}) {
+	const setPreviewStep = useEditorPreview((s) => s.setFormStep);
+	const groups = groupSteps(fields);
+	/** Etapa i no canvas (etapas sem campos não aparecem). */
+	const renderIndex = (i: number) =>
+		groups
+			.slice(0, i)
+			.filter((g) => g.items.some((it) => it.f.type !== "hidden")).length;
+
+	return (
+		<Field label="Etapas">
+			<ListEditor<StepGroup>
+				items={groups}
+				variant="section"
+				min={1}
+				max={10}
+				addLabel="Adicionar etapa"
+				onChange={(fn) => setFields(flatten(fn([...groups])))}
+				create={() => {
+					const marker = stepMarker(`Etapa ${groups.length + 1}`);
+					return { id: marker.id, marker, markerIndex: -1, items: [] };
+				}}
+				duplicate={(g) => {
+					const marker = stepMarker(`${g.marker?.label || "Etapa"} (cópia)`);
+					return {
+						id: marker.id,
+						marker,
+						markerIndex: -1,
+						items: g.items.map((it) => ({
+							f: { ...structuredClone(it.f), id: newItemId() },
+							index: -1,
+						})),
+					};
+				}}
+				onOpen={(_, i) => setPreviewStep(nodeId, renderIndex(i))}
+				itemLabel={(g, i) => `${i + 1}. ${g.marker?.label || `Etapa ${i + 1}`}`}
+				itemMeta={(g) => {
+					const n = g.items.filter((it) => it.f.type !== "hidden").length;
+					return n === 1 ? "1 campo" : `${n} campos`;
+				}}
+				renderItem={(g, i) => (
+					<>
+						{g.marker ? (
+							<TextField
+								path={`fields.${g.markerIndex}.label`}
+								label="Título da etapa"
+							/>
+						) : (
+							<Field label="Título da etapa">
+								<Input
+									className="h-8 text-xs"
+									placeholder={`Etapa ${i + 1}`}
+									onChange={(e) =>
+										setFields(
+											flatten([
+												{ ...g, marker: stepMarker(e.target.value) },
+												...groups.slice(1),
+											]),
+										)
+									}
+								/>
+							</Field>
+						)}
+						<Field label="Campos da etapa">
+							<ListEditor<FormField>
+								items={g.items.map((it) => it.f)}
+								addLabel="Adicionar campo"
+								create={newField}
+								onChange={(fn) => {
+									const next = fn(g.items.map((it) => it.f));
+									setFields(
+										flatten(
+											groups.map((x) =>
+												x.id === g.id
+													? { ...x, items: next.map((f) => ({ f, index: -1 })) }
+													: x,
+											),
+										),
+									);
+								}}
+								itemLabel={fieldLabel}
+								renderItem={(f, k) => (
+									<FieldItem
+										itemPath={`fields.${g.items[k]?.index ?? fields.indexOf(f)}`}
+										field={f}
+									/>
+								)}
+							/>
+							{g.items.length === 0 ? (
+								<p className="text-[11px] text-muted-foreground">
+									Etapa sem campos não aparece no formulário.
+								</p>
+							) : null}
+						</Field>
+					</>
+				)}
+			/>
+			<Button
+				type="button"
+				size="sm"
+				variant="ghost"
+				className="h-8 justify-start text-xs text-muted-foreground"
+				onClick={() => setFields(fields.filter((f) => f.type !== "step"))}
+			>
+				Juntar tudo em uma etapa só
+			</Button>
+		</Field>
 	);
 }
 
@@ -733,32 +910,7 @@ function FormSettings() {
 							label="Nome do formulário"
 							hint="Aparece nos leads recebidos."
 						/>
-						<ListField<FormField>
-							path="fields"
-							label="Campos"
-							addLabel="Adicionar campo"
-							min={1}
-							create={() => ({
-								id: newItemId(),
-								type: "text",
-								name: "",
-								label: "Novo campo",
-								placeholder: "",
-								required: false,
-								options: "Opção 1\nOpção 2",
-								value: "",
-								showCountry: true,
-								country: "55",
-							})}
-							itemLabel={(item) =>
-								item.type === "step"
-									? `⎯ Etapa: ${item.label || "sem título"}`
-									: `${item.label || item.name} · ${TYPE_LABEL[item.type]}`
-							}
-							renderItem={(itemPath, item) => (
-								<FieldItem itemPath={itemPath} field={item} />
-							)}
-						/>
+						<FieldsEditor />
 					</Group>
 					<StepsGroup />
 					<Group title="Botão de envio">

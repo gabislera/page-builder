@@ -45,26 +45,17 @@ type ListFieldProps<T extends ListItem> = {
 };
 
 /**
- * Editor de lista: adicionar, duplicar, remover e reordenar arrastando.
- * Cada item abre/fecha para mostrar seus campos.
+ * Editor de lista ligado a uma prop: adicionar, duplicar, remover e
+ * reordenar arrastando. Cada item abre/fecha para mostrar seus campos.
  */
 export function ListField<T extends ListItem>({
 	path,
 	label,
-	create,
-	itemLabel,
 	renderItem,
-	addLabel = "Adicionar item",
-	min = 0,
-	max = 50,
+	...rest
 }: ListFieldProps<T>) {
 	const { props, update } = useNodeProps<Record<string, unknown>>();
 	const items = getPath<T[]>(props, path) ?? [];
-	const [open, setOpen] = useState<string | null>(null);
-	const sensors = useSensors(
-		useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
-	);
-
 	const mutate = (fn: (list: T[]) => T[]) =>
 		update((draft) => {
 			const keys = path.split(".");
@@ -74,10 +65,68 @@ export function ListField<T extends ListItem>({
 			const last = keys[keys.length - 1];
 			target[last] = fn([...((target[last] as T[]) ?? [])]);
 		});
+	return (
+		<Field label={label}>
+			<ListEditor
+				{...rest}
+				items={items}
+				onChange={mutate}
+				renderItem={(item, index) =>
+					renderItem(`${path}.${index}`, item, index)
+				}
+			/>
+		</Field>
+	);
+}
+
+export type ListEditorProps<T extends ListItem> = {
+	items: T[];
+	/** Recebe uma função que transforma a lista atual na nova. */
+	onChange: (fn: (list: T[]) => T[]) => void;
+	create: () => T;
+	itemLabel: (item: T, index: number) => string;
+	renderItem: (item: T, index: number) => ReactNode;
+	/** Cópia de um item (padrão: clone com id novo). */
+	duplicate?: (item: T) => T;
+	/** Chamado quando um item é aberto. */
+	onOpen?: (item: T, index: number) => void;
+	/** Detalhe à direita do título (ex.: "3 campos"). */
+	itemMeta?: (item: T, index: number) => ReactNode;
+	addLabel?: string;
+	min?: number;
+	max?: number;
+	/** Visual dos itens: "card" (padrão) ou "section" (mais destacado). */
+	variant?: "card" | "section";
+};
+
+/** Lista editável sem ligação direta com as props (controlada). */
+export function ListEditor<T extends ListItem>({
+	items,
+	onChange,
+	create,
+	itemLabel,
+	renderItem,
+	duplicate = (item) => ({ ...structuredClone(item), id: newItemId() }),
+	onOpen,
+	itemMeta,
+	addLabel = "Adicionar item",
+	min = 0,
+	max = 50,
+	variant = "card",
+}: ListEditorProps<T>) {
+	const [open, setOpen] = useState<string | null>(null);
+	const sensors = useSensors(
+		useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+	);
+	const toggle = (item: T, index: number) => {
+		const next = open === item.id ? null : item.id;
+		setOpen(next);
+		if (next) onOpen?.(item, index);
+	};
 
 	const onDragEnd = ({ active, over }: DragEndEvent) => {
 		if (!over || active.id === over.id) return;
-		mutate((list) => {
+		onChange((list) => {
 			const from = list.findIndex((i) => i.id === active.id);
 			const to = list.findIndex((i) => i.id === over.id);
 			return arrayMove(list, from, to);
@@ -85,65 +134,67 @@ export function ListField<T extends ListItem>({
 	};
 
 	return (
-		<Field label={label}>
-			<div className="flex flex-col gap-1.5">
-				<DndContext
-					sensors={sensors}
-					collisionDetection={closestCenter}
-					onDragEnd={onDragEnd}
+		<div className="flex flex-col gap-1.5">
+			<DndContext
+				sensors={sensors}
+				collisionDetection={closestCenter}
+				onDragEnd={onDragEnd}
+			>
+				<SortableContext
+					items={items.map((i) => i.id)}
+					strategy={verticalListSortingStrategy}
 				>
-					<SortableContext
-						items={items.map((i) => i.id)}
-						strategy={verticalListSortingStrategy}
-					>
-						{items.map((item, index) => (
-							<SortableItem
-								key={item.id}
-								id={item.id}
-								title={itemLabel(item, index) || `Item ${index + 1}`}
-								open={open === item.id}
-								onToggle={() => setOpen(open === item.id ? null : item.id)}
-								canRemove={items.length > min}
-								canDuplicate={items.length < max}
-								onRemove={() =>
-									mutate((list) => list.filter((i) => i.id !== item.id))
-								}
-								onDuplicate={() =>
-									mutate((list) => {
-										const copy = { ...structuredClone(item), id: newItemId() };
-										list.splice(index + 1, 0, copy);
-										return list;
-									})
-								}
-							>
-								{renderItem(`${path}.${index}`, item, index)}
-							</SortableItem>
-						))}
-					</SortableContext>
-				</DndContext>
-				{items.length < max ? (
-					<Button
-						type="button"
-						size="sm"
-						variant="outline"
-						className="h-8 text-xs"
-						onClick={() => {
-							const item = create();
-							mutate((list) => [...list, item]);
-							setOpen(item.id);
-						}}
-					>
-						<Plus className="size-3.5" /> {addLabel}
-					</Button>
-				) : null}
-			</div>
-		</Field>
+					{items.map((item, index) => (
+						<SortableItem
+							key={item.id}
+							id={item.id}
+							title={itemLabel(item, index) || `Item ${index + 1}`}
+							meta={itemMeta?.(item, index)}
+							variant={variant}
+							open={open === item.id}
+							onToggle={() => toggle(item, index)}
+							canRemove={items.length > min}
+							canDuplicate={items.length < max}
+							onRemove={() =>
+								onChange((list) => list.filter((i) => i.id !== item.id))
+							}
+							onDuplicate={() =>
+								onChange((list) => {
+									list.splice(index + 1, 0, duplicate(item));
+									return list;
+								})
+							}
+						>
+							{renderItem(item, index)}
+						</SortableItem>
+					))}
+				</SortableContext>
+			</DndContext>
+			{items.length < max ? (
+				<Button
+					type="button"
+					size="sm"
+					variant="outline"
+					className="h-8 text-xs"
+					onClick={() => {
+						const item = create();
+						onChange((list) => [...list, item]);
+						setOpen(item.id);
+						onOpen?.(item, items.length);
+					}}
+				>
+					<Plus className="size-3.5" /> {addLabel}
+				</Button>
+			) : null}
+		</div>
 	);
 }
 
 function SortableItem({
 	id,
 	title,
+	meta,
+	variant,
 	open,
 	onToggle,
 	onRemove,
@@ -154,6 +205,8 @@ function SortableItem({
 }: {
 	id: string;
 	title: string;
+	meta?: ReactNode;
+	variant: "card" | "section";
 	open: boolean;
 	onToggle: () => void;
 	onRemove: () => void;
@@ -175,11 +228,17 @@ function SortableItem({
 			ref={setNodeRef}
 			style={{ transform: CSS.Transform.toString(transform), transition }}
 			className={cn(
-				"rounded-md border border-border bg-card",
+				"min-w-0 rounded-md border border-border bg-card",
+				variant === "section" && open && "border-primary/50",
 				isDragging && "z-10 opacity-80 shadow-lg",
 			)}
 		>
-			<div className="flex h-8 items-center gap-1 px-1">
+			<div
+				className={cn(
+					"flex items-center gap-1 px-1",
+					variant === "section" ? "h-10" : "h-8",
+				)}
+			>
 				<button
 					type="button"
 					className="flex size-6 cursor-grab items-center justify-center text-muted-foreground active:cursor-grabbing"
@@ -199,7 +258,16 @@ function SortableItem({
 							open && "rotate-90",
 						)}
 					/>
-					<span className="truncate">{title}</span>
+					<span
+						className={cn("truncate", variant === "section" && "font-medium")}
+					>
+						{title}
+					</span>
+					{meta ? (
+						<span className="ml-auto shrink-0 pl-1 text-[10px] text-muted-foreground">
+							{meta}
+						</span>
+					) : null}
 				</button>
 				{canDuplicate ? (
 					<button
@@ -223,7 +291,12 @@ function SortableItem({
 				) : null}
 			</div>
 			{open ? (
-				<div className="flex flex-col gap-3 border-t border-border p-3">
+				<div
+					className={cn(
+						"flex flex-col gap-3 border-t border-border",
+						variant === "section" ? "p-2.5" : "p-3",
+					)}
+				>
 					{children}
 				</div>
 			) : null}
