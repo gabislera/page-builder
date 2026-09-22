@@ -19,6 +19,7 @@ import { IconBox } from "./components/icon-box.tsx";
 import { IconList } from "./components/icon-list.tsx";
 import { Image } from "./components/image.tsx";
 import { Logo } from "./components/logo.tsx";
+import { MapEmbed } from "./components/map.tsx";
 import { Menu } from "./components/menu.tsx";
 import { Modal } from "./components/modal.tsx";
 import { Page } from "./components/page.tsx";
@@ -58,6 +59,7 @@ export const COMPONENTS: Record<string, AnyComponentDefinition> =
 			StatCounter,
 			AnnouncementBar,
 			ShareButtons,
+			MapEmbed,
 			Modal,
 			FloatingButtons,
 			Html,
