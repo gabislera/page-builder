@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ScrollArea } from "#/components/ui/scroll-area";
 import { TooltipProvider } from "#/components/ui/tooltip";
+import { UI_ACCENT } from "#/lib/brand";
 import { RenderProvider } from "../core/render-context.tsx";
 import type { SiteSettings } from "../core/theme.ts";
 import type { SectionTree } from "../core/tree.ts";
@@ -103,7 +104,7 @@ export function EditorShell({
 					<Editor
 						resolver={resolver}
 						onRender={RenderNode}
-						indicator={{ success: "#2563eb", error: "#ef4444", thickness: 3 }}
+						indicator={{ success: UI_ACCENT, error: "#ef4444", thickness: 3 }}
 						onNodesChange={() => useSaveState.getState().markChanged()}
 					>
 						<div className="dark flex h-screen flex-col bg-editor-bg text-foreground">

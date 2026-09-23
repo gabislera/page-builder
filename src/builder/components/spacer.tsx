@@ -1,4 +1,5 @@
 import { MoveVertical } from "lucide-react";
+import { UI_ACCENT } from "#/lib/brand";
 import { Group } from "../controls/field.tsx";
 import { NumberUnitField } from "../controls/inputs.tsx";
 import { SettingsTabs } from "../controls/settings-layout.tsx";
@@ -21,8 +22,7 @@ function SpacerView({ id, rootRef }: NodeViewProps<SpacerProps>) {
 			style={
 				isEditor
 					? {
-							background:
-								"repeating-linear-gradient(45deg,transparent,transparent 6px,#2563eb0d 6px,#2563eb0d 12px)",
+							background: `repeating-linear-gradient(45deg,transparent,transparent 6px,${UI_ACCENT}1a 6px,${UI_ACCENT}1a 12px)`,
 						}
 					: undefined
 			}

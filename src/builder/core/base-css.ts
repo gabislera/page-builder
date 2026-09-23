@@ -2,6 +2,8 @@
  * CSS base aplicado igualmente no canvas do editor e na página publicada.
  * Mantém os dois idênticos: nada de reset do Tailwind dentro do canvas.
  */
+import { UI_ACCENT, UI_ACCENT_SOFT, UI_EDITING } from "#/lib/brand";
+
 export const BASE_CSS = `
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
@@ -37,10 +39,10 @@ html{scroll-behavior:auto}
 ::-webkit-scrollbar-thumb:hover{background-color:rgba(0,0,0,.35)}
 @supports not selector(::-webkit-scrollbar){html{scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.25) transparent}}
 [data-pb-node]{cursor:default}
-.pb-hover{outline:1px dashed #60a5fa !important;outline-offset:-1px}
-.pb-selected{outline:2px solid #2563eb !important;outline-offset:-2px}
+.pb-hover{outline:1px dashed ${UI_ACCENT_SOFT} !important;outline-offset:-1px}
+.pb-selected{outline:2px solid ${UI_ACCENT} !important;outline-offset:-2px}
 .pb-anim-fade-in,.pb-anim-fade-up{opacity:1;transform:none}
 .pb-placeholder{display:flex;align-items:center;justify-content:center;min-height:80px;width:100%;border:1.5px dashed #c4c4cc;border-radius:6px;color:#71717a;font:500 12px/1.4 Inter,system-ui,sans-serif;background:repeating-linear-gradient(45deg,#fafafa,#fafafa 8px,#f4f4f5 8px,#f4f4f5 16px);pointer-events:none;text-align:center;padding:12px}
-.pb-editing{outline:2px solid #22c55e !important;cursor:text}
+.pb-editing{outline:2px solid ${UI_EDITING} !important;cursor:text}
 .pb-editing:focus{outline:2px solid #22c55e !important}
 `;

@@ -7,6 +7,7 @@ import {
 	ArrowRight,
 	PanelTop,
 } from "lucide-react";
+import { UI_ACCENT, UI_ACCENT_FG } from "#/lib/brand";
 import { ColorField } from "../controls/color.tsx";
 import { Group } from "../controls/field.tsx";
 import {
@@ -100,8 +101,8 @@ const BADGES_STYLE: React.CSSProperties = {
 const BADGE_STYLE: React.CSSProperties = {
 	padding: "2px 6px",
 	borderRadius: 4,
-	background: "#2563eb",
-	color: "#ffffff",
+	background: UI_ACCENT,
+	color: UI_ACCENT_FG,
 	font: "600 10px/1.4 Inter,system-ui,sans-serif",
 	letterSpacing: 0,
 	textTransform: "none",

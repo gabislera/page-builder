@@ -5,6 +5,7 @@
 import { useEditor } from "@craftjs/core";
 import { Plus } from "lucide-react";
 import type { ReactNode } from "react";
+import { UI_ACCENT } from "#/lib/brand";
 import { flattenChildren } from "../core/children.ts";
 import { TOP_BAR_TYPE } from "../core/node-helpers.ts";
 import { ROOT_ID, type SitePart } from "../core/tree.ts";
@@ -50,7 +51,7 @@ export function SitePartSlot({ part }: { part: SitePart }) {
 			{stored ? (
 				<button
 					type="button"
-					style={{ ...action, borderColor: "#2563eb", color: "#2563eb" }}
+					style={{ ...action, borderColor: UI_ACCENT, color: "#047857" }}
 					onClick={applySiteVersion}
 				>
 					Usar o {label} do site

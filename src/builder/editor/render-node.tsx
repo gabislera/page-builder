@@ -17,6 +17,7 @@ import {
 	useState,
 } from "react";
 import { createPortal } from "react-dom";
+import { UI_ACCENT, UI_ACCENT_FG } from "#/lib/brand";
 import { TOP_BAR_TYPE } from "../core/node-helpers.ts";
 import { ROOT_ID } from "../core/tree.ts";
 import { duplicateNode, moveSection } from "./node-actions.ts";
@@ -126,8 +127,8 @@ const bar: React.CSSProperties = {
 	height: 24,
 	padding: "0 4px",
 	borderRadius: "4px 4px 0 0",
-	background: "#2563eb",
-	color: "#fff",
+	background: UI_ACCENT,
+	color: UI_ACCENT_FG,
 	font: "600 11px/1 Inter, system-ui, sans-serif",
 	whiteSpace: "nowrap",
 	pointerEvents: "auto",
@@ -290,8 +291,9 @@ function NodeBar({
 						width: 28,
 						height: 28,
 						borderRadius: 999,
-						background: "#2563eb",
-						boxShadow: "0 4px 12px rgba(37,99,235,.45)",
+						background: UI_ACCENT,
+						color: UI_ACCENT_FG,
+						boxShadow: `0 4px 12px color-mix(in srgb, ${UI_ACCENT} 45%, transparent)`,
 					}}
 				>
 					<Plus size={16} />
