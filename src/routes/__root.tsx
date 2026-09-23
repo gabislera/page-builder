@@ -4,6 +4,7 @@ import {
 	HeadContent,
 	Scripts,
 } from "@tanstack/react-router";
+import { ConfirmDialogHost } from "#/components/confirm-dialog";
 import { Toaster } from "#/components/ui/sonner";
 import { APP_NAME } from "#/lib/brand";
 import appCss from "../styles.css?url";
@@ -33,6 +34,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<body>
 				{children}
 				<Toaster position="bottom-right" />
+				<ConfirmDialogHost />
 				<Scripts />
 			</body>
 		</html>

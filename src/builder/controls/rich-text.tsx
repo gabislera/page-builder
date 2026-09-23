@@ -22,9 +22,17 @@ import {
 	Strikethrough,
 	Underline,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { create } from "zustand";
+import { Button } from "#/components/ui/button";
+import { Input } from "#/components/ui/input";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "#/components/ui/popover";
 import { cn } from "#/lib/utils";
+import { normalizeUrl } from "../core/actions.ts";
 import { fontStack } from "../core/style-engine.ts";
 import { fontChoices } from "../core/theme.ts";
 import { ColorInput } from "./color.tsx";
@@ -235,15 +243,10 @@ export function RichToolbar({ editor }: { editor: Editor }) {
 					AlignRight,
 					"Direita",
 				)}
-				{btn(
-					state.link,
-					() => {
-						if (state.link) return chain().unsetLink().run();
-						const url = window.prompt("URL do link");
-						if (url) chain().setLink({ href: url }).run();
-					},
-					LinkIcon,
-					"Link",
+				{state.link ? (
+					btn(true, () => chain().unsetLink().run(), LinkIcon, "Remover link")
+				) : (
+					<LinkButton onApply={(href) => chain().setLink({ href }).run()} />
 				)}
 				{btn(
 					false,
@@ -304,5 +307,56 @@ export function RichToolbar({ editor }: { editor: Editor }) {
 				/>
 			</div>
 		</div>
+	);
+}
+
+/** Botão de link: pede a URL num popover (no lugar do prompt do navegador). */
+function LinkButton({ onApply }: { onApply: (href: string) => void }) {
+	const [open, setOpen] = useState(false);
+	const [url, setUrl] = useState("");
+	const apply = () => {
+		const href = url.trim();
+		if (href) onApply(normalizeUrl(href));
+		setOpen(false);
+		setUrl("");
+	};
+	return (
+		<Popover open={open} onOpenChange={setOpen}>
+			<PopoverTrigger asChild>
+				<button
+					type="button"
+					title="Link"
+					onMouseDown={(e) => e.preventDefault()}
+					className="flex size-7 items-center justify-center rounded hover:bg-accent"
+				>
+					<LinkIcon className="size-3.5" />
+				</button>
+			</PopoverTrigger>
+			<PopoverContent
+				align="start"
+				className="w-72 p-2"
+				// devolve o foco ao texto (a seleção continua marcada)
+				onCloseAutoFocus={(e) => e.preventDefault()}
+			>
+				<form
+					className="flex gap-1.5"
+					onSubmit={(e) => {
+						e.preventDefault();
+						apply();
+					}}
+				>
+					<Input
+						autoFocus
+						className="h-8 text-xs"
+						placeholder="https://..."
+						value={url}
+						onChange={(e) => setUrl(e.target.value)}
+					/>
+					<Button type="submit" size="sm" className="h-8 text-xs">
+						Aplicar
+					</Button>
+				</form>
+			</PopoverContent>
+		</Popover>
 	);
 }

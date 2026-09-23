@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { confirm } from "#/components/confirm-dialog";
 import { NewPageDialog } from "#/components/new-page-dialog";
 import { PageAddressDialog } from "#/components/page-address-dialog";
 import { Badge } from "#/components/ui/badge";
@@ -141,9 +142,20 @@ function ProjectPages() {
 								</DropdownMenuItem>
 								<DropdownMenuItem
 									className="text-destructive"
-									onClick={() => {
-										if (window.confirm(`Excluir a página "${p.name}"?`))
-											remove.mutate(p.id);
+									onClick={async () => {
+										const ok = await confirm({
+											title: "Excluir página?",
+											description: (
+												<>
+													A página <strong>{p.name}</strong> será excluída
+													{p.status === "published" ? " e sairá do ar" : ""}.
+													Essa ação não pode ser desfeita.
+												</>
+											),
+											confirmText: "Excluir página",
+											destructive: true,
+										});
+										if (ok) remove.mutate(p.id);
 									}}
 								>
 									<Trash2 className="size-4" /> Excluir
