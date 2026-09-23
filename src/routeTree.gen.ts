@@ -19,6 +19,7 @@ import { Route as AppProjectsProjectIdRouteImport } from './routes/_app/projects
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiFormsPageIdRouteImport } from './routes/api/forms/$pageId'
 import { Route as ApiViewsPageIdRouteImport } from './routes/api/views/$pageId'
+import { Route as PProjectSlugIndexRouteImport } from './routes/p/$projectSlug/index'
 import { Route as PProjectSlugPageSlugRouteImport } from './routes/p/$projectSlug/$pageSlug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -70,6 +71,11 @@ const ApiViewsPageIdRoute = ApiViewsPageIdRouteImport.update({
   path: '/api/views/$pageId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PProjectSlugIndexRoute = PProjectSlugIndexRouteImport.update({
+  id: '/p/$projectSlug/',
+  path: '/p/$projectSlug/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PProjectSlugPageSlugRoute = PProjectSlugPageSlugRouteImport.update({
   id: '/p/$projectSlug/$pageSlug',
   path: '/p/$projectSlug/$pageSlug',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/api/views/$pageId': typeof ApiViewsPageIdRoute
   '/p/$projectSlug/$pageSlug': typeof PProjectSlugPageSlugRoute
   '/projects/': typeof AppProjectsIndexRoute
+  '/p/$projectSlug/': typeof PProjectSlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/api/views/$pageId': typeof ApiViewsPageIdRoute
   '/p/$projectSlug/$pageSlug': typeof PProjectSlugPageSlugRoute
   '/projects': typeof AppProjectsIndexRoute
+  '/p/$projectSlug': typeof PProjectSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/api/views/$pageId': typeof ApiViewsPageIdRoute
   '/p/$projectSlug/$pageSlug': typeof PProjectSlugPageSlugRoute
   '/_app/projects/': typeof AppProjectsIndexRoute
+  '/p/$projectSlug/': typeof PProjectSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/api/views/$pageId'
     | '/p/$projectSlug/$pageSlug'
     | '/projects/'
+    | '/p/$projectSlug/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/api/views/$pageId'
     | '/p/$projectSlug/$pageSlug'
     | '/projects'
+    | '/p/$projectSlug'
   id:
     | '__root__'
     | '/'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/api/views/$pageId'
     | '/p/$projectSlug/$pageSlug'
     | '/_app/projects/'
+    | '/p/$projectSlug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -164,6 +176,7 @@ export interface RootRouteChildren {
   ApiFormsPageIdRoute: typeof ApiFormsPageIdRoute
   ApiViewsPageIdRoute: typeof ApiViewsPageIdRoute
   PProjectSlugPageSlugRoute: typeof PProjectSlugPageSlugRoute
+  PProjectSlugIndexRoute: typeof PProjectSlugIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiViewsPageIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/$projectSlug/': {
+      id: '/p/$projectSlug/'
+      path: '/p/$projectSlug'
+      fullPath: '/p/$projectSlug/'
+      preLoaderRoute: typeof PProjectSlugIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/$projectSlug/$pageSlug': {
       id: '/p/$projectSlug/$pageSlug'
       path: '/p/$projectSlug/$pageSlug'
@@ -270,6 +290,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiFormsPageIdRoute: ApiFormsPageIdRoute,
   ApiViewsPageIdRoute: ApiViewsPageIdRoute,
   PProjectSlugPageSlugRoute: PProjectSlugPageSlugRoute,
+  PProjectSlugIndexRoute: PProjectSlugIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

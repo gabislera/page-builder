@@ -119,20 +119,6 @@ export async function renderTemplatePreview(
 	});
 }
 
-/** Página inicial do projeto: slug "home"/"inicio" ou a mais antiga. */
-export async function homeSlug(projectId: string) {
-	const rows = await db
-		.select({ slug: page.slug })
-		.from(page)
-		.where(and(eq(page.projectId, projectId), isNull(page.deletedAt)))
-		.orderBy(asc(page.createdAt));
-	return (
-		rows.find((r) => r.slug === "home" || r.slug === "inicio")?.slug ??
-		rows[0]?.slug ??
-		null
-	);
-}
-
 export async function publishPageById(pageId: string) {
 	const row = await db.query.page.findFirst({ where: eq(page.id, pageId) });
 	if (!row) throw new Error("Página não encontrada");
