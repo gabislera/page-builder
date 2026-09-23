@@ -13,6 +13,7 @@ import { DebouncedInput } from "../controls/inputs.tsx";
 import { ROOT_ID } from "../core/tree.ts";
 import { COMPONENTS } from "../registry.ts";
 import { unlinkGlobal } from "./node-actions.ts";
+import { canSaveAsTemplate, SaveAsTemplateButton } from "./save-template.tsx";
 import { SitePartCard } from "./site-parts.tsx";
 
 /** Componentes compostos: o filho selecionado ganha atalho para o pai. */
@@ -152,6 +153,13 @@ export function SettingsPanel() {
 							)
 						}
 						onUnlink={() => unlinkGlobal(editor, selected.id)}
+					/>
+				) : null}
+				{selected.isTopLevel && canSaveAsTemplate(selected.type) ? (
+					<SaveAsTemplateButton
+						nodeId={selected.id}
+						type={selected.type}
+						defaultName={selected.customName || selected.displayName}
 					/>
 				) : null}
 			</div>

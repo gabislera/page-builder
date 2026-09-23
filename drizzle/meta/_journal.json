@@ -15,6 +15,13 @@
       "when": 1790246928159,
       "tag": "0001_site_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790269090063,
+      "tag": "0002_section_template_user",
+      "breakpoints": true
     }
   ]
 }

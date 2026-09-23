@@ -190,8 +190,10 @@ export const pageSection = pgTable(
 );
 
 /** Modelos de seção. `projectId` nulo = modelo do sistema. */
+/** Seções salvas pelo usuário como modelo (valem em todos os projetos dele). */
 export const sectionTemplate = pgTable("section_template", {
 	id: id(),
+	userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
 	projectId: text("project_id").references(() => project.id, {
 		onDelete: "cascade",
 	}),

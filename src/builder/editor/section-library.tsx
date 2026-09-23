@@ -1,9 +1,17 @@
 import type { SerializedNodes } from "@craftjs/core";
 import { useEditor } from "@craftjs/core";
-import { useQuery } from "@tanstack/react-query";
-import { Files, FileText, Globe, Loader2 } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	Bookmark,
+	Files,
+	FileText,
+	Globe,
+	Loader2,
+	Trash2,
+} from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { confirm } from "#/components/confirm-dialog";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import {
@@ -16,7 +24,7 @@ import { cn } from "#/lib/utils";
 import { BASE_CSS } from "../core/base-css.ts";
 import { buildRoot, buildTree } from "../core/build.ts";
 import { googleFontsHref } from "../core/style-engine.ts";
-import { ROOT_ID, type SitePart } from "../core/tree.ts";
+import { cloneTree, ROOT_ID, type SitePart } from "../core/tree.ts";
 import { renderBody } from "../renderer/render-page.tsx";
 import { CONTENT_TEMPLATES } from "../templates/content.ts";
 import { HEADER_FOOTER_TEMPLATES } from "../templates/headers-footers.ts";
@@ -29,13 +37,14 @@ import {
 	SECTION_TEMPLATES,
 	type SectionTemplate,
 } from "../templates/sections.ts";
-import { useEditorContext } from "./context.tsx";
+import { type SavedSection, useEditorContext } from "./context.tsx";
 import { insertTree } from "./node-actions.ts";
 import { useSectionPicker } from "./section-picker-store.ts";
 import { PART_CATEGORY, type PartScope, useSitePart } from "./site-parts.tsx";
 import { useSiteStore } from "./site-store.ts";
 
 const GLOBAL_TAB = "Seções globais";
+const SAVED_TAB = "Meus modelos";
 
 const ALL_TEMPLATES: SectionTemplate[] = [
 	...HEADER_FOOTER_TEMPLATES,
@@ -73,6 +82,21 @@ export function SectionLibraryDialog() {
 		enabled: isOpen && category === GLOBAL_TAB,
 	});
 
+	const queryClient = useQueryClient();
+	const saved = useQuery({
+		queryKey: ["saved-sections"],
+		queryFn: services.listSavedSections,
+		enabled: isOpen && category === SAVED_TAB,
+	});
+	const removeSaved = useMutation({
+		mutationFn: services.deleteSavedSection,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["saved-sections"] });
+			toast.success("Modelo excluído");
+		},
+		onError: (e) => toast.error(e.message),
+	});
+
 	const typeAt = (id: string) => editor.query.node(id).get().data.name;
 
 	/**
@@ -104,15 +128,19 @@ export function SectionLibraryDialog() {
 	const partOf = (kind: SitePart) =>
 		kind === "header" ? headerPart : footerPart;
 
-	/** Modelo de cabeçalho/rodapé esperando a escolha "todas as páginas / só esta". */
-	const [pending, setPending] = useState<SectionTemplate | null>(null);
+	/** Cabeçalho/rodapé esperando a escolha "todas as páginas / só esta". */
+	type Pending = {
+		kind: SitePart;
+		make: () => { rootNodeId: string; nodes: SerializedNodes };
+	};
+	const [pending, setPending] = useState<Pending | null>(null);
 	useEffect(() => {
 		if (!isOpen) setPending(null);
 	}, [isOpen]);
 
-	const applyPart = (template: SectionTemplate, scope: PartScope) => {
-		const part = partOf(template.kind as SitePart);
-		part.insertTemplate(buildTree(template.build(), ROOT_ID), scope);
+	const applyPart = (p: Pending, scope: PartScope) => {
+		const part = partOf(p.kind);
+		part.insertTemplate(p.make(), scope);
 		setPending(null);
 		close();
 		toast.success(
@@ -126,9 +154,13 @@ export function SectionLibraryDialog() {
 		const template = ALL_TEMPLATES.find((t) => t.id === id);
 		if (!template) return;
 		if (template.kind !== "section") {
+			const p: Pending = {
+				kind: template.kind,
+				make: () => buildTree(template.build(), ROOT_ID),
+			};
 			// sem cabeçalho/rodapé no site ainda: este vira o do site sem perguntar
-			if (!partOf(template.kind).stored) applyPart(template, "site");
-			else setPending(template);
+			if (!partOf(template.kind).stored) applyPart(p, "site");
+			else setPending(p);
 			return;
 		}
 		insertTree(
@@ -137,6 +169,19 @@ export function SectionLibraryDialog() {
 			ROOT_ID,
 			insertAt(),
 		);
+		close();
+	};
+
+	/** Modelo salvo: entra como cópia nova (ids novos, sem vínculos). */
+	const insertSaved = (s: SavedSection) => {
+		const make = () => cloneTree(s.nodes, s.rootNodeId, ROOT_ID);
+		if (s.kind !== "section") {
+			const p: Pending = { kind: s.kind, make };
+			if (!partOf(s.kind).stored) applyPart(p, "site");
+			else setPending(p);
+			return;
+		}
+		insertTree(editor, make(), ROOT_ID, insertAt());
 		close();
 	};
 
@@ -172,26 +217,83 @@ export function SectionLibraryDialog() {
 					<DialogTitle>Adicionar seção</DialogTitle>
 				</DialogHeader>
 				<div className="flex min-h-0 flex-1">
-					<nav className="flex w-48 shrink-0 flex-col gap-1 border-r border-border p-3">
-						{[...CATEGORIES, GLOBAL_TAB].map((c) => (
+					<nav className="flex w-48 shrink-0 flex-col gap-1 overflow-y-auto border-r border-border p-3">
+						{[...CATEGORIES, SAVED_TAB, GLOBAL_TAB].map((c) => (
 							<button
 								key={c}
 								type="button"
 								onClick={() => setCategory(c)}
 								className={cn(
-									"flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent",
+									"flex shrink-0 items-center gap-2 rounded-md px-3 py-1.5 text-left text-sm hover:bg-accent",
 									category === c && "bg-accent font-medium",
 								)}
 							>
 								{c === GLOBAL_TAB ? (
 									<Globe className="size-3.5 text-sky-400" />
 								) : null}
+								{c === SAVED_TAB ? (
+									<Bookmark className="size-3.5 text-primary" />
+								) : null}
 								{c}
 							</button>
 						))}
 					</nav>
 					<div className="grid flex-1 auto-rows-min grid-cols-2 gap-4 overflow-y-auto p-6">
-						{category === GLOBAL_TAB ? (
+						{category === SAVED_TAB ? (
+							<>
+								{saved.isLoading ? (
+									<Loader2 className="size-5 animate-spin text-muted-foreground" />
+								) : null}
+								{saved.data?.length === 0 ? (
+									<p className="col-span-2 text-sm text-muted-foreground">
+										Nenhum modelo salvo ainda. Selecione uma seção na página e
+										use "Salvar como modelo" no painel de configurações. Seus
+										modelos aparecem aqui em todos os seus projetos.
+									</p>
+								) : null}
+								{saved.data?.map((s) => (
+									<div
+										key={s.id}
+										className="group/saved relative flex flex-col"
+									>
+										<SectionCard
+											title={s.name}
+											badge={
+												s.kind === "header"
+													? "Cabeçalho"
+													: s.kind === "footer"
+														? "Rodapé"
+														: undefined
+											}
+											tree={{ rootNodeId: s.rootNodeId, nodes: s.nodes }}
+											onClick={() => insertSaved(s)}
+										/>
+										<button
+											type="button"
+											title="Excluir modelo"
+											className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-md bg-background/90 text-muted-foreground opacity-0 shadow transition-opacity group-hover/saved:opacity-100 hover:text-destructive"
+											onClick={async () => {
+												const ok = await confirm({
+													title: "Excluir modelo?",
+													description: (
+														<>
+															O modelo <strong>{s.name}</strong> sai da sua
+															biblioteca. As páginas que já usam essa seção não
+															mudam.
+														</>
+													),
+													confirmText: "Excluir modelo",
+													destructive: true,
+												});
+												if (ok) removeSaved.mutate(s.id);
+											}}
+										>
+											<Trash2 className="size-3.5" />
+										</button>
+									</div>
+								))}
+							</>
+						) : category === GLOBAL_TAB ? (
 							<>
 								{globals.isLoading ? (
 									<Loader2 className="size-5 animate-spin text-muted-foreground" />
@@ -237,7 +339,7 @@ export function SectionLibraryDialog() {
 				</div>
 				{pending ? (
 					<ScopeChoice
-						label={partOf(pending.kind as SitePart).label}
+						label={partOf(pending.kind).label}
 						onChoose={(scope) => applyPart(pending, scope)}
 						onCancel={() => setPending(null)}
 					/>

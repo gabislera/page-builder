@@ -1,3 +1,4 @@
+import type { SerializedNodes } from "@craftjs/core";
 import { createContext, useContext } from "react";
 
 export type PageSettingsPatch = {
@@ -28,6 +29,16 @@ export type GlobalSectionItem = {
  * para que os componentes do builder não importem o backend (evita ciclo
  * servidor → renderizador → componentes → servidor).
  */
+/** Seção salva pelo usuário como modelo. */
+export type SavedSection = {
+	id: string;
+	name: string;
+	kind: "section" | "header" | "footer";
+	rootNodeId: string;
+	nodes: SerializedNodes;
+	createdAt: string;
+};
+
 export type EditorServices = {
 	listPages: () => Promise<PageSummary[]>;
 	listAssets: () => Promise<AssetItem[]>;
@@ -48,6 +59,14 @@ export type EditorServices = {
 		republish: string[],
 	) => Promise<{ publishedAt: string | null; url: string }>;
 	unpublishPage: () => Promise<{ ok: boolean }>;
+	listSavedSections: () => Promise<SavedSection[]>;
+	saveSectionAsTemplate: (input: {
+		name: string;
+		kind: "section" | "header" | "footer";
+		rootNodeId: string;
+		nodes: SerializedNodes;
+	}) => Promise<{ id: string }>;
+	deleteSavedSection: (id: string) => Promise<{ ok: boolean }>;
 	updateSettings: (patch: PageSettingsPatch) => Promise<PageSettingsPatch>;
 	updateSiteSettings: (patch: {
 		theme?: import("../core/theme.ts").SiteTheme;

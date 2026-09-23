@@ -18,6 +18,11 @@ import {
 	unpublishPage,
 	updatePageSettings,
 } from "#/server/pages";
+import {
+	deleteSavedSection,
+	listSavedSections,
+	saveSectionAsTemplate,
+} from "#/server/saved-sections";
 import { getSession } from "#/server/session";
 import { republishSite, updateSiteSettings } from "#/server/site";
 
@@ -78,6 +83,10 @@ function EditorRoute() {
 			savePage: (input) => savePage({ data: { pageId, ...input } }),
 			publishPage: (republish) => publishPage({ data: { pageId, republish } }),
 			unpublishPage: () => unpublishPage({ data: { pageId } }),
+			listSavedSections: () => listSavedSections(),
+			saveSectionAsTemplate: (input) =>
+				saveSectionAsTemplate({ data: { projectId, ...input } }),
+			deleteSavedSection: (id) => deleteSavedSection({ data: { id } }),
 			updateSettings: (patch) =>
 				updatePageSettings({ data: { pageId, ...patch } }),
 			updateSiteSettings: (patch) =>
