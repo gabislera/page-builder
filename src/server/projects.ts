@@ -78,6 +78,7 @@ export const getProjectSettings = createServerFn({ method: "GET" })
 			name: row.name,
 			slug: row.slug,
 			homePageId: normalizeSiteSettings(row.settings).homePageId,
+			notFoundPageId: normalizeSiteSettings(row.settings).notFoundPageId,
 			publishedPages: pages,
 			isOwner: member.role === "owner",
 		};
@@ -92,6 +93,8 @@ export const updateProject = createServerFn({ method: "POST" })
 			slug: z.string().trim().optional(),
 			/** Vazio (null): página inicial automática. */
 			homePageId: z.string().nullable().optional(),
+			/** Vazio (null): página 404 padrão. */
+			notFoundPageId: z.string().nullable().optional(),
 		}),
 	)
 	.handler(async ({ data, context }) => {
@@ -102,8 +105,16 @@ export const updateProject = createServerFn({ method: "POST" })
 		if (!row) throw new Error("Projeto não encontrado");
 		const patch: Partial<typeof project.$inferInsert> = {};
 		if (data.name) patch.name = data.name;
-		if (data.homePageId !== undefined)
-			patch.settings = { ...row.settings, homePageId: data.homePageId };
+		if (data.homePageId !== undefined || data.notFoundPageId !== undefined)
+			patch.settings = {
+				...row.settings,
+				...(data.homePageId !== undefined
+					? { homePageId: data.homePageId }
+					: {}),
+				...(data.notFoundPageId !== undefined
+					? { notFoundPageId: data.notFoundPageId }
+					: {}),
+			};
 		const slug = data.slug;
 		const slugChanged = slug !== undefined && slug !== row.slug;
 		if (slugChanged) {

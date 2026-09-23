@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as EditorPageIdRouteImport } from './routes/editor.$pageId'
 import { Route as AppProjectsIndexRouteImport } from './routes/_app/projects/index'
@@ -21,6 +22,7 @@ import { Route as ApiFormsPageIdRouteImport } from './routes/api/forms/$pageId'
 import { Route as ApiViewsPageIdRouteImport } from './routes/api/views/$pageId'
 import { Route as PProjectSlugIndexRouteImport } from './routes/p/$projectSlug/index'
 import { Route as PProjectSlugPageSlugRouteImport } from './routes/p/$projectSlug/$pageSlug'
+import { Route as PProjectSlugSitemapDotxmlRouteImport } from './routes/p/$projectSlug/sitemap[.]xml'
 import { Route as AppProjectsProjectIdIndexRouteImport } from './routes/_app/projects/$projectId/index'
 import { Route as AppProjectsProjectIdLeadsRouteImport } from './routes/_app/projects/$projectId/leads'
 import { Route as AppProjectsProjectIdVisitasRouteImport } from './routes/_app/projects/$projectId/visitas'
@@ -37,6 +39,11 @@ const AppRoute = AppRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -84,6 +91,12 @@ const PProjectSlugPageSlugRoute = PProjectSlugPageSlugRouteImport.update({
   path: '/p/$projectSlug/$pageSlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PProjectSlugSitemapDotxmlRoute =
+  PProjectSlugSitemapDotxmlRouteImport.update({
+    id: '/p/$projectSlug/sitemap.xml',
+    path: '/p/$projectSlug/sitemap.xml',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AppProjectsProjectIdIndexRoute =
   AppProjectsProjectIdIndexRouteImport.update({
     id: '/',
@@ -106,6 +119,7 @@ const AppProjectsProjectIdVisitasRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/signup': typeof SignupRoute
   '/editor/$pageId': typeof EditorPageIdRoute
   '/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
@@ -113,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/api/forms/$pageId': typeof ApiFormsPageIdRoute
   '/api/views/$pageId': typeof ApiViewsPageIdRoute
   '/p/$projectSlug/$pageSlug': typeof PProjectSlugPageSlugRoute
+  '/p/$projectSlug/sitemap.xml': typeof PProjectSlugSitemapDotxmlRoute
   '/projects/': typeof AppProjectsIndexRoute
   '/p/$projectSlug/': typeof PProjectSlugIndexRoute
   '/projects/$projectId/leads': typeof AppProjectsProjectIdLeadsRoute
@@ -122,12 +137,14 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/signup': typeof SignupRoute
   '/editor/$pageId': typeof EditorPageIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/forms/$pageId': typeof ApiFormsPageIdRoute
   '/api/views/$pageId': typeof ApiViewsPageIdRoute
   '/p/$projectSlug/$pageSlug': typeof PProjectSlugPageSlugRoute
+  '/p/$projectSlug/sitemap.xml': typeof PProjectSlugSitemapDotxmlRoute
   '/projects': typeof AppProjectsIndexRoute
   '/p/$projectSlug': typeof PProjectSlugIndexRoute
   '/projects/$projectId/leads': typeof AppProjectsProjectIdLeadsRoute
@@ -139,6 +156,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/signup': typeof SignupRoute
   '/editor/$pageId': typeof EditorPageIdRoute
   '/_app/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
@@ -146,6 +164,7 @@ export interface FileRoutesById {
   '/api/forms/$pageId': typeof ApiFormsPageIdRoute
   '/api/views/$pageId': typeof ApiViewsPageIdRoute
   '/p/$projectSlug/$pageSlug': typeof PProjectSlugPageSlugRoute
+  '/p/$projectSlug/sitemap.xml': typeof PProjectSlugSitemapDotxmlRoute
   '/_app/projects/': typeof AppProjectsIndexRoute
   '/p/$projectSlug/': typeof PProjectSlugIndexRoute
   '/_app/projects/$projectId/leads': typeof AppProjectsProjectIdLeadsRoute
@@ -157,6 +176,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/robots.txt'
     | '/signup'
     | '/editor/$pageId'
     | '/projects/$projectId'
@@ -164,6 +184,7 @@ export interface FileRouteTypes {
     | '/api/forms/$pageId'
     | '/api/views/$pageId'
     | '/p/$projectSlug/$pageSlug'
+    | '/p/$projectSlug/sitemap.xml'
     | '/projects/'
     | '/p/$projectSlug/'
     | '/projects/$projectId/leads'
@@ -173,12 +194,14 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/robots.txt'
     | '/signup'
     | '/editor/$pageId'
     | '/api/auth/$'
     | '/api/forms/$pageId'
     | '/api/views/$pageId'
     | '/p/$projectSlug/$pageSlug'
+    | '/p/$projectSlug/sitemap.xml'
     | '/projects'
     | '/p/$projectSlug'
     | '/projects/$projectId/leads'
@@ -189,6 +212,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/login'
+    | '/robots.txt'
     | '/signup'
     | '/editor/$pageId'
     | '/_app/projects/$projectId'
@@ -196,6 +220,7 @@ export interface FileRouteTypes {
     | '/api/forms/$pageId'
     | '/api/views/$pageId'
     | '/p/$projectSlug/$pageSlug'
+    | '/p/$projectSlug/sitemap.xml'
     | '/_app/projects/'
     | '/p/$projectSlug/'
     | '/_app/projects/$projectId/leads'
@@ -207,12 +232,14 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
   SignupRoute: typeof SignupRoute
   EditorPageIdRoute: typeof EditorPageIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiFormsPageIdRoute: typeof ApiFormsPageIdRoute
   ApiViewsPageIdRoute: typeof ApiViewsPageIdRoute
   PProjectSlugPageSlugRoute: typeof PProjectSlugPageSlugRoute
+  PProjectSlugSitemapDotxmlRoute: typeof PProjectSlugSitemapDotxmlRoute
   PProjectSlugIndexRoute: typeof PProjectSlugIndexRoute
 }
 
@@ -237,6 +264,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -302,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PProjectSlugPageSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/$projectSlug/sitemap.xml': {
+      id: '/p/$projectSlug/sitemap.xml'
+      path: '/p/$projectSlug/sitemap.xml'
+      fullPath: '/p/$projectSlug/sitemap.xml'
+      preLoaderRoute: typeof PProjectSlugSitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/projects/$projectId/': {
       id: '/_app/projects/$projectId/'
       path: '/'
@@ -357,12 +398,14 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   SignupRoute: SignupRoute,
   EditorPageIdRoute: EditorPageIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiFormsPageIdRoute: ApiFormsPageIdRoute,
   ApiViewsPageIdRoute: ApiViewsPageIdRoute,
   PProjectSlugPageSlugRoute: PProjectSlugPageSlugRoute,
+  PProjectSlugSitemapDotxmlRoute: PProjectSlugSitemapDotxmlRoute,
   PProjectSlugIndexRoute: PProjectSlugIndexRoute,
 }
 export const routeTree = rootRouteImport

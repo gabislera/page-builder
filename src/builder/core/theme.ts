@@ -39,6 +39,8 @@ export type SiteSettings = {
 	footerSectionId: string | null;
 	/** Página aberta no endereço do site (/p/projeto). Vazio: automática. */
 	homePageId: string | null;
+	/** Página mostrada quando o endereço não existe. Vazio: página padrão. */
+	notFoundPageId: string | null;
 	cookieBanner: CookieBanner;
 };
 
@@ -94,6 +96,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
 	headerSectionId: null,
 	footerSectionId: null,
 	homePageId: null,
+	notFoundPageId: null,
 	cookieBanner: DEFAULT_COOKIE_BANNER,
 };
 
@@ -119,6 +122,7 @@ export function normalizeSiteSettings(
 		headerSectionId: input?.headerSectionId ?? null,
 		footerSectionId: input?.footerSectionId ?? null,
 		homePageId: input?.homePageId ?? null,
+		notFoundPageId: input?.notFoundPageId ?? null,
 		cookieBanner: { ...DEFAULT_COOKIE_BANNER, ...input?.cookieBanner },
 	};
 }

@@ -51,11 +51,13 @@ export function ProjectSettingsDialog({
 	const [name, setName] = useState("");
 	const [slug, setSlug] = useState("");
 	const [home, setHome] = useState(AUTO);
+	const [notFound, setNotFound] = useState(AUTO);
 	useEffect(() => {
 		if (settings.data && open) {
 			setName(settings.data.name);
 			setSlug(settings.data.slug);
 			setHome(settings.data.homePageId ?? AUTO);
+			setNotFound(settings.data.notFoundPageId ?? AUTO);
 		}
 	}, [settings.data, open]);
 
@@ -75,6 +77,7 @@ export function ProjectSettingsDialog({
 					name: name.trim(),
 					slug: slugify(slug),
 					homePageId: home === AUTO ? null : home,
+					notFoundPageId: notFound === AUTO ? null : notFound,
 				},
 			}),
 		onSuccess: async () => {
@@ -162,6 +165,28 @@ export function ProjectSettingsDialog({
 							<p className="text-xs leading-relaxed text-muted-foreground">
 								Abre em /p/{slugify(slug) || d.slug}. Automática: a página
 								"home" ou "inicio", ou a primeira publicada.
+							</p>
+						</div>
+						<div className="flex flex-col gap-1.5">
+							<span className="text-xs text-muted-foreground">
+								Página de erro (404)
+							</span>
+							<Select value={notFound} onValueChange={setNotFound}>
+								<SelectTrigger className="w-full">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value={AUTO}>Padrão</SelectItem>
+									{d.publishedPages.map((p) => (
+										<SelectItem key={p.id} value={p.id}>
+											{p.name} (/{p.slug})
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							<p className="text-xs leading-relaxed text-muted-foreground">
+								Aparece quando alguém abre um endereço que não existe. Ela fica
+								fora do sitemap.
 							</p>
 						</div>
 						{d.isOwner ? (
