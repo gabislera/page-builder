@@ -61,8 +61,8 @@ export function ConfirmDialogHost() {
 			<AlertDialogContent size="sm">
 				<AlertDialogHeader>
 					{request.destructive ? (
-						<AlertDialogMedia className="bg-destructive/10 text-destructive">
-							<AlertTriangle />
+						<AlertDialogMedia className="mb-1 size-auto bg-transparent text-destructive">
+							<AlertTriangle className="size-7" />
 						</AlertDialogMedia>
 					) : null}
 					<AlertDialogTitle>{request.title}</AlertDialogTitle>
