@@ -21,6 +21,9 @@ import { Route as ApiFormsPageIdRouteImport } from './routes/api/forms/$pageId'
 import { Route as ApiViewsPageIdRouteImport } from './routes/api/views/$pageId'
 import { Route as PProjectSlugIndexRouteImport } from './routes/p/$projectSlug/index'
 import { Route as PProjectSlugPageSlugRouteImport } from './routes/p/$projectSlug/$pageSlug'
+import { Route as AppProjectsProjectIdIndexRouteImport } from './routes/_app/projects/$projectId/index'
+import { Route as AppProjectsProjectIdLeadsRouteImport } from './routes/_app/projects/$projectId/leads'
+import { Route as AppProjectsProjectIdVisitasRouteImport } from './routes/_app/projects/$projectId/visitas'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -81,32 +84,55 @@ const PProjectSlugPageSlugRoute = PProjectSlugPageSlugRouteImport.update({
   path: '/p/$projectSlug/$pageSlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppProjectsProjectIdIndexRoute =
+  AppProjectsProjectIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AppProjectsProjectIdRoute,
+  } as any)
+const AppProjectsProjectIdLeadsRoute =
+  AppProjectsProjectIdLeadsRouteImport.update({
+    id: '/leads',
+    path: '/leads',
+    getParentRoute: () => AppProjectsProjectIdRoute,
+  } as any)
+const AppProjectsProjectIdVisitasRoute =
+  AppProjectsProjectIdVisitasRouteImport.update({
+    id: '/visitas',
+    path: '/visitas',
+    getParentRoute: () => AppProjectsProjectIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/editor/$pageId': typeof EditorPageIdRoute
-  '/projects/$projectId': typeof AppProjectsProjectIdRoute
+  '/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/forms/$pageId': typeof ApiFormsPageIdRoute
   '/api/views/$pageId': typeof ApiViewsPageIdRoute
   '/p/$projectSlug/$pageSlug': typeof PProjectSlugPageSlugRoute
   '/projects/': typeof AppProjectsIndexRoute
   '/p/$projectSlug/': typeof PProjectSlugIndexRoute
+  '/projects/$projectId/leads': typeof AppProjectsProjectIdLeadsRoute
+  '/projects/$projectId/visitas': typeof AppProjectsProjectIdVisitasRoute
+  '/projects/$projectId/': typeof AppProjectsProjectIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/editor/$pageId': typeof EditorPageIdRoute
-  '/projects/$projectId': typeof AppProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/forms/$pageId': typeof ApiFormsPageIdRoute
   '/api/views/$pageId': typeof ApiViewsPageIdRoute
   '/p/$projectSlug/$pageSlug': typeof PProjectSlugPageSlugRoute
   '/projects': typeof AppProjectsIndexRoute
   '/p/$projectSlug': typeof PProjectSlugIndexRoute
+  '/projects/$projectId/leads': typeof AppProjectsProjectIdLeadsRoute
+  '/projects/$projectId/visitas': typeof AppProjectsProjectIdVisitasRoute
+  '/projects/$projectId': typeof AppProjectsProjectIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -115,13 +141,16 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/editor/$pageId': typeof EditorPageIdRoute
-  '/_app/projects/$projectId': typeof AppProjectsProjectIdRoute
+  '/_app/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/forms/$pageId': typeof ApiFormsPageIdRoute
   '/api/views/$pageId': typeof ApiViewsPageIdRoute
   '/p/$projectSlug/$pageSlug': typeof PProjectSlugPageSlugRoute
   '/_app/projects/': typeof AppProjectsIndexRoute
   '/p/$projectSlug/': typeof PProjectSlugIndexRoute
+  '/_app/projects/$projectId/leads': typeof AppProjectsProjectIdLeadsRoute
+  '/_app/projects/$projectId/visitas': typeof AppProjectsProjectIdVisitasRoute
+  '/_app/projects/$projectId/': typeof AppProjectsProjectIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -137,19 +166,24 @@ export interface FileRouteTypes {
     | '/p/$projectSlug/$pageSlug'
     | '/projects/'
     | '/p/$projectSlug/'
+    | '/projects/$projectId/leads'
+    | '/projects/$projectId/visitas'
+    | '/projects/$projectId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/signup'
     | '/editor/$pageId'
-    | '/projects/$projectId'
     | '/api/auth/$'
     | '/api/forms/$pageId'
     | '/api/views/$pageId'
     | '/p/$projectSlug/$pageSlug'
     | '/projects'
     | '/p/$projectSlug'
+    | '/projects/$projectId/leads'
+    | '/projects/$projectId/visitas'
+    | '/projects/$projectId'
   id:
     | '__root__'
     | '/'
@@ -164,6 +198,9 @@ export interface FileRouteTypes {
     | '/p/$projectSlug/$pageSlug'
     | '/_app/projects/'
     | '/p/$projectSlug/'
+    | '/_app/projects/$projectId/leads'
+    | '/_app/projects/$projectId/visitas'
+    | '/_app/projects/$projectId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -265,16 +302,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PProjectSlugPageSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/projects/$projectId/': {
+      id: '/_app/projects/$projectId/'
+      path: '/'
+      fullPath: '/projects/$projectId/'
+      preLoaderRoute: typeof AppProjectsProjectIdIndexRouteImport
+      parentRoute: typeof AppProjectsProjectIdRoute
+    }
+    '/_app/projects/$projectId/leads': {
+      id: '/_app/projects/$projectId/leads'
+      path: '/leads'
+      fullPath: '/projects/$projectId/leads'
+      preLoaderRoute: typeof AppProjectsProjectIdLeadsRouteImport
+      parentRoute: typeof AppProjectsProjectIdRoute
+    }
+    '/_app/projects/$projectId/visitas': {
+      id: '/_app/projects/$projectId/visitas'
+      path: '/visitas'
+      fullPath: '/projects/$projectId/visitas'
+      preLoaderRoute: typeof AppProjectsProjectIdVisitasRouteImport
+      parentRoute: typeof AppProjectsProjectIdRoute
+    }
   }
 }
 
+interface AppProjectsProjectIdRouteChildren {
+  AppProjectsProjectIdLeadsRoute: typeof AppProjectsProjectIdLeadsRoute
+  AppProjectsProjectIdVisitasRoute: typeof AppProjectsProjectIdVisitasRoute
+  AppProjectsProjectIdIndexRoute: typeof AppProjectsProjectIdIndexRoute
+}
+
+const AppProjectsProjectIdRouteChildren: AppProjectsProjectIdRouteChildren = {
+  AppProjectsProjectIdLeadsRoute: AppProjectsProjectIdLeadsRoute,
+  AppProjectsProjectIdVisitasRoute: AppProjectsProjectIdVisitasRoute,
+  AppProjectsProjectIdIndexRoute: AppProjectsProjectIdIndexRoute,
+}
+
+const AppProjectsProjectIdRouteWithChildren =
+  AppProjectsProjectIdRoute._addFileChildren(AppProjectsProjectIdRouteChildren)
+
 interface AppRouteChildren {
-  AppProjectsProjectIdRoute: typeof AppProjectsProjectIdRoute
+  AppProjectsProjectIdRoute: typeof AppProjectsProjectIdRouteWithChildren
   AppProjectsIndexRoute: typeof AppProjectsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppProjectsProjectIdRoute: AppProjectsProjectIdRoute,
+  AppProjectsProjectIdRoute: AppProjectsProjectIdRouteWithChildren,
   AppProjectsIndexRoute: AppProjectsIndexRoute,
 }
 
