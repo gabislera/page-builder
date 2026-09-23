@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+	CloudOff,
 	Copy,
 	ExternalLink,
 	Link2,
@@ -22,7 +23,12 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "#/components/ui/dropdown-menu";
-import { deletePage, duplicatePage, listPages } from "#/server/pages";
+import {
+	deletePage,
+	duplicatePage,
+	listPages,
+	unpublishPage,
+} from "#/server/pages";
 import { listProjects } from "#/server/projects";
 
 export const Route = createFileRoute("/_app/projects/$projectId/")({
@@ -53,6 +59,14 @@ function ProjectPages() {
 	const duplicate = useMutation({
 		mutationFn: (pageId: string) => duplicatePage({ data: { pageId } }),
 		onSuccess: refresh,
+		onError: (e) => toast.error(e.message),
+	});
+	const unpublish = useMutation({
+		mutationFn: (pageId: string) => unpublishPage({ data: { pageId } }),
+		onSuccess: () => {
+			toast.success("Página despublicada");
+			refresh();
+		},
 		onError: (e) => toast.error(e.message),
 	});
 	const remove = useMutation({
@@ -131,6 +145,27 @@ function ProjectPages() {
 										>
 											<ExternalLink className="size-4" /> Abrir publicada
 										</a>
+									</DropdownMenuItem>
+								) : null}
+								{p.status === "published" ? (
+									<DropdownMenuItem
+										onClick={async () => {
+											const ok = await confirm({
+												title: "Despublicar página?",
+												description: (
+													<>
+														<strong>{p.name}</strong> sai do ar: o endereço
+														deixa de abrir e os formulários param de receber
+														leads. O conteúdo continua salvo.
+													</>
+												),
+												confirmText: "Despublicar",
+												destructive: true,
+											});
+											if (ok) unpublish.mutate(p.id);
+										}}
+									>
+										<CloudOff className="size-4" /> Despublicar
 									</DropdownMenuItem>
 								) : null}
 								<DropdownMenuItem onClick={() => duplicate.mutate(p.id)}>

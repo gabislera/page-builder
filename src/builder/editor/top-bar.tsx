@@ -4,6 +4,8 @@ import {
 	AlertTriangle,
 	ArrowLeft,
 	Check,
+	ChevronDown,
+	CloudOff,
 	CloudUpload,
 	ExternalLink,
 	Eye,
@@ -16,6 +18,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { confirm } from "#/components/confirm-dialog";
 import { Button } from "#/components/ui/button";
 import {
 	DropdownMenu,
@@ -54,6 +57,24 @@ export function TopBar({
 	const [previewOpen, setPreviewOpen] = useState(false);
 	const [publishing, setPublishing] = useState(false);
 	const publishedAt = useSaveState((s) => s.publishedAt);
+
+	const unpublish = async () => {
+		const ok = await confirm({
+			title: "Despublicar página?",
+			description:
+				"A página sai do ar: o endereço deixa de abrir e os formulários param de receber leads. O conteúdo continua salvo e pode ser publicado de novo.",
+			confirmText: "Despublicar",
+			destructive: true,
+		});
+		if (!ok) return;
+		try {
+			await services.unpublishPage();
+			useSaveState.getState().set({ publishedAt: null });
+			toast.success("Página despublicada");
+		} catch (e) {
+			toast.error(e instanceof Error ? e.message : "Falha ao despublicar");
+		}
+	};
 
 	const publish = async () => {
 		setPublishing(true);
@@ -179,19 +200,42 @@ export function TopBar({
 						</a>
 					</Button>
 				) : null}
-				<Button
-					size="sm"
-					className="h-8"
-					onClick={publish}
-					disabled={publishing}
-				>
-					{publishing ? (
-						<Loader2 className="size-4 animate-spin" />
-					) : (
-						<CloudUpload className="size-4" />
-					)}
-					Publicar
-				</Button>
+				<div className="flex">
+					<Button
+						size="sm"
+						className={publishedAt ? "h-8 rounded-r-none" : "h-8"}
+						onClick={publish}
+						disabled={publishing}
+						title={
+							publishedAt ? "Publicar as alterações" : "Colocar a página no ar"
+						}
+					>
+						{publishing ? (
+							<Loader2 className="size-4 animate-spin" />
+						) : (
+							<CloudUpload className="size-4" />
+						)}
+						Publicar
+					</Button>
+					{publishedAt ? (
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button
+									size="sm"
+									className="h-8 rounded-l-none border-l border-primary-foreground/20 px-1.5"
+									aria-label="Mais opções de publicação"
+								>
+									<ChevronDown className="size-4" />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
+								<DropdownMenuItem onClick={unpublish}>
+									<CloudOff className="size-4" /> Despublicar
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					) : null}
+				</div>
 			</div>
 			<PreviewDialog open={previewOpen} onOpenChange={setPreviewOpen} />
 		</header>

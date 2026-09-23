@@ -476,6 +476,19 @@ export const publishPage = createServerFn({ method: "POST" })
 		return result;
 	});
 
+/** Tira a página do ar: volta a rascunho e o endereço deixa de responder. */
+export const unpublishPage = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
+	.validator(z.object({ pageId: z.string() }))
+	.handler(async ({ data, context }) => {
+		const row = await requirePageAccess(context.user.id, data.pageId);
+		await db
+			.update(page)
+			.set({ status: "draft", publishedHtml: null, publishedAt: null })
+			.where(eq(page.id, row.id));
+		return { ok: true };
+	});
+
 /* ------------------------------------------------------------------ */
 /* Seções globais e modelos                                            */
 /* ------------------------------------------------------------------ */

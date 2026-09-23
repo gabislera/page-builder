@@ -47,6 +47,7 @@ export type EditorServices = {
 	publishPage: (
 		republish: string[],
 	) => Promise<{ publishedAt: string | null; url: string }>;
+	unpublishPage: () => Promise<{ ok: boolean }>;
 	updateSettings: (patch: PageSettingsPatch) => Promise<PageSettingsPatch>;
 	updateSiteSettings: (patch: {
 		theme?: import("../core/theme.ts").SiteTheme;

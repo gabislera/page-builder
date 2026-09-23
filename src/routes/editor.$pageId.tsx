@@ -15,6 +15,7 @@ import {
 	listPages,
 	publishPage,
 	savePage,
+	unpublishPage,
 	updatePageSettings,
 } from "#/server/pages";
 import { getSession } from "#/server/session";
@@ -76,6 +77,7 @@ function EditorRoute() {
 			listGlobalSections: () => listGlobalSections({ data: { projectId } }),
 			savePage: (input) => savePage({ data: { pageId, ...input } }),
 			publishPage: (republish) => publishPage({ data: { pageId, republish } }),
+			unpublishPage: () => unpublishPage({ data: { pageId } }),
 			updateSettings: (patch) =>
 				updatePageSettings({ data: { pageId, ...patch } }),
 			updateSiteSettings: (patch) =>
