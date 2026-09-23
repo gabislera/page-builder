@@ -1,6 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { BarChart3, ExternalLink, FileText, Inbox } from "lucide-react";
+import {
+	BarChart3,
+	ExternalLink,
+	FileText,
+	Inbox,
+	Settings,
+} from "lucide-react";
+import { useState } from "react";
+import { ProjectSettingsDialog } from "#/components/project-settings-dialog";
+import { Button } from "#/components/ui/button";
 import { cn } from "#/lib/utils";
 import { listProjects } from "#/server/projects";
 
@@ -32,6 +41,7 @@ function ProjectLayout() {
 		queryFn: () => listProjects(),
 	});
 	const project = projects.data?.find((p) => p.id === projectId);
+	const [settingsOpen, setSettingsOpen] = useState(false);
 	return (
 		<div className="flex flex-col gap-6">
 			<div className="flex flex-col gap-1">
@@ -43,6 +53,15 @@ function ProjectLayout() {
 				</Link>
 				<div className="flex flex-wrap items-center gap-3">
 					<h1 className="text-2xl font-semibold">{project?.name ?? "..."}</h1>
+					<Button
+						variant="ghost"
+						size="icon"
+						className="size-8 text-muted-foreground"
+						title="Configurações do projeto"
+						onClick={() => setSettingsOpen(true)}
+					>
+						<Settings className="size-4" />
+					</Button>
 					{project ? (
 						<a
 							href={`/p/${project.slug}`}
@@ -72,6 +91,11 @@ function ProjectLayout() {
 				))}
 			</nav>
 			<Outlet />
+			<ProjectSettingsDialog
+				projectId={projectId}
+				open={settingsOpen}
+				onOpenChange={setSettingsOpen}
+			/>
 		</div>
 	);
 }

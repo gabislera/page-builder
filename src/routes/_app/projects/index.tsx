@@ -1,9 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { FolderOpen, Loader2, Plus } from "lucide-react";
+import {
+	FolderOpen,
+	Loader2,
+	MoreHorizontal,
+	Plus,
+	Settings,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ProjectSettingsDialog } from "#/components/project-settings-dialog";
 import { Button } from "#/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "#/components/ui/dropdown-menu";
 import { Input } from "#/components/ui/input";
 import { createProject, listProjects } from "#/server/projects";
 
@@ -15,6 +28,7 @@ function ProjectsPage() {
 	const queryClient = useQueryClient();
 	const navigate = useNavigate();
 	const [name, setName] = useState("");
+	const [settingsOf, setSettingsOf] = useState<string | null>(null);
 	const projects = useQuery({
 		queryKey: ["projects"],
 		queryFn: () => listProjects(),
@@ -73,20 +87,49 @@ function ProjectsPage() {
 			) : null}
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{projects.data?.map((p) => (
-					<Link
+					<div
 						key={p.id}
-						to="/projects/$projectId"
-						params={{ projectId: p.id }}
-						className="flex items-center gap-3 rounded-xl border border-border bg-card p-5 transition hover:border-primary"
+						className="relative flex items-center gap-3 rounded-xl border border-border bg-card p-5 transition hover:border-primary"
 					>
-						<FolderOpen className="size-5 text-primary" />
-						<div className="flex flex-col">
-							<span className="font-medium">{p.name}</span>
-							<span className="text-xs text-muted-foreground">/{p.slug}</span>
+						<FolderOpen className="size-5 shrink-0 text-primary" />
+						<div className="flex min-w-0 flex-col">
+							<Link
+								to="/projects/$projectId"
+								params={{ projectId: p.id }}
+								// o link cobre o cartão inteiro
+								className="truncate font-medium after:absolute after:inset-0"
+							>
+								{p.name}
+							</Link>
+							<span className="truncate text-xs text-muted-foreground">
+								/p/{p.slug}
+							</span>
 						</div>
-					</Link>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button
+									size="icon"
+									variant="ghost"
+									className="relative z-10 ml-auto size-8 shrink-0"
+									aria-label="Opções do projeto"
+								>
+									<MoreHorizontal className="size-4" />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
+								<DropdownMenuItem onClick={() => setSettingsOf(p.id)}>
+									<Settings className="size-4" /> Configurações
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</div>
 				))}
 			</div>
+			<ProjectSettingsDialog
+				projectId={settingsOf}
+				open={Boolean(settingsOf)}
+				onOpenChange={(v) => !v && setSettingsOf(null)}
+			/>
 		</div>
 	);
 }
