@@ -98,11 +98,6 @@ function ProjectPages() {
 								timeStyle: "short",
 							})}
 						</span>
-						<Button asChild size="sm" variant="outline">
-							<Link to="/editor/$pageId" params={{ pageId: p.id }}>
-								<Pencil className="size-3.5" /> Editar
-							</Link>
-						</Button>
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button size="icon" variant="ghost" className="size-8">
@@ -110,6 +105,11 @@ function ProjectPages() {
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
+								<DropdownMenuItem asChild>
+									<Link to="/editor/$pageId" params={{ pageId: p.id }}>
+										<Pencil className="size-4" /> Editar
+									</Link>
+								</DropdownMenuItem>
 								{p.status === "published" && project ? (
 									<DropdownMenuItem asChild>
 										<a
