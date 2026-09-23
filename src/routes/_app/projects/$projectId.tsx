@@ -3,13 +3,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
 	Copy,
 	ExternalLink,
+	Link2,
 	Loader2,
 	MoreHorizontal,
 	Pencil,
 	Trash2,
 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { NewPageDialog } from "#/components/new-page-dialog";
+import { PageAddressDialog } from "#/components/page-address-dialog";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import {
@@ -37,6 +40,12 @@ function ProjectPages() {
 		queryKey: ["pages", projectId],
 		queryFn: () => listPages({ data: { projectId } }),
 	});
+	const [addressOf, setAddressOf] = useState<{
+		id: string;
+		name: string;
+		slug: string;
+		status: string;
+	} | null>(null);
 	const refresh = () =>
 		queryClient.invalidateQueries({ queryKey: ["pages", projectId] });
 
@@ -63,7 +72,10 @@ function ProjectPages() {
 					</Link>
 					<h1 className="text-2xl font-semibold">{project?.name ?? "..."}</h1>
 				</div>
-				<NewPageDialog projectId={projectId} />
+				<NewPageDialog
+					projectId={projectId}
+					projectSlug={project?.slug ?? ""}
+				/>
 			</div>
 			{pages.isLoading ? (
 				<Loader2 className="size-5 animate-spin text-muted-foreground" />
@@ -110,6 +122,9 @@ function ProjectPages() {
 										<Pencil className="size-4" /> Editar
 									</Link>
 								</DropdownMenuItem>
+								<DropdownMenuItem onClick={() => setAddressOf(p)}>
+									<Link2 className="size-4" /> Nome e endereço
+								</DropdownMenuItem>
 								{p.status === "published" && project ? (
 									<DropdownMenuItem asChild>
 										<a
@@ -138,6 +153,12 @@ function ProjectPages() {
 					</div>
 				))}
 			</div>
+			<PageAddressDialog
+				page={addressOf}
+				projectSlug={project?.slug ?? ""}
+				onClose={() => setAddressOf(null)}
+				onSaved={refresh}
+			/>
 		</div>
 	);
 }

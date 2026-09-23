@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Check, FilePlus2, Loader2, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { SlugInput } from "#/components/slug-input";
 import { Button } from "#/components/ui/button";
 import {
 	Dialog,
@@ -14,6 +15,7 @@ import {
 	DialogTrigger,
 } from "#/components/ui/dialog";
 import { Input } from "#/components/ui/input";
+import { slugify } from "#/lib/slug";
 import { cn } from "#/lib/utils";
 import {
 	createPage,
@@ -26,11 +28,24 @@ const BLANK = "blank";
 const PREVIEW_WIDTH = 1280;
 
 /** Nova página: escolher um modelo (com prévia real) e dar um nome. */
-export function NewPageDialog({ projectId }: { projectId: string }) {
+export function NewPageDialog({
+	projectId,
+	projectSlug,
+}: {
+	projectId: string;
+	projectSlug: string;
+}) {
 	const navigate = useNavigate();
 	const [open, setOpen] = useState(false);
 	const [templateId, setTemplateId] = useState(BLANK);
 	const [name, setName] = useState("");
+	// o endereço acompanha o nome até o usuário mexer nele
+	const [slug, setSlug] = useState("");
+	const [slugTouched, setSlugTouched] = useState(false);
+	const rename = (next: string) => {
+		setName(next);
+		if (!slugTouched) setSlug(slugify(next));
+	};
 	const templates = useQuery({
 		queryKey: ["page-templates"],
 		queryFn: () => listPageTemplates(),
@@ -43,6 +58,7 @@ export function NewPageDialog({ projectId }: { projectId: string }) {
 				data: {
 					projectId,
 					name: name.trim(),
+					slug: slugify(slug) || undefined,
 					templateId: templateId === BLANK ? undefined : templateId,
 				},
 			}),
@@ -54,9 +70,7 @@ export function NewPageDialog({ projectId }: { projectId: string }) {
 	const choose = (id: string, label: string) => {
 		setTemplateId(id);
 		// sugere o nome do modelo se o usuário ainda não digitou um
-		setName((current) =>
-			!current.trim() || current === suggested.current ? label : current,
-		);
+		if (!name.trim() || name === suggested.current) rename(label);
 		suggested.current = label;
 	};
 	const suggested = useRef("");
@@ -69,6 +83,8 @@ export function NewPageDialog({ projectId }: { projectId: string }) {
 				if (v) {
 					setTemplateId(BLANK);
 					setName("");
+					setSlug("");
+					setSlugTouched(false);
 					suggested.current = "";
 				}
 			}}
@@ -119,19 +135,38 @@ export function NewPageDialog({ projectId }: { projectId: string }) {
 				</div>
 				<DialogFooter className="flex-col gap-2 sm:flex-row sm:items-center">
 					<form
-						className="flex w-full gap-2"
+						className="grid w-full gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end"
 						onSubmit={(e) => {
 							e.preventDefault();
 							if (name.trim()) create.mutate();
 						}}
 					>
-						<Input
-							autoFocus
-							placeholder="Nome da página"
-							value={name}
-							onChange={(e) => setName(e.target.value)}
-							className="flex-1"
-						/>
+						<div className="flex flex-col gap-1.5">
+							<label
+								htmlFor="new-page-name"
+								className="text-xs text-muted-foreground"
+							>
+								Nome da página
+							</label>
+							<Input
+								id="new-page-name"
+								autoFocus
+								placeholder="ex.: Lançamento do curso"
+								value={name}
+								onChange={(e) => rename(e.target.value)}
+							/>
+						</div>
+						<div className="flex flex-col gap-1.5">
+							<span className="text-xs text-muted-foreground">Endereço</span>
+							<SlugInput
+								prefix={`/p/${projectSlug}/`}
+								value={slug}
+								onChange={(v) => {
+									setSlug(v);
+									setSlugTouched(true);
+								}}
+							/>
+						</div>
 						<Button type="submit" disabled={create.isPending || !name.trim()}>
 							{create.isPending ? (
 								<Loader2 className="size-4 animate-spin" />

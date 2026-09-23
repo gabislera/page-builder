@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { SlugInput } from "#/components/slug-input";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { Switch } from "#/components/ui/switch";
@@ -27,12 +28,13 @@ export function PageMetaPanel({
 	initial: PageMeta;
 	onSaved: (meta: PageMeta) => void;
 }) {
-	const { services } = useEditorContext();
+	const { services, projectSlug } = useEditorContext();
 	const [meta, setMeta] = useState(initial);
 	const dirty = JSON.stringify(meta) !== JSON.stringify(initial);
 
 	const save = useMutation({
-		mutationFn: () => services.updateSettings(meta),
+		mutationFn: () =>
+			services.updateSettings({ ...meta, slug: slugify(meta.slug) }),
 		onSuccess: (res) => {
 			const next = { ...meta, ...res } as PageMeta;
 			setMeta(next);
@@ -58,15 +60,14 @@ export function PageMetaPanel({
 					/>
 				</Field>
 				<Field
-					label="Endereço (slug)"
-					hint="Letras minúsculas, números e hífen."
+					label="Endereço da página"
+					hint="Letras minúsculas, números e hífen. Links antigos para o endereço anterior deixam de funcionar."
 				>
-					<Input
-						className="h-8 font-mono text-xs"
+					<SlugInput
+						size="sm"
+						prefix={`/p/${projectSlug}/`}
 						value={meta.slug}
-						onChange={(e) =>
-							setMeta({ ...meta, slug: slugify(e.target.value) })
-						}
+						onChange={(slug) => setMeta((m) => ({ ...m, slug }))}
 					/>
 				</Field>
 			</Group>

@@ -98,10 +98,20 @@ export const createPage = createServerFn({ method: "POST" })
 	)
 	.handler(async ({ data, context }) => {
 		await requireProjectAccess(context.user.id, data.projectId);
-		const slug = await uniqueSlug(
-			data.projectId,
-			slugify(data.slug || data.name) || "pagina",
-		);
+		const chosen = data.slug ? slugify(data.slug) : "";
+		if (chosen) {
+			const taken = await db.query.page.findFirst({
+				where: and(
+					eq(page.projectId, data.projectId),
+					eq(page.slug, chosen),
+					isNull(page.deletedAt),
+				),
+			});
+			if (taken) throw new Error("Já existe uma página com esse endereço");
+		}
+		const slug =
+			chosen ||
+			(await uniqueSlug(data.projectId, slugify(data.name) || "pagina"));
 		const template = PAGE_TEMPLATES.find((t) => t.id === data.templateId);
 		const tree = template ? buildPageTemplate(template) : blankPage();
 		return db.transaction(async (tx) => {
