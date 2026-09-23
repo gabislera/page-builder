@@ -10,6 +10,9 @@ type EditorUIState = {
 	zoom: "fit" | number;
 	leftPanel: LeftPanel;
 	favoriteColors: string[];
+	/** Otimiza imagens antes de enviar (WebP, tamanho máximo). */
+	optimizeImages: boolean;
+	setOptimizeImages: (v: boolean) => void;
 	setDevice: (device: Device) => void;
 	setZoom: (zoom: "fit" | number) => void;
 	setLeftPanel: (panel: LeftPanel) => void;
@@ -31,6 +34,8 @@ export const useEditorUI = create<EditorUIState>()(
 				"#22c55e",
 				"#ef4444",
 			],
+			optimizeImages: true,
+			setOptimizeImages: (optimizeImages) => set({ optimizeImages }),
 			setDevice: (device) => set({ device }),
 			setZoom: (zoom) => set({ zoom }),
 			setLeftPanel: (leftPanel) => set({ leftPanel }),
@@ -47,7 +52,11 @@ export const useEditorUI = create<EditorUIState>()(
 		}),
 		{
 			name: "pb-editor-ui",
-			partialize: (s) => ({ zoom: s.zoom, favoriteColors: s.favoriteColors }),
+			partialize: (s) => ({
+				zoom: s.zoom,
+				favoriteColors: s.favoriteColors,
+				optimizeImages: s.optimizeImages,
+			}),
 		},
 	),
 );

@@ -10,8 +10,11 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "#/components/ui/dialog";
+import { Switch } from "#/components/ui/switch";
+import { formatBytes, optimizeImage } from "#/lib/optimize-image";
 import { cn } from "#/lib/utils";
 import { useEditorContext } from "../editor/context.tsx";
+import { useEditorUI } from "../editor/store.ts";
 import { DebouncedInput } from "./inputs.tsx";
 
 type Accept = "image" | "video" | "svg";
@@ -126,8 +129,21 @@ function AssetLibrary({
 		queryFn: services.listAssets,
 	});
 
+	const optimize = useEditorUI((s) => s.optimizeImages);
+	const setOptimize = useEditorUI((s) => s.setOptimizeImages);
 	const upload = useMutation({
-		mutationFn: services.uploadAsset,
+		mutationFn: async (file: File) => {
+			if (!optimize) return services.uploadAsset(file);
+			const result = await optimizeImage(file);
+			const asset = await services.uploadAsset(result.file);
+			if (result.optimized) {
+				const saved = 1 - result.file.size / result.before;
+				toast.success("Imagem otimizada", {
+					description: `${formatBytes(result.before)} → ${formatBytes(result.file.size)} (${Math.round(saved * 100)}% menor)`,
+				});
+			}
+			return asset;
+		},
 		onSuccess: (asset) => {
 			queryClient.invalidateQueries({ queryKey });
 			onSelect(asset.url);
@@ -180,6 +196,13 @@ function AssetLibrary({
 					onChange={(e) => handleFiles(e.target.files)}
 				/>
 			</label>
+			{accept === "image" ? (
+				<label className="-mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+					<Switch checked={optimize} onCheckedChange={setOptimize} />
+					Otimizar imagens (WebP, até 2400 px). Desligue para enviar o arquivo
+					original.
+				</label>
+			) : null}
 			<div className="grid max-h-[50vh] grid-cols-4 gap-3 overflow-y-auto">
 				{assets.isLoading ? (
 					<p className="col-span-4 text-sm text-muted-foreground">
