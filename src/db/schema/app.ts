@@ -236,6 +236,35 @@ export const pageView = pgTable(
 );
 
 /* ------------------------------------------------------------------ */
+/* AI                                                                  */
+/* ------------------------------------------------------------------ */
+
+/** One model call: history, per-user daily limit, and cost tracking. */
+export const aiGeneration = pgTable(
+  "ai_generation",
+  {
+    id: id(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    projectId: text("project_id").references(() => project.id, { onDelete: "set null" }),
+    /** "section", "page", "edit"... */
+    kind: text("kind").notNull(),
+    model: text("model").notNull(),
+    prompt: text("prompt").notNull(),
+    /** Generated AI-Spec (null on error). */
+    output: jsonb("output").$type<unknown>(),
+    error: text("error"),
+    inputTokens: integer("input_tokens").notNull().default(0),
+    cachedInputTokens: integer("cached_input_tokens").notNull().default(0),
+    outputTokens: integer("output_tokens").notNull().default(0),
+    durationMs: integer("duration_ms").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("ai_generation_user_idx").on(t.userId, t.createdAt)],
+);
+
+/* ------------------------------------------------------------------ */
 /* Relations                                                           */
 /* ------------------------------------------------------------------ */
 

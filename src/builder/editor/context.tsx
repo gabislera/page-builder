@@ -72,6 +72,11 @@ export type EditorServices = {
     cookieBanner?: import("../core/theme.ts").CookieBanner;
   }) => Promise<import("../core/theme.ts").SiteSettings>;
   republishSite: () => Promise<{ count: number }>;
+  generateSection: (input: {
+    prompt: string;
+    pageOutline: string[];
+    variation: number;
+  }) => Promise<{ spec: import("../ai/spec.ts").SectionSpec }>;
 };
 
 export type EditorContextValue = {

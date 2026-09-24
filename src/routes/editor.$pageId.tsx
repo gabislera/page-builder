@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import type { EditorServices } from "#/builder/editor/context";
 import { EditorShell } from "#/builder/editor/editor-shell";
 import { APP_NAME } from "#/lib/brand";
+import { generateSection } from "#/server/ai";
 import { createUpload, deleteAsset, listAssets, registerAsset } from "#/server/assets";
 import {
   getEditorPage,
@@ -80,6 +81,7 @@ function EditorRoute() {
       updateSettings: (patch) => updatePageSettings({ data: { pageId, ...patch } }),
       updateSiteSettings: (patch) => updateSiteSettings({ data: { projectId, ...patch } }),
       republishSite: () => republishSite({ data: { projectId } }),
+      generateSection: (input) => generateSection({ data: { pageId, ...input } }),
     };
   }, [page]);
 
