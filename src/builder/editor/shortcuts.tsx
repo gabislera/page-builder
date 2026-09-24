@@ -1,10 +1,11 @@
 import type { SerializedNodes } from "@craftjs/core";
 import { useEditor } from "@craftjs/core";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { TOP_LEVEL_TYPES } from "../core/node-helpers.ts";
 import { cloneTree, ROOT_ID } from "../core/tree.ts";
 import { duplicateNode, insertTree } from "./node-actions.ts";
 import { useSaveState } from "./save-store.ts";
+import { useStyleActions } from "./style-actions.ts";
 
 let clipboard: {
 	rootNodeId: string;
@@ -27,6 +28,10 @@ export function KeyboardShortcuts({
 	canvasDoc: Document | null;
 }) {
 	const editor = useEditor();
+	// sempre a versão atual, sem registrar os atalhos de novo a cada render
+	const style = useStyleActions();
+	const styleActions = useRef(style);
+	styleActions.current = style;
 
 	useEffect(() => {
 		const onKey = (e: KeyboardEvent) => {
@@ -57,6 +62,15 @@ export function KeyboardShortcuts({
 			}
 			if (!selected || selected === ROOT_ID) return;
 			const node = editor.query.node(selected);
+
+			// Ctrl+Alt+C / Ctrl+Alt+V: copiar e colar estilo (e.code: no Mac o
+			// Option muda a letra digitada)
+			if (mod && e.altKey && (e.code === "KeyC" || e.code === "KeyV")) {
+				e.preventDefault();
+				if (e.code === "KeyC") styleActions.current.copyStyle(selected);
+				else styleActions.current.pasteStyle(selected);
+				return;
+			}
 
 			if ((key === "delete" || key === "backspace") && node.isDeletable()) {
 				e.preventDefault();
