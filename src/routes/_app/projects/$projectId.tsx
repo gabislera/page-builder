@@ -1,19 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { BarChart3, ExternalLink, FileText, Inbox, Settings } from "lucide-react";
+import { BarChart3, ExternalLink, FileText, Inbox, Palette, Settings } from "lucide-react";
 import { useState } from "react";
 import { ProjectSettingsDialog } from "#/components/project-settings-dialog";
 import { Button } from "#/components/ui/button";
 import { cn } from "#/lib/utils";
 import { listProjects } from "#/server/projects";
 
-/** Project: title and tabs (pages, leads, visits). */
+/** Project: title and tabs (pages, site, leads, visits). */
 export const Route = createFileRoute("/_app/projects/$projectId")({
   component: ProjectLayout,
 });
 
 const TABS = [
   { to: "/projects/$projectId", label: "Páginas", icon: FileText, exact: true },
+  {
+    to: "/projects/$projectId/site",
+    label: "Site",
+    icon: Palette,
+    exact: false,
+  },
   {
     to: "/projects/$projectId/leads",
     label: "Leads",

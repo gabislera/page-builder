@@ -25,6 +25,7 @@ import { Route as PProjectSlugPageSlugRouteImport } from './routes/p/$projectSlu
 import { Route as PProjectSlugSitemapDotxmlRouteImport } from './routes/p/$projectSlug/sitemap[.]xml'
 import { Route as AppProjectsProjectIdIndexRouteImport } from './routes/_app/projects/$projectId/index'
 import { Route as AppProjectsProjectIdLeadsRouteImport } from './routes/_app/projects/$projectId/leads'
+import { Route as AppProjectsProjectIdSiteRouteImport } from './routes/_app/projects/$projectId/site'
 import { Route as AppProjectsProjectIdVisitasRouteImport } from './routes/_app/projects/$projectId/visitas'
 
 const IndexRoute = IndexRouteImport.update({
@@ -109,6 +110,12 @@ const AppProjectsProjectIdLeadsRoute =
     path: '/leads',
     getParentRoute: () => AppProjectsProjectIdRoute,
   } as any)
+const AppProjectsProjectIdSiteRoute =
+  AppProjectsProjectIdSiteRouteImport.update({
+    id: '/site',
+    path: '/site',
+    getParentRoute: () => AppProjectsProjectIdRoute,
+  } as any)
 const AppProjectsProjectIdVisitasRoute =
   AppProjectsProjectIdVisitasRouteImport.update({
     id: '/visitas',
@@ -131,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/projects/': typeof AppProjectsIndexRoute
   '/p/$projectSlug/': typeof PProjectSlugIndexRoute
   '/projects/$projectId/leads': typeof AppProjectsProjectIdLeadsRoute
+  '/projects/$projectId/site': typeof AppProjectsProjectIdSiteRoute
   '/projects/$projectId/visitas': typeof AppProjectsProjectIdVisitasRoute
   '/projects/$projectId/': typeof AppProjectsProjectIdIndexRoute
 }
@@ -148,6 +156,7 @@ export interface FileRoutesByTo {
   '/projects': typeof AppProjectsIndexRoute
   '/p/$projectSlug': typeof PProjectSlugIndexRoute
   '/projects/$projectId/leads': typeof AppProjectsProjectIdLeadsRoute
+  '/projects/$projectId/site': typeof AppProjectsProjectIdSiteRoute
   '/projects/$projectId/visitas': typeof AppProjectsProjectIdVisitasRoute
   '/projects/$projectId': typeof AppProjectsProjectIdIndexRoute
 }
@@ -168,6 +177,7 @@ export interface FileRoutesById {
   '/_app/projects/': typeof AppProjectsIndexRoute
   '/p/$projectSlug/': typeof PProjectSlugIndexRoute
   '/_app/projects/$projectId/leads': typeof AppProjectsProjectIdLeadsRoute
+  '/_app/projects/$projectId/site': typeof AppProjectsProjectIdSiteRoute
   '/_app/projects/$projectId/visitas': typeof AppProjectsProjectIdVisitasRoute
   '/_app/projects/$projectId/': typeof AppProjectsProjectIdIndexRoute
 }
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/projects/'
     | '/p/$projectSlug/'
     | '/projects/$projectId/leads'
+    | '/projects/$projectId/site'
     | '/projects/$projectId/visitas'
     | '/projects/$projectId/'
   fileRoutesByTo: FileRoutesByTo
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/projects'
     | '/p/$projectSlug'
     | '/projects/$projectId/leads'
+    | '/projects/$projectId/site'
     | '/projects/$projectId/visitas'
     | '/projects/$projectId'
   id:
@@ -224,6 +236,7 @@ export interface FileRouteTypes {
     | '/_app/projects/'
     | '/p/$projectSlug/'
     | '/_app/projects/$projectId/leads'
+    | '/_app/projects/$projectId/site'
     | '/_app/projects/$projectId/visitas'
     | '/_app/projects/$projectId/'
   fileRoutesById: FileRoutesById
@@ -357,6 +370,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProjectsProjectIdLeadsRouteImport
       parentRoute: typeof AppProjectsProjectIdRoute
     }
+    '/_app/projects/$projectId/site': {
+      id: '/_app/projects/$projectId/site'
+      path: '/site'
+      fullPath: '/projects/$projectId/site'
+      preLoaderRoute: typeof AppProjectsProjectIdSiteRouteImport
+      parentRoute: typeof AppProjectsProjectIdRoute
+    }
     '/_app/projects/$projectId/visitas': {
       id: '/_app/projects/$projectId/visitas'
       path: '/visitas'
@@ -369,12 +389,14 @@ declare module '@tanstack/react-router' {
 
 interface AppProjectsProjectIdRouteChildren {
   AppProjectsProjectIdLeadsRoute: typeof AppProjectsProjectIdLeadsRoute
+  AppProjectsProjectIdSiteRoute: typeof AppProjectsProjectIdSiteRoute
   AppProjectsProjectIdVisitasRoute: typeof AppProjectsProjectIdVisitasRoute
   AppProjectsProjectIdIndexRoute: typeof AppProjectsProjectIdIndexRoute
 }
 
 const AppProjectsProjectIdRouteChildren: AppProjectsProjectIdRouteChildren = {
   AppProjectsProjectIdLeadsRoute: AppProjectsProjectIdLeadsRoute,
+  AppProjectsProjectIdSiteRoute: AppProjectsProjectIdSiteRoute,
   AppProjectsProjectIdVisitasRoute: AppProjectsProjectIdVisitasRoute,
   AppProjectsProjectIdIndexRoute: AppProjectsProjectIdIndexRoute,
 }

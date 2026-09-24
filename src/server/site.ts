@@ -41,6 +41,15 @@ const cookieBannerInput = z.object({
   appearance: z.enum(["light", "dark"]),
 });
 
+/** Site theme, identity, and cookie banner (project "Site" tab). */
+export const getSiteSettings = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .validator(z.object({ projectId: z.string() }))
+  .handler(async ({ data, context }) => {
+    await requireProjectAccess(context.user.id, data.projectId);
+    return (await loadSiteSettings(data.projectId)).settings;
+  });
+
 /** Update site theme, identity, and/or cookie banner. Header/footer change via the editor. */
 export const updateSiteSettings = createServerFn({ method: "POST" })
   .middleware([authMiddleware])

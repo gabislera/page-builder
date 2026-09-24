@@ -3,8 +3,8 @@ import { useMemo } from "react";
 import type { EditorServices } from "#/builder/editor/context";
 import { EditorShell } from "#/builder/editor/editor-shell";
 import { APP_NAME } from "#/lib/brand";
+import { projectServices } from "#/lib/project-services";
 import { generateSection } from "#/server/ai";
-import { createUpload, deleteAsset, listAssets, registerAsset } from "#/server/assets";
 import {
   getEditorPage,
   listGlobalSections,
@@ -16,7 +16,6 @@ import {
 } from "#/server/pages";
 import { deleteSavedSection, listSavedSections, saveSectionAsTemplate } from "#/server/saved-sections";
 import { getSession } from "#/server/session";
-import { republishSite, updateSiteSettings } from "#/server/site";
 
 export const Route = createFileRoute("/editor/$pageId")({
   // Craft.js runs in the browser only
@@ -44,33 +43,7 @@ function EditorRoute() {
     const { id: pageId, projectId } = page;
     return {
       listPages: () => listPages({ data: { projectId } }),
-      listAssets: () => listAssets({ data: { projectId } }),
-      uploadAsset: async (file) => {
-        const { uploadUrl, key } = await createUpload({
-          data: {
-            projectId,
-            name: file.name,
-            mimeType: file.type,
-            size: file.size,
-          },
-        });
-        const res = await fetch(uploadUrl, {
-          method: "PUT",
-          body: file,
-          headers: { "Content-Type": file.type },
-        });
-        if (!res.ok) throw new Error("Falha no envio do arquivo");
-        return registerAsset({
-          data: {
-            projectId,
-            key,
-            name: file.name,
-            mimeType: file.type,
-            size: file.size,
-          },
-        });
-      },
-      deleteAsset: (assetId) => deleteAsset({ data: { projectId, assetId } }),
+      ...projectServices(projectId),
       listGlobalSections: () => listGlobalSections({ data: { projectId } }),
       savePage: (input) => savePage({ data: { pageId, ...input } }),
       publishPage: (republish) => publishPage({ data: { pageId, republish } }),
@@ -79,8 +52,6 @@ function EditorRoute() {
       saveSectionAsTemplate: (input) => saveSectionAsTemplate({ data: { projectId, ...input } }),
       deleteSavedSection: (id) => deleteSavedSection({ data: { id } }),
       updateSettings: (patch) => updatePageSettings({ data: { pageId, ...patch } }),
-      updateSiteSettings: (patch) => updateSiteSettings({ data: { projectId, ...patch } }),
-      republishSite: () => republishSite({ data: { projectId } }),
       generateSection: (input) => generateSection({ data: { pageId, ...input } }),
     };
   }, [page]);
