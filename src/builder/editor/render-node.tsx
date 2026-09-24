@@ -18,6 +18,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { UI_ACCENT, UI_ACCENT_FG } from "#/lib/brand";
+import { FEATURES } from "#/lib/features";
 import { TOP_BAR_TYPE } from "../core/node-helpers.ts";
 import { ROOT_ID } from "../core/tree.ts";
 import { duplicateNode, moveSection } from "./node-actions.ts";
@@ -74,7 +75,10 @@ export function RenderNode({ render }: { render: ReactNode }) {
 							name={name}
 							selected={isSelected}
 							isTopLevel={isTopLevel}
-							isGlobal={Boolean(custom?.isGlobal || custom?.sitePart)}
+							isGlobal={Boolean(
+								(FEATURES.globalSections && custom?.isGlobal) ||
+									custom?.sitePart,
+							)}
 							canDelete={isDeletable && editor.query.node(id).isDeletable()}
 							canDrag={isDraggable}
 							canDuplicate={!custom?.notDuplicable}

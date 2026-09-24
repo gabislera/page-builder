@@ -1,6 +1,7 @@
 import { useEditor } from "@craftjs/core";
 import { ChevronRight, Eye, EyeOff, Globe } from "lucide-react";
 import { useState } from "react";
+import { FEATURES } from "#/lib/features";
 import { cn } from "#/lib/utils";
 import { ROOT_ID } from "../core/tree.ts";
 import { COMPONENTS } from "../registry.ts";
@@ -38,7 +39,8 @@ function LayerItem({ id, depth }: { id: string; depth: number }) {
 							children: n.data.nodes,
 							hidden: n.data.hidden,
 							isGlobal: Boolean(
-								n.data.custom?.isGlobal || n.data.custom?.sitePart,
+								(FEATURES.globalSections && n.data.custom?.isGlobal) ||
+									n.data.custom?.sitePart,
 							),
 						}
 					: null,

@@ -20,6 +20,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "#/components/ui/dialog";
+import { FEATURES } from "#/lib/features";
 import { cn } from "#/lib/utils";
 import { BASE_CSS } from "../core/base-css.ts";
 import { buildRoot, buildTree } from "../core/build.ts";
@@ -218,7 +219,11 @@ export function SectionLibraryDialog() {
 				</DialogHeader>
 				<div className="flex min-h-0 flex-1">
 					<nav className="flex w-48 shrink-0 flex-col gap-1 overflow-y-auto border-r border-border p-3">
-						{[...CATEGORIES, SAVED_TAB, GLOBAL_TAB].map((c) => (
+						{[
+							...CATEGORIES,
+							SAVED_TAB,
+							...(FEATURES.globalSections ? [GLOBAL_TAB] : []),
+						].map((c) => (
 							<button
 								key={c}
 								type="button"

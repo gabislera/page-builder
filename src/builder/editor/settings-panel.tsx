@@ -9,6 +9,7 @@ import {
 import { createElement } from "react";
 import { Button } from "#/components/ui/button";
 import { Switch } from "#/components/ui/switch";
+import { FEATURES } from "#/lib/features";
 import { DebouncedInput } from "../controls/inputs.tsx";
 import { ROOT_ID } from "../core/tree.ts";
 import { COMPONENTS } from "../registry.ts";
@@ -141,7 +142,7 @@ export function SettingsPanel() {
 					<SitePartCard
 						part={selected.type === "Header" ? "header" : "footer"}
 					/>
-				) : selected.isTopLevel ? (
+				) : selected.isTopLevel && FEATURES.globalSections ? (
 					<GlobalToggle
 						isGlobal={selected.isGlobal}
 						onChange={(v) =>
