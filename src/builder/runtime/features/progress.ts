@@ -2,10 +2,7 @@
  * Barra de progresso: cresce de 0 até o valor quando entra na tela.
  * Sem JS (ou com movimento reduzido) a barra já aparece no valor final.
  */
-export const progressScript = (_cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const progressScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
   var els=document.querySelectorAll('[data-pb-progress]');if(!els.length)return;
   if(!('IntersectionObserver' in window))return;

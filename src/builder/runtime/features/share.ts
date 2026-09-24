@@ -3,10 +3,7 @@
  * (ou o link fixo), copia o link com aviso e usa o compartilhamento nativo
  * do celular quando existe.
  */
-export const shareScript = (_cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const shareScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
 document.querySelectorAll('[data-pb-share]').forEach(function(w){
   var url=w.getAttribute('data-pb-share-url')||location.href.split('#')[0];

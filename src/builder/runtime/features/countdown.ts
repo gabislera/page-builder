@@ -6,10 +6,7 @@
  * - evergreen: início salvo no localStorage por nó; recarregar não reinicia.
  * - daily: zera todo dia no horário data-pb-daily do fuso data-pb-tz.
  */
-export const countdownScript = (_cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const countdownScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
   var els=document.querySelectorAll('[data-pb-countdown]');if(!els.length)return;
   var SEC={d:86400,h:3600,m:60,s:1};

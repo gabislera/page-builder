@@ -9,12 +9,10 @@ import { COMPONENTS } from "../registry.ts";
  * (e o painel mostra o valor certo em vez de vazio).
  */
 export function normalizeNodes(nodes: SerializedNodes): SerializedNodes {
-	const out: SerializedNodes = {};
-	for (const [id, node] of Object.entries(nodes)) {
-		const def = COMPONENTS[typeOf(node)];
-		out[id] = def
-			? { ...node, props: withDefaults(def.defaults, node.props) }
-			: node;
-	}
-	return out;
+  const out: SerializedNodes = {};
+  for (const [id, node] of Object.entries(nodes)) {
+    const def = COMPONENTS[typeOf(node)];
+    out[id] = def ? { ...node, props: withDefaults(def.defaults, node.props) } : node;
+  }
+  return out;
 }

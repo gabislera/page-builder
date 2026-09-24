@@ -2,10 +2,7 @@
  * Efeitos ao rolar (parallax). O elemento recebe `--pb-py`, somado ao
  * `translate` dele no CSS; a velocidade vem de `--pb-parallax`.
  */
-export const motionScript = (_cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const motionScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   var els=[].slice.call(document.querySelectorAll('.pb-parallax'));

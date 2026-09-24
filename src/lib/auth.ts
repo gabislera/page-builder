@@ -6,19 +6,19 @@ import * as schema from "#/db/schema";
 import { APP_NAME } from "#/lib/brand";
 
 export const auth = betterAuth({
-	appName: APP_NAME,
-	database: drizzleAdapter(db, { provider: "pg", schema }),
-	emailAndPassword: {
-		enabled: true,
-		minPasswordLength: 8,
-	},
-	session: {
-		expiresIn: 60 * 60 * 24 * 7,
-		updateAge: 60 * 60 * 24,
-		cookieCache: { enabled: true, maxAge: 5 * 60 },
-	},
-	// tanstackStartCookies precisa ser o último plugin
-	plugins: [tanstackStartCookies()],
+  appName: APP_NAME,
+  database: drizzleAdapter(db, { provider: "pg", schema }),
+  emailAndPassword: {
+    enabled: true,
+    minPasswordLength: 8,
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 7,
+    updateAge: 60 * 60 * 24,
+    cookieCache: { enabled: true, maxAge: 5 * 60 },
+  },
+  // tanstackStartCookies precisa ser o último plugin
+  plugins: [tanstackStartCookies()],
 });
 
 export type Session = typeof auth.$Infer.Session;

@@ -53,36 +53,31 @@ const pageView = (endpoint: string) => `
 `;
 
 /** Blocos extras por recurso. Preenchidos pelos componentes que precisam. */
-export const FEATURE_SCRIPTS: Partial<
-	Record<RuntimeFeature, (cfg: RuntimeConfig) => string>
-> = {
-	header: headerScript,
-	menu: menuScript,
-	motion: motionScript,
-	gallery: galleryScript,
-	tabs: tabsScript,
-	carousel: carouselScript,
-	accordion: accordionScript,
-	counter: counterScript,
-	announcement: announcementScript,
-	share: shareScript,
-	form: formScript,
-	modal: modalScript,
-	floating: floatingScript,
-	video: videoScript,
-	countdown: countdownScript,
-	progress: progressScript,
+export const FEATURE_SCRIPTS: Partial<Record<RuntimeFeature, (cfg: RuntimeConfig) => string>> = {
+  header: headerScript,
+  menu: menuScript,
+  motion: motionScript,
+  gallery: galleryScript,
+  tabs: tabsScript,
+  carousel: carouselScript,
+  accordion: accordionScript,
+  counter: counterScript,
+  announcement: announcementScript,
+  share: shareScript,
+  form: formScript,
+  modal: modalScript,
+  floating: floatingScript,
+  video: videoScript,
+  countdown: countdownScript,
+  progress: progressScript,
 };
 
-export function buildRuntime(
-	features: Set<RuntimeFeature>,
-	cfg: RuntimeConfig,
-): string {
-	let js = CORE;
-	for (const f of features) {
-		const script = FEATURE_SCRIPTS[f];
-		if (script) js += script(cfg);
-	}
-	js += pageView(cfg.viewEndpoint);
-	return `(function(){${js}})();`;
+export function buildRuntime(features: Set<RuntimeFeature>, cfg: RuntimeConfig): string {
+  let js = CORE;
+  for (const f of features) {
+    const script = FEATURE_SCRIPTS[f];
+    if (script) js += script(cfg);
+  }
+  js += pageView(cfg.viewEndpoint);
+  return `(function(){${js}})();`;
 }

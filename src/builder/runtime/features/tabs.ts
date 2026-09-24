@@ -3,10 +3,7 @@
  * setas, Home e End navegam entre as abas (tabindex móvel + aria-selected).
  * O N-ésimo botão da barra abre o N-ésimo painel.
  */
-export const tabsScript = (_cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const tabsScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
   var ts=document.querySelectorAll('[data-pb-tabs]');
   if(!ts.length)return;

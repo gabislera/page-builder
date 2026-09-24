@@ -6,16 +6,13 @@ import { Children, Fragment, isValidElement, type ReactNode } from "react";
  * numeram os filhos (abas, acordeão, carrossel) veriam um filho só.
  */
 export function flattenChildren(children: ReactNode): ReactNode[] {
-	const out: ReactNode[] = [];
-	for (const child of Children.toArray(children)) {
-		if (
-			isValidElement<{ children?: ReactNode }>(child) &&
-			child.type === Fragment
-		) {
-			out.push(...flattenChildren(child.props.children));
-		} else {
-			out.push(child);
-		}
-	}
-	return out;
+  const out: ReactNode[] = [];
+  for (const child of Children.toArray(children)) {
+    if (isValidElement<{ children?: ReactNode }>(child) && child.type === Fragment) {
+      out.push(...flattenChildren(child.props.children));
+    } else {
+      out.push(child);
+    }
+  }
+  return out;
 }

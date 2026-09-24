@@ -13,86 +13,73 @@ import { useSectionPicker } from "./section-picker-store.ts";
 import { PART_CATEGORY, PART_LABEL, useSitePart } from "./site-parts.tsx";
 
 const box: React.CSSProperties = {
-	display: "flex",
-	alignItems: "center",
-	justifyContent: "center",
-	gap: 8,
-	minHeight: 56,
-	margin: 8,
-	border: "1.5px dashed #c4c4cc",
-	borderRadius: 8,
-	background: "#fafafa",
-	color: "#52525b",
-	font: "500 12px/1.4 Inter, system-ui, sans-serif",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 8,
+  minHeight: 56,
+  margin: 8,
+  border: "1.5px dashed #c4c4cc",
+  borderRadius: 8,
+  background: "#fafafa",
+  color: "#52525b",
+  font: "500 12px/1.4 Inter, system-ui, sans-serif",
 };
 
 const action: React.CSSProperties = {
-	display: "inline-flex",
-	alignItems: "center",
-	gap: 6,
-	height: 30,
-	padding: "0 12px",
-	border: "1px solid #d4d4d8",
-	borderRadius: 6,
-	background: "#ffffff",
-	color: "#18181b",
-	font: "inherit",
-	cursor: "pointer",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 6,
+  height: 30,
+  padding: "0 12px",
+  border: "1px solid #d4d4d8",
+  borderRadius: 6,
+  background: "#ffffff",
+  color: "#18181b",
+  font: "inherit",
+  cursor: "pointer",
 };
 
 export function SitePartSlot({ part }: { part: SitePart }) {
-	const { current, stored, applySiteVersion } = useSitePart(part);
-	const openPicker = useSectionPicker((s) => s.open);
-	if (current) return null;
-	const label = PART_LABEL[part].toLowerCase();
-	return (
-		<div style={box} data-pb-slot={part}>
-			<span style={{ color: "#71717a" }}>Esta página está sem {label}.</span>
-			{stored ? (
-				<button
-					type="button"
-					style={{ ...action, borderColor: UI_ACCENT, color: "#047857" }}
-					onClick={applySiteVersion}
-				>
-					Usar o {label} do site
-				</button>
-			) : null}
-			<button
-				type="button"
-				style={action}
-				onClick={() => openPicker(undefined, PART_CATEGORY[part])}
-			>
-				<Plus size={14} />{" "}
-				{stored ? "Escolher outro modelo" : `Adicionar ${label}`}
-			</button>
-		</div>
-	);
+  const { current, stored, applySiteVersion } = useSitePart(part);
+  const openPicker = useSectionPicker((s) => s.open);
+  if (current) return null;
+  const label = PART_LABEL[part].toLowerCase();
+  return (
+    <div style={box} data-pb-slot={part}>
+      <span style={{ color: "#71717a" }}>Esta página está sem {label}.</span>
+      {stored ? (
+        <button
+          type="button"
+          style={{ ...action, borderColor: UI_ACCENT, color: "#047857" }}
+          onClick={applySiteVersion}
+        >
+          Usar o {label} do site
+        </button>
+      ) : null}
+      <button type="button" style={action} onClick={() => openPicker(undefined, PART_CATEGORY[part])}>
+        <Plus size={14} /> {stored ? "Escolher outro modelo" : `Adicionar ${label}`}
+      </button>
+    </div>
+  );
 }
 
 /**
  * Filhos da página no editor, com os espaços de cabeçalho e rodapé no lugar
  * certo: barras de aviso primeiro (ficam sempre no topo), depois o cabeçalho.
  */
-export function EditorPageBody({
-	children,
-	placeholder,
-}: {
-	children: ReactNode;
-	placeholder: ReactNode;
-}) {
-	const { bars } = useEditor((state) => ({
-		bars: (state.nodes[ROOT_ID]?.data.nodes ?? []).filter(
-			(id) => state.nodes[id]?.data.name === TOP_BAR_TYPE,
-		).length,
-	}));
-	const kids = flattenChildren(children);
-	return (
-		<>
-			{kids.slice(0, bars)}
-			<SitePartSlot part="header" />
-			{kids.slice(bars)}
-			{placeholder}
-			<SitePartSlot part="footer" />
-		</>
-	);
+export function EditorPageBody({ children, placeholder }: { children: ReactNode; placeholder: ReactNode }) {
+  const { bars } = useEditor((state) => ({
+    bars: (state.nodes[ROOT_ID]?.data.nodes ?? []).filter((id) => state.nodes[id]?.data.name === TOP_BAR_TYPE).length,
+  }));
+  const kids = flattenChildren(children);
+  return (
+    <>
+      {kids.slice(0, bars)}
+      <SitePartSlot part="header" />
+      {kids.slice(bars)}
+      {placeholder}
+      <SitePartSlot part="footer" />
+    </>
+  );
 }

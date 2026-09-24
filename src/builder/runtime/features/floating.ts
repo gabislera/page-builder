@@ -2,10 +2,7 @@
  * Runtime dos botões flutuantes: mostra o "voltar ao topo" depois de rolar
  * (data-pb-offset, em px) e rola suavemente até o topo ao clicar.
  */
-export const floatingScript = (_cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const floatingScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
 var tops=document.querySelectorAll('[data-pb-top]');
 if(!tops.length)return;

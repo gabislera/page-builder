@@ -10,69 +10,66 @@ import { loadSiteSettings, republishProject } from "./page-store.ts";
 const hexOrCss = z.string().trim().min(1).max(120);
 
 const themeInput = z.object({
-	colors: z
-		.array(
-			z.object({
-				id: z.string().regex(/^[a-z0-9-]{1,40}$/),
-				name: z.string().trim().min(1).max(40),
-				value: hexOrCss,
-				system: z.boolean().optional(),
-			}),
-		)
-		.max(40),
-	fonts: z.object({ heading: z.string().max(60), body: z.string().max(60) }),
+  colors: z
+    .array(
+      z.object({
+        id: z.string().regex(/^[a-z0-9-]{1,40}$/),
+        name: z.string().trim().min(1).max(40),
+        value: hexOrCss,
+        system: z.boolean().optional(),
+      }),
+    )
+    .max(40),
+  fonts: z.object({ heading: z.string().max(60), body: z.string().max(60) }),
 });
 
 const identityInput = z.object({
-	name: z.string().trim().max(80),
-	logoUrl: z.string().max(1000),
-	logoLightUrl: z.string().max(1000),
+  name: z.string().trim().max(80),
+  logoUrl: z.string().max(1000),
+  logoLightUrl: z.string().max(1000),
 });
 
 const cookieBannerInput = z.object({
-	enabled: z.boolean(),
-	mode: z.enum(["block", "notice"]),
-	text: z.string().trim().max(600),
-	acceptText: z.string().trim().max(40),
-	rejectText: z.string().trim().max(40),
-	policyText: z.string().trim().max(60),
-	policyUrl: z.string().trim().max(1000),
-	position: z.enum(["bottom", "bottom-left", "bottom-right"]),
-	appearance: z.enum(["light", "dark"]),
+  enabled: z.boolean(),
+  mode: z.enum(["block", "notice"]),
+  text: z.string().trim().max(600),
+  acceptText: z.string().trim().max(40),
+  rejectText: z.string().trim().max(40),
+  policyText: z.string().trim().max(60),
+  policyUrl: z.string().trim().max(1000),
+  position: z.enum(["bottom", "bottom-left", "bottom-right"]),
+  appearance: z.enum(["light", "dark"]),
 });
 
 /** Atualiza tema, identidade e/ou aviso de cookies do site. Cabeçalho/rodapé mudam pelo editor. */
 export const updateSiteSettings = createServerFn({ method: "POST" })
-	.middleware([authMiddleware])
-	.validator(
-		z.object({
-			projectId: z.string(),
-			theme: themeInput.optional(),
-			identity: identityInput.optional(),
-			cookieBanner: cookieBannerInput.optional(),
-		}),
-	)
-	.handler(async ({ data, context }) => {
-		await requireProjectAccess(context.user.id, data.projectId);
-		const { settings } = await loadSiteSettings(data.projectId);
-		const next = {
-			...settings,
-			...(data.theme ? { theme: data.theme } : {}),
-			...(data.identity ? { identity: data.identity } : {}),
-			...(data.cookieBanner ? { cookieBanner: data.cookieBanner } : {}),
-		};
-		await db
-			.update(project)
-			.set({ settings: next })
-			.where(eq(project.id, data.projectId));
-		return (await loadSiteSettings(data.projectId)).settings;
-	});
+  .middleware([authMiddleware])
+  .validator(
+    z.object({
+      projectId: z.string(),
+      theme: themeInput.optional(),
+      identity: identityInput.optional(),
+      cookieBanner: cookieBannerInput.optional(),
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    await requireProjectAccess(context.user.id, data.projectId);
+    const { settings } = await loadSiteSettings(data.projectId);
+    const next = {
+      ...settings,
+      ...(data.theme ? { theme: data.theme } : {}),
+      ...(data.identity ? { identity: data.identity } : {}),
+      ...(data.cookieBanner ? { cookieBanner: data.cookieBanner } : {}),
+    };
+    await db.update(project).set({ settings: next }).where(eq(project.id, data.projectId));
+    return (await loadSiteSettings(data.projectId)).settings;
+  });
 
 /** Republica as páginas publicadas para aplicar mudanças de tema e identidade. */
 export const republishSite = createServerFn({ method: "POST" })
-	.middleware([authMiddleware])
-	.validator(z.object({ projectId: z.string() }))
-	.handler(async ({ data, context }) => {
-		await requireProjectAccess(context.user.id, data.projectId);
-		return { count: await republishProject(data.projectId) };
-	});
+  .middleware([authMiddleware])
+  .validator(z.object({ projectId: z.string() }))
+  .handler(async ({ data, context }) => {
+    await requireProjectAccess(context.user.id, data.projectId);
+    return { count: await republishProject(data.projectId) };
+  });

@@ -4,10 +4,7 @@
  * `grid-template-rows` (classe `is-open`). Ao fechar, o atributo `open` só sai
  * quando a transição termina, para a animação aparecer também no fechamento.
  */
-export const accordionScript = (_cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const accordionScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
   var accs=document.querySelectorAll('.pb-acc');
   if(!accs.length)return;

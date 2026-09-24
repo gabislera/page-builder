@@ -3,10 +3,7 @@
  * escondida. O script inline logo depois da barra já esconde na leitura do
  * HTML; aqui só tratamos o clique.
  */
-export const announcementScript = (_cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const announcementScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
   var bar=document.querySelector('.pb-bar[data-pb-sticky]:not([hidden])');
   if(!bar)return;

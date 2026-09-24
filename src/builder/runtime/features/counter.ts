@@ -3,10 +3,7 @@
  * valor final com desaceleração no fim. O HTML já tem o número final; sem JS
  * (ou com "reduzir movimento") ele simplesmente aparece pronto.
  */
-export const counterScript = (_cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const counterScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
   var els=document.querySelectorAll('[data-pb-count]');
   if(!els.length||!('IntersectionObserver' in window))return;

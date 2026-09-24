@@ -4,10 +4,7 @@
  * ao rolar para baixo (`pb-header-hidden`) e o mostra de volta ao subir.
  * O menu hambúrguer fica no runtime do Menu.
  */
-export const headerScript = (_cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const headerScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
   var hs=Array.prototype.slice.call(document.querySelectorAll('[data-pb-header]'));
   if(!hs.length)return;

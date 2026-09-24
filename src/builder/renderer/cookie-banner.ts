@@ -8,16 +8,10 @@
  */
 import type { CookieBanner } from "../core/theme.ts";
 
-const esc = (s: string) =>
-	s
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;");
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** Só http(s), caminhos relativos e âncoras: nada de javascript:. */
-const safeUrl = (url: string) =>
-	/^(https?:\/\/|\/|#|\.\/)/i.test(url.trim()) ? url.trim() : "";
+const safeUrl = (url: string) => (/^(https?:\/\/|\/|#|\.\/)/i.test(url.trim()) ? url.trim() : "");
 
 /** Chave da escolha no localStorage, separada por site. */
 const storageKey = (siteKey: string) => `pb-consent:${siteKey}`;
@@ -44,31 +38,25 @@ window.pbLoadTracking=function(){
  * Rastreamento do <head> quando depende de consentimento: templates inertes
  * + carregador. Se o visitante já aceitou, carrega na hora.
  */
-export function gatedTracking(
-	siteKey: string,
-	head: string,
-	body: string,
-): string {
-	if (!head.trim() && !body.trim()) return "";
-	const key = JSON.stringify(storageKey(siteKey));
-	return `<template id="pb-consent-head">${head}</template>
+export function gatedTracking(siteKey: string, head: string, body: string): string {
+  if (!head.trim() && !body.trim()) return "";
+  const key = JSON.stringify(storageKey(siteKey));
+  return `<template id="pb-consent-head">${head}</template>
 <template id="pb-consent-body">${body}</template>
 <script>${LOADER}
 try{if(localStorage.getItem(${key})==='all')window.pbLoadTracking();}catch(e){}</script>`;
 }
 
 export function cookieBannerHtml(cb: CookieBanner, siteKey: string): string {
-	const policy = safeUrl(cb.policyUrl);
-	const link =
-		policy && cb.policyText
-			? ` <a href="${esc(policy)}" target="_blank" rel="noopener">${esc(cb.policyText)}</a>`
-			: "";
-	const reject =
-		cb.mode === "block"
-			? `<button type="button" class="pb-cookie-btn pb-cookie-reject" data-pb-consent="essential">${esc(cb.rejectText || "Recusar")}</button>`
-			: "";
-	const key = JSON.stringify(storageKey(siteKey));
-	return `<div class="pb-cookie pb-cookie-${cb.position} pb-cookie-${cb.appearance}" role="dialog" aria-label="Aviso de cookies" data-pb-cookie hidden>
+  const policy = safeUrl(cb.policyUrl);
+  const link =
+    policy && cb.policyText ? ` <a href="${esc(policy)}" target="_blank" rel="noopener">${esc(cb.policyText)}</a>` : "";
+  const reject =
+    cb.mode === "block"
+      ? `<button type="button" class="pb-cookie-btn pb-cookie-reject" data-pb-consent="essential">${esc(cb.rejectText || "Recusar")}</button>`
+      : "";
+  const key = JSON.stringify(storageKey(siteKey));
+  return `<div class="pb-cookie pb-cookie-${cb.position} pb-cookie-${cb.appearance}" role="dialog" aria-label="Aviso de cookies" data-pb-cookie hidden>
 <p class="pb-cookie-text">${esc(cb.text)}${link}</p>
 <div class="pb-cookie-actions">${reject}<button type="button" class="pb-cookie-btn pb-cookie-accept" data-pb-consent="all">${esc(cb.acceptText || "Aceitar")}</button></div>
 </div>

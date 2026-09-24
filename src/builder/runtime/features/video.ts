@@ -2,10 +2,7 @@
  * Vídeo com miniatura (facade): troca o botão pelo player só ao clicar.
  * A página carrega só a imagem; o iframe do YouTube/Vimeo vem sob demanda.
  */
-export const videoScript = (_cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const videoScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 document.addEventListener('click',function(e){
   var t=e.target instanceof Element?e.target:null;if(!t)return;
   var b=t.closest('[data-pb-video-facade]');if(!b)return;

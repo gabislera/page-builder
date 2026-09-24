@@ -3,10 +3,7 @@
  * ao clicar num link ou com Esc; trava a rolagem da página enquanto aberto),
  * submenus recolhíveis no painel e marcação do link da página atual.
  */
-export const menuScript = (_cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const menuScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
   var ms=Array.prototype.slice.call(document.querySelectorAll('[data-pb-menu]'));
   if(!ms.length)return;

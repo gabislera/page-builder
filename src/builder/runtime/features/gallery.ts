@@ -4,10 +4,7 @@
  * dentro da janela. Os itens são os links [data-pb-lightbox] de cada
  * [data-pb-gallery]; itens com link próprio não entram.
  */
-export const galleryScript = (_cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const galleryScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
 if(!document.querySelector('[data-pb-gallery]'))return;
 var st=document.createElement('style');

@@ -3,10 +3,7 @@
  * internas, e abertura automática (após tempo ou intenção de saída).
  * A abertura por clique (data-pb-modal) já está no runtime principal.
  */
-export const modalScript = (_cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const modalScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
 var ds=document.querySelectorAll('dialog.pb-modal');
 if(!ds.length)return;

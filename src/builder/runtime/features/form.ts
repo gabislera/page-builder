@@ -4,10 +4,7 @@
  * e ação pós-envio (mensagem ou redirect).
  * Configuração vem dos data-atributos do <form data-pb-form>.
  */
-export const formScript = (cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const formScript = (cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
 var EP=${JSON.stringify(cfg.formEndpoint)};
 function digits(s){return (s||'').replace(/\\D/g,'');}

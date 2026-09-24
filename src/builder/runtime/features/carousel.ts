@@ -5,10 +5,7 @@
  * slides por vez), loop nas setas e autoplay (pausa com o mouse em cima,
  * com foco dentro, com a aba oculta e respeita prefers-reduced-motion).
  */
-export const carouselScript = (_cfg: {
-	viewEndpoint: string;
-	formEndpoint: string;
-}) => `
+export const carouselScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
   var cs=document.querySelectorAll('[data-pb-carousel]');
   if(!cs.length)return;
