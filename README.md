@@ -57,6 +57,15 @@ src/
 - **Salvamento.** Autosave com debounce, rascunho local para recuperar trabalho e controle de versão otimista: se outra aba salvou antes, o editor avisa o conflito.
 - **Server functions sem vazar o banco.** Funções que usam o `db` fora de um handler ficam em módulos próprios (ex.: `server/page-store.ts`); assim o compilador consegue tirar o driver do Postgres do bundle do navegador.
 
+### Geração com IA
+
+A IA não escreve props do Craft. Ela escreve **AI-Spec** (`builder/ai/spec.ts`): blocos (`Features`, `Pricing`, `Split`...), textos e tokens de design (tom da seção, tamanho do título). O compilador (`builder/ai/compile.ts`) transforma isso em `NodeSpec` com os mesmos helpers dos templates, então a seção gerada segue o tema, é responsiva e fica editável como qualquer outra.
+
+- Servidor: `server/ai.ts` (server function) e `server/ai-store.ts` (modelo, limite diário, log em `ai_generation`).
+- Editor: aba "Gerar com IA" na biblioteca de seções. São 3 variações em paralelo, com preview real.
+- Configure `OPENAI_API_KEY` no `.env.local`. Modelos e limite são opcionais (veja `.env.example`).
+- Um bloco novo no AI-Spec precisa de schema em `spec.ts`, de um `case` em `compile.ts` e, se ajudar, de uma menção nas regras de `prompt.ts`.
+
 ### Adicionando um componente
 
 1. Crie `src/builder/components/<nome>.tsx` exportando um `ComponentDefinition` (veja `button.tsx`).
