@@ -1,6 +1,6 @@
 /**
- * Cria (ou recria) a página "vitrine" com todos os componentes, para teste
- * manual e visual. Uso: pnpm tsx --env-file=.env.local scripts/seed-showcase.ts <projectId>
+ * Create (or recreate) the "vitrine" page with every component, for manual
+ * visual testing. Usage: pnpm tsx --env-file=.env.local scripts/seed-showcase.ts <projectId>
  */
 import { and, eq } from "drizzle-orm";
 import { containerPresets } from "#/builder/components/container.tsx";
@@ -32,7 +32,7 @@ const section = (spec: ReturnType<typeof h>, kind: SectionTree["kind"], name: st
 	return { rootNodeId: tree.rootNodeId, kind, name, isGlobal: false, nodes: tree.nodes };
 };
 
-// cabeçalho e rodapé do site (aparecem em todas as páginas que usam o padrão)
+// site header and footer (shown on every page that uses the default)
 const siteHeader = section(tpl("header-menu-right").build(), "header", "Cabeçalho do site");
 const siteFooter = section(tpl("footer-columns").build(), "footer", "Rodapé do site");
 
@@ -96,7 +96,7 @@ const sections: SectionTree[] = [
 	section(tpl("cta-gradient").build(), "section", "CTA"),
 ];
 
-// o botão "Abrir pop-up" abre o modal da mesma seção
+// the "Abrir pop-up" button opens the modal in the same section
 const adv = sections[4];
 const modalId = Object.entries(adv.nodes).find(([, n]) => (n.type as { resolvedName: string }).resolvedName === "Modal")?.[0];
 const buttonId = Object.entries(adv.nodes).find(([, n]) => (n.type as { resolvedName: string }).resolvedName === "Button")?.[0];

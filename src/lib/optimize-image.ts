@@ -1,8 +1,8 @@
 /**
- * Otimização de imagens no navegador, antes do envio: reduz para no máximo
- * MAX_SIDE no maior lado e converte para WebP. Respeita a orientação da
- * câmera (EXIF), descarta os metadados (incluindo localização) e mantém a
- * transparência. SVG e GIF (pode ser animado) passam sem mudança.
+ * Browser-side image optimization before upload: shrinks the longest side
+ * to MAX_SIDE and converts to WebP. Honors camera orientation (EXIF),
+ * strips metadata (including location), and keeps transparency. SVG and
+ * GIF (may be animated) pass through unchanged.
  */
 
 const MAX_SIDE = 2400;
@@ -11,9 +11,9 @@ const OPTIMIZABLE = /^image\/(jpeg|png|webp|avif)$/;
 
 export type OptimizeResult = {
   file: File;
-  /** Tamanho antes, em bytes. */
+  /** Size before, in bytes. */
   before: number;
-  /** true se a imagem enviada é a versão otimizada. */
+  /** true if the uploaded image is the optimized version. */
   optimized: boolean;
   width?: number;
   height?: number;
@@ -45,14 +45,14 @@ export async function optimizeImage(file: File): Promise<OptimizeResult> {
   try {
     bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   } catch {
-    return keep; // formato que o navegador não decodifica
+    return keep; // format the browser cannot decode
   }
   try {
     const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
     const width = Math.round(bitmap.width * scale);
     const height = Math.round(bitmap.height * scale);
     const blob = await encode(bitmap, width, height);
-    // navegador sem WebP devolve PNG: nesse caso não vale a troca
+    // browser without WebP returns PNG: not worth swapping in that case
     if (!blob || blob.type !== "image/webp") return keep;
     if (blob.size >= file.size && scale === 1) return { ...keep, width, height };
     const name = `${file.name.replace(/\.[^.]+$/, "") || "imagem"}.webp`;

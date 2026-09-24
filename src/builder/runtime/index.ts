@@ -1,6 +1,6 @@
 /**
- * JavaScript da página publicada. Pequeno, sem dependências, roda depois do
- * HTML. Cada bloco só é incluído se algum componente da página precisar dele.
+ * Published-page JavaScript. Small, no dependencies, runs after the HTML.
+ * Each block is included only if some component on the page needs it.
  */
 import type { RuntimeFeature } from "../core/types.ts";
 import { accordionScript } from "./features/accordion.ts";
@@ -52,7 +52,7 @@ const pageView = (endpoint: string) => `
 }catch(e){}})();
 `;
 
-/** Blocos extras por recurso. Preenchidos pelos componentes que precisam. */
+/** Extra blocks per feature. Filled by the components that need them. */
 export const FEATURE_SCRIPTS: Partial<Record<RuntimeFeature, (cfg: RuntimeConfig) => string>> = {
   header: headerScript,
   menu: menuScript,

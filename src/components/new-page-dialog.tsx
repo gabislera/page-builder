@@ -20,16 +20,16 @@ import { cn } from "#/lib/utils";
 import { createPage, listPageTemplates, previewPageTemplate } from "#/server/pages";
 
 const BLANK = "blank";
-/** Largura em que a prévia é renderizada (desktop) antes de ser reduzida. */
+/** Width the preview is rendered at (desktop) before being scaled down. */
 const PREVIEW_WIDTH = 1280;
 
-/** Nova página: escolher um modelo (com prévia real) e dar um nome. */
+/** New page: pick a template (with a real preview) and give it a name. */
 export function NewPageDialog({ projectId, projectSlug }: { projectId: string; projectSlug: string }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [templateId, setTemplateId] = useState(BLANK);
   const [name, setName] = useState("");
-  // o endereço acompanha o nome até o usuário mexer nele
+  // slug follows the name until the user edits it
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
   const rename = (next: string) => {
@@ -58,7 +58,7 @@ export function NewPageDialog({ projectId, projectSlug }: { projectId: string; p
 
   const choose = (id: string, label: string) => {
     setTemplateId(id);
-    // sugere o nome do modelo se o usuário ainda não digitou um
+    // suggest the template name if the user has not typed one yet
     if (!name.trim() || name === suggested.current) rename(label);
     suggested.current = label;
   };
@@ -197,7 +197,7 @@ function TemplateCard({
   );
 }
 
-/** Script injetado na prévia: rola a página sozinha quando o card pede. */
+/** Script injected into the preview: scrolls the page when the card asks. */
 const PREVIEW_SCRIPT = `<style>html{scrollbar-width:none}::-webkit-scrollbar{display:none}</style><script>
 addEventListener("message",function(e){
   var d=e.data;if(!d||!d.pbScroll)return;
@@ -211,8 +211,8 @@ addEventListener("message",function(e){
 </script>`;
 
 /**
- * Página real do modelo, renderizada a 1280px de largura e reduzida para
- * caber no card. Ao passar o mouse, a página rola devagar até o fim.
+ * Real template page, rendered at 1280px wide and scaled to fit the card.
+ * On hover, the page slowly scrolls to the bottom.
  */
 function TemplatePreview({ projectId, templateId }: { projectId: string; templateId: string }) {
   const box = useRef<HTMLDivElement>(null);
@@ -236,7 +236,7 @@ function TemplatePreview({ projectId, templateId }: { projectId: string; templat
     return () => ro.disconnect();
   }, []);
 
-  // o card (button) é o "group": rola a prévia enquanto o mouse está em cima
+  // the card (button) is the "group": scroll the preview while hovered
   useEffect(() => {
     const card = box.current?.closest("button");
     if (!card) return;
@@ -258,7 +258,7 @@ function TemplatePreview({ projectId, templateId }: { projectId: string; templat
           ref={frame}
           title="Prévia do modelo"
           srcDoc={html.data + PREVIEW_SCRIPT}
-          // só scripts (carrossel, contadores, rolagem); sem acesso ao app
+          // scripts only (carousel, counters, scroll); no access to the app
           sandbox="allow-scripts"
           tabIndex={-1}
           className="pointer-events-none absolute top-0 left-0 origin-top-left border-0"

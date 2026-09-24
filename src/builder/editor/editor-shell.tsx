@@ -51,7 +51,7 @@ export function EditorShell({
   siteParts: { header: SectionTree | null; footer: SectionTree | null };
   services: EditorContextValue["services"];
 }) {
-  // o tema precisa estar no store antes do primeiro render do canvas
+  // theme must be in the store before the first canvas render
   useState(() => useSiteStore.getState().init(site, siteParts));
   const identity = useSiteStore((s) => s.settings.identity);
   const [meta, setMeta] = useState<PageMeta>({
@@ -131,7 +131,7 @@ export function EditorShell({
   );
 }
 
-/** Oferece restaurar um rascunho local que não chegou a ser salvo no servidor. */
+/** Offers to restore a local draft that never reached the server. */
 function DraftRecovery({ pageId, version, serverJson }: { pageId: string; version: number; serverJson: string }) {
   const { actions } = useEditor();
   useEffect(() => {

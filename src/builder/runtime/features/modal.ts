@@ -1,7 +1,7 @@
 /**
- * Runtime dos modais: fechar pelo botão, pelo fundo e ao seguir âncoras
- * internas, e abertura automática (após tempo ou intenção de saída).
- * A abertura por clique (data-pb-modal) já está no runtime principal.
+ * Modal runtime: close via button, backdrop, or following in-page anchors,
+ * and auto-open (after a delay or on exit intent). Click-to-open
+ * (data-pb-modal) already lives in the main runtime.
  */
 export const modalScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){

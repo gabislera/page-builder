@@ -1,6 +1,6 @@
 /**
- * Vídeo com miniatura (facade): troca o botão pelo player só ao clicar.
- * A página carrega só a imagem; o iframe do YouTube/Vimeo vem sob demanda.
+ * Video with thumbnail (facade): swaps the button for the player only on click.
+ * The page loads only the image; the YouTube/Vimeo iframe is on demand.
  */
 export const videoScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 document.addEventListener('click',function(e){

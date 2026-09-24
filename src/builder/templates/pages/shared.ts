@@ -1,7 +1,7 @@
 /**
- * Peças comuns dos modelos de página: fotos, títulos, selos, grades e
- * botões com o mesmo acabamento. Cores e fontes vêm do tema do site (C.*),
- * então o modelo se adapta à identidade de quem usa.
+ * Shared pieces for page templates: photos, titles, pills, grids, and
+ * buttons with the same finish. Colors and fonts come from the site theme
+ * (C.*), so the template adapts to the user's identity.
  */
 import { containerPresets } from "../../components/container.tsx";
 import { h, type NodeSpec } from "../../core/build.ts";
@@ -10,7 +10,7 @@ import { type Responsive, responsive } from "../../core/responsive.ts";
 import type { Action } from "../../core/style-types.ts";
 import { C } from "../../core/theme.ts";
 
-/** Foto do Unsplash (licença livre para uso comercial), já recortada. */
+/** Unsplash photo (free for commercial use), already cropped. */
 export const photo = (id: string, w = 1600, ratio?: number) =>
   `https://images.unsplash.com/photo-${id}?w=${w}${ratio ? `&h=${Math.round(w / ratio)}` : ""}&q=80&auto=format&fit=crop`;
 
@@ -18,12 +18,12 @@ export const r = responsive;
 type Align = "left" | "center";
 const textAlign = (a: Align) => ({ textAlign: r(a) });
 
-/** Branco com transparência (textos sobre fundo escuro). */
+/** White with transparency (text on a dark background). */
 export const white = (pct: number) => `color-mix(in srgb, #ffffff ${pct}%, transparent)`;
-/** Cor do tema com transparência. */
+/** Theme color with transparency. */
 export const tint = (color: string, pct: number) => `color-mix(in srgb, ${color} ${pct}%, transparent)`;
 
-/** Espaçamento vertical padrão das seções. */
+/** Default vertical section padding. */
 export const sectionPadding = (desktop = "104px", mobile = "64px") =>
   r(sides(desktop, "24px"), undefined, sides(mobile, "16px"));
 
@@ -42,7 +42,7 @@ export const section = (name: string, children: NodeSpec[], props: Record<string
 
 export const bg = (color: string) => defaultBackground({ type: "color", color });
 
-/** Fundo escuro com um brilho suave da cor primária no canto. */
+/** Dark background with a soft primary glow in the corner. */
 export const darkGlow = (angle = 160) =>
   defaultBackground({
     type: "gradient",
@@ -91,7 +91,7 @@ export const grid = (
     name,
   );
 
-/** Caixa branca com borda suave, cantos arredondados e sombra leve. */
+/** White box with a soft border, rounded corners, and a light shadow. */
 export const card = (children: NodeSpec[], props: Record<string, unknown> = {}, name = "Card"): NodeSpec =>
   stack(
     children,
@@ -117,7 +117,7 @@ export const card = (children: NodeSpec[], props: Record<string, unknown> = {}, 
     name,
   );
 
-/** Texto pequeno em caixa alta acima dos títulos ("O QUE VOCÊ RECEBE"). */
+/** Small uppercase text above titles ("O QUE VOCÊ RECEBE"). */
 export const eyebrow = (text: string, align: Align = "center", color = C.primary) =>
   h("Heading", {
     text,
@@ -176,7 +176,7 @@ export const lead = (
     box: { maxWidth: r(opts.maxWidth ?? "680px") },
   });
 
-/** Título de seção: selo + título + subtítulo, centralizados. */
+/** Section title: pill + title + subtitle, centered. */
 export const heading = (
   kicker: string,
   text: string,
@@ -201,7 +201,7 @@ export const heading = (
   ];
 };
 
-/** Selo arredondado ("Turma 2026 · Inscrições abertas"). */
+/** Rounded pill ("Turma 2026 · Inscrições abertas"). */
 export const pill = (
   text: string,
   opts: {
@@ -250,7 +250,7 @@ export const anchor = (id: string): Action => ({
   newTab: false,
 });
 
-/** Botão principal grande. */
+/** Large primary button. */
 export const cta = (
   text: string,
   opts: {
@@ -293,7 +293,7 @@ export const cta = (
     box: { alignSelf: r(opts.align ?? "center") },
   });
 
-/** Lista com ícone de check. */
+/** Checklist with a check icon. */
 export const checks = (
   items: string[],
   opts: {
@@ -326,7 +326,7 @@ export const checks = (
     },
   });
 
-/** Imagem com cantos arredondados e sombra. */
+/** Image with rounded corners and a shadow. */
 export const picture = (src: string, alt: string, props: Record<string, unknown> = {}) =>
   h(
     "Image",
@@ -347,7 +347,7 @@ export const picture = (src: string, alt: string, props: Record<string, unknown>
     "Imagem",
   );
 
-/** Rodapé enxuto para páginas sem o rodapé do site (vendas, captura). */
+/** Compact footer for pages without the site footer (sales, capture). */
 export const miniFooter = (text: string, dark = true) =>
   section(
     "Rodapé",
@@ -374,7 +374,7 @@ export const miniFooter = (text: string, dark = true) =>
     },
   );
 
-/** Perguntas frequentes no estilo lista (acordeão). */
+/** FAQ in list style (accordion). */
 export const faq = (items: [string, string][], props: Record<string, unknown> = {}) =>
   h(
     "Accordion",

@@ -1,7 +1,7 @@
 /**
- * Acesso a dados de páginas e seções, só no servidor. Fica fora de pages.ts
- * porque funções de módulo que usam o `db` impediriam o compilador de
- * remover o driver do Postgres do bundle do navegador.
+ * Page and section data access, server-only. Kept out of pages.ts because
+ * module-level functions that use `db` would stop the compiler from
+ * tree-shaking the Postgres driver out of the browser bundle.
  */
 import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { normalizeSiteSettings, type SiteSettings } from "#/builder/core/theme";
@@ -15,7 +15,7 @@ export const publicPagePath = (projectSlug: string, pageSlug: string) => `/p/${p
 
 type PageRow = typeof page.$inferSelect;
 
-/** Configurações do site (tema, identidade, cabeçalho/rodapé padrão). */
+/** Site settings (theme, identity, default header/footer). */
 export async function loadSiteSettings(projectId: string) {
   const row = await db.query.project.findFirst({
     where: eq(project.id, projectId),
@@ -24,7 +24,7 @@ export async function loadSiteSettings(projectId: string) {
   return { project: row, settings: normalizeSiteSettings(row.settings) };
 }
 
-/** Seção de cabeçalho/rodapé do site, marcada como parte do site. */
+/** Site header/footer section, marked as a site part. */
 export async function loadSitePart(
   projectId: string,
   sectionId: string | null,
@@ -46,8 +46,8 @@ export async function loadSitePart(
 }
 
 /**
- * Seções da página na ordem de exibição, incluindo o cabeçalho e o rodapé do
- * site quando a página usa o padrão.
+ * Page sections in display order, including the site header and footer
+ * when the page uses the default.
  */
 export async function loadPageSections(row: PageRow, settings: SiteSettings) {
   const [own, header, footer] = await Promise.all([
@@ -55,7 +55,7 @@ export async function loadPageSections(row: PageRow, settings: SiteSettings) {
     row.headerMode === "site" ? loadSitePart(row.projectId, settings.headerSectionId, "header") : null,
     row.footerMode === "site" ? loadSitePart(row.projectId, settings.footerSectionId, "footer") : null,
   ]);
-  // barras de aviso ficam acima do cabeçalho do site
+  // announcement bars sit above the site header
   return [
     ...own.filter(isTopBar),
     ...(header ? [header] : []),
@@ -65,8 +65,8 @@ export async function loadPageSections(row: PageRow, settings: SiteSettings) {
 }
 
 /**
- * HTML de prévia de um modelo de página com o tema, a identidade e o
- * cabeçalho/rodapé do projeto (sem salvar nada).
+ * Preview HTML of a page template with the project's theme, identity, and
+ * header/footer (nothing is saved).
  */
 export async function renderTemplatePreview(projectId: string, template: PageTemplate) {
   const { project: proj, settings } = await loadSiteSettings(projectId);
@@ -87,7 +87,7 @@ export async function renderTemplatePreview(projectId: string, template: PageTem
     nodes: mergePage(tree.root, sections),
     seo: { title: template.name },
     tracking: {},
-    // a prévia não mostra o aviso de cookies
+    // preview does not show the cookie banner
     site: {
       ...settings,
       cookieBanner: { ...settings.cookieBanner, enabled: false },
@@ -137,7 +137,7 @@ export async function publishPageById(pageId: string) {
   };
 }
 
-/** Republica todas as páginas publicadas do projeto (ex.: depois de mudar o tema). */
+/** Republish all published pages in the project (e.g. after a theme change). */
 export async function republishProject(projectId: string) {
   const rows = await db
     .select({ id: page.id })
@@ -244,7 +244,7 @@ export async function insertSections(tx: Tx, projectId: string, pageId: string, 
   }
 }
 
-/** Remove seções que não são globais e não estão em nenhuma página. */
+/** Remove sections that are not global and not used by any page. */
 export async function deleteOrphanSections(tx: Tx, candidateIds: string[]) {
   if (!candidateIds.length) return;
   await tx

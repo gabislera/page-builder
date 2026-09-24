@@ -1,6 +1,6 @@
 /**
- * Seções prontas com componentes interativos (acordeão, abas e carrossel).
- * Cada modelo gera uma subárvore nova (ids novos) a cada inserção.
+ * Ready-made sections with interactive components (accordion, tabs, carousel).
+ * Each template generates a fresh subtree (new ids) on every insert.
  */
 import { containerPresets } from "../components/container.tsx";
 import { h, type NodeSpec } from "../core/build.ts";
@@ -32,12 +32,12 @@ const sectionTitle = (text: string, subtitle?: string): NodeSpec[] => [
     : []),
 ];
 
-/** Imagem neutra (SVG embutido) para o usuário trocar pela dele. */
+/** Neutral image (inline SVG) for the user to replace with their own. */
 const PLACEHOLDER_IMAGE =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='900'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%2394a3b8'/><stop offset='1' stop-color='%23334155'/></linearGradient></defs><rect width='1600' height='900' fill='url(%23g)'/></svg>";
 
 /* ------------------------------------------------------------------ */
-/* Perguntas frequentes                                                */
+/* FAQ                                                                 */
 /* ------------------------------------------------------------------ */
 
 const FAQ = [
@@ -48,7 +48,7 @@ const FAQ = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Abas                                                                */
+/* Tabs                                                                */
 /* ------------------------------------------------------------------ */
 
 const tabContent = (title: string, text: string): NodeSpec =>
@@ -74,7 +74,7 @@ const tabContent = (title: string, text: string): NodeSpec =>
   );
 
 /* ------------------------------------------------------------------ */
-/* Carrossel                                                           */
+/* Carousel                                                            */
 /* ------------------------------------------------------------------ */
 
 const heroSlide = (title: string, text: string): NodeSpec =>

@@ -20,7 +20,7 @@ export const PLACEHOLDER_IMAGE =
   );
 
 export type ImageProps = {
-  /** Imagem por dispositivo: mobile/tablet podem usar outra imagem. */
+  /** Image per device: mobile/tablet can use another image. */
   src: Responsive<string>;
   alt: string;
   height: Responsive<Length>;

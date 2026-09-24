@@ -1,6 +1,6 @@
 /**
- * Página "vitrine-3" com barra de aviso, contadores e formulário em etapas.
- * Uso: pnpm tsx --env-file=.env.local scripts/seed-showcase-3.ts <projectId>
+ * "vitrine-3" page with announcement bar, counters, and a multi-step form.
+ * Usage: pnpm tsx --env-file=.env.local scripts/seed-showcase-3.ts <projectId>
  */
 import { and, eq, inArray } from "drizzle-orm";
 import { buildRoot, buildTree, h } from "#/builder/core/build.ts";
@@ -48,7 +48,7 @@ const existing = await db.query.page.findFirst({
 	where: and(eq(page.projectId, projectId), eq(page.slug, "vitrine-3")),
 });
 if (existing) {
-	// seções próprias da página antiga (não globais) saem junto
+	// the old page's own (non-global) sections are removed with it
 	const links = await db
 		.select({ sectionId: pageSection.sectionId })
 		.from(pageSection)

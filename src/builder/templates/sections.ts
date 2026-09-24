@@ -1,6 +1,6 @@
 /**
- * Biblioteca de seções prontas. Cada modelo gera uma subárvore nova
- * (ids novos) a cada inserção.
+ * Ready-made section library. Each template generates a fresh subtree
+ * (new ids) on every insert.
  */
 import { containerPresets } from "../components/container.tsx";
 import { h, type NodeSpec } from "../core/build.ts";

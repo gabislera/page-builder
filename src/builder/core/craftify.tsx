@@ -5,8 +5,8 @@ import { EDITOR_HIDDEN_STYLE, HIDDEN_DISPLAY } from "./style-engine.ts";
 import type { AnyComponentDefinition } from "./types.ts";
 
 /**
- * Transforma uma definição de componente num componente do Craft: conecta o
- * elemento raiz à seleção/drag e injeta o CSS do nó no canvas.
+ * Turns a component definition into a Craft component: connects the
+ * root element to selection/drag and injects the node's CSS into the canvas.
  */
 export function craftify(def: AnyComponentDefinition) {
   function CraftComponent(allProps: Record<string, unknown>) {
@@ -20,7 +20,7 @@ export function craftify(def: AnyComponentDefinition) {
       (path: string, value: unknown) => setProp((draft: Record<string, unknown>) => setPath(draft, path, value)),
       [setProp],
     );
-    // no editor, elementos ocultos num dispositivo ficam translúcidos em vez de sumir
+    // in the editor, elements hidden on a device stay translucent instead of disappearing
     const css = def.css(id, props).replaceAll(`display:${HIDDEN_DISPLAY}`, EDITOR_HIDDEN_STYLE);
     const rootRef = useCallback(
       (el: HTMLElement | null) => {

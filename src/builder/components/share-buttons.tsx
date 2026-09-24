@@ -1,8 +1,8 @@
 /**
- * Botões de compartilhar: WhatsApp, Facebook, LinkedIn, X, Telegram, e-mail,
- * copiar link e o compartilhamento nativo do celular. O link compartilhado é
- * o da própria página (lido no navegador) ou um link fixo; o runtime "share"
- * monta os endereços e cuida do copiar/compartilhar.
+ * Share buttons: WhatsApp, Facebook, LinkedIn, X, Telegram, email,
+ * copy link, and native mobile share. The shared URL is the current
+ * page (read in the browser) or a fixed URL; the "share" runtime
+ * builds the destinations and handles copy/share.
  */
 import {
   AlignHorizontalJustifyCenter,
@@ -29,7 +29,7 @@ import type { ComponentDefinition, NodeViewProps } from "../core/types.ts";
 
 export type ShareNetwork = "whatsapp" | "facebook" | "linkedin" | "x" | "telegram" | "email" | "copy" | "native";
 
-/** Nome, ícone e cor oficial de cada opção. */
+/** Name, icon, and official color for each option. */
 export const SHARE_NETWORKS: Record<ShareNetwork, { label: string; icon: string; color: string }> = {
   whatsapp: { label: "WhatsApp", icon: "whatsapp", color: "#25D366" },
   facebook: { label: "Facebook", icon: "facebook", color: "#1877F2" },
@@ -45,12 +45,12 @@ export type ShareItem = { id: string; network: ShareNetwork };
 
 export type ShareButtonsProps = {
   items: ShareItem[];
-  /** "page": link da página aberta; "custom": link fixo. */
+  /** "page": current page URL; "custom": fixed URL. */
   urlMode: "page" | "custom";
   url: string;
-  /** Texto que acompanha o link. Vazio: título da página. */
+  /** Text that accompanies the link. Empty: page title. */
   text: string;
-  /** Texto antes dos botões ("Compartilhe:"). */
+  /** Text before the buttons ("Compartilhe:"). */
   label: string;
   layout: "icons" | "buttons";
   shape: "circle" | "rounded" | "square";
@@ -94,13 +94,13 @@ function ShareButtonsView({ id, props, rootRef }: NodeViewProps<ShareButtonsProp
             "aria-label": withText ? undefined : net.label,
             title: withText ? undefined : net.label,
           };
-          // copiar e nativo são botões; as redes são links (href no runtime)
+          // copy and native are buttons; networks are links (href set at runtime)
           return item.network === "copy" || item.network === "native" ? (
             <button
               key={item.id}
               type="button"
               {...common}
-              // o nativo só aparece se o navegador suportar
+              // native only shows if the browser supports it
               hidden={item.network === "native" && !isEditor ? true : undefined}
               data-pb-copied={item.network === "copy" ? props.copiedText : undefined}
               tabIndex={isEditor ? -1 : undefined}
@@ -108,7 +108,7 @@ function ShareButtonsView({ id, props, rootRef }: NodeViewProps<ShareButtonsProp
               {content}
             </button>
           ) : (
-            // biome-ignore lint/a11y/useValidAnchor: o href real (com o link da página aberta) é montado no navegador pelo runtime
+            // biome-ignore lint/a11y/useValidAnchor: the real href (with the current page URL) is built in the browser by the runtime
             <a
               key={item.id}
               href="#"
@@ -336,14 +336,14 @@ export const ShareButtons: ComponentDefinition<ShareButtonsProps> = {
     if (p.colorMode === "custom") {
       btn.set("color", p.iconColor).set("background-color", p.background || "transparent");
     } else {
-      // oficiais: fundo na cor da marca, ícone branco
+      // official: brand-color background, white icon
       for (const n of new Set(p.items.map((i) => i.network))) {
         const color = SHARE_NETWORKS[n]?.color ?? "#52525b";
         sheet.rule(` .pb-share-${n}`).set("background-color", color).set("color", "#ffffff");
       }
     }
 
-    // aviso "Link copiado!" num balão acima do botão
+    // "Link copiado!" toast in a balloon above the button
     sheet
       .rule(" .pb-share-btn[data-pb-copied-show]::after")
       .set("content", "attr(data-pb-copied)")

@@ -16,7 +16,7 @@ export async function requireProjectAccess(userId: string, projectId: string) {
   return member;
 }
 
-/** Carrega a página e confirma que o usuário tem acesso ao projeto dela. */
+/** Load the page and confirm the user has access to its project. */
 export async function requirePageAccess(userId: string, pageId: string) {
   const row = await db.query.page.findFirst({
     where: and(eq(page.id, pageId), isNull(page.deletedAt)),

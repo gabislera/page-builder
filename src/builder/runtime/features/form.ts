@@ -1,8 +1,8 @@
 /**
- * Runtime dos formulários: máscara de telefone, validação nativa, etapas
- * (só avança com a etapa válida), envio via fetch para o endpoint da página
- * e ação pós-envio (mensagem ou redirect).
- * Configuração vem dos data-atributos do <form data-pb-form>.
+ * Form runtime: phone mask, native validation, steps (advance only when the
+ * step is valid), fetch submit to the page endpoint, and post-submit action
+ * (message or redirect). Config comes from data attributes on
+ * <form data-pb-form>.
  */
 export const formScript = (cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
@@ -58,7 +58,7 @@ function go(f,i,focus){
     if(first)try{first.focus({preventScroll:true});}catch(x){}
   }
 }
-/** Valida só os campos da etapa visível; mostra o aviso do 1º inválido. */
+/** Validates only the visible step's fields; shows the first invalid hint. */
 function stepValid(f){
   var s=steps(f)[cur(f)];if(!s)return true;
   s.querySelectorAll('[data-pb-tel]').forEach(function(w){telSync(w,false);});
@@ -82,7 +82,7 @@ document.addEventListener('submit',function(e){
   if(!(f instanceof HTMLFormElement)||!f.hasAttribute('data-pb-form'))return;
   e.preventDefault();
   if(f.getAttribute('data-pb-busy'))return;
-  // Enter numa etapa intermediária: avança em vez de enviar
+  // Enter on a middle step: advance instead of submit
   var n=steps(f).length;
   if(n&&cur(f)<n-1){if(stepValid(f))go(f,cur(f)+1,true);return;}
   f.querySelectorAll('[data-pb-tel]').forEach(function(w){telSync(w,false);});
@@ -109,7 +109,7 @@ document.addEventListener('submit',function(e){
     if(f.getAttribute('data-pb-after')==='redirect'&&url){
       if(f.getAttribute('data-pb-append-query')==='1')url=withQuery(url);
       var blank=f.getAttribute('data-pb-target')==='_blank';
-      // pequena espera para os pixels registrarem o Lead antes de sair da página
+      // brief wait so pixels can record the Lead before leaving the page
       setTimeout(function(){
         if(blank){var w=window.open(url,'_blank','noopener');if(!w){location.href=url;return;}done();f.reset();}
         else{location.href=url;}

@@ -31,7 +31,7 @@ const timestamps = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Tipos dos campos JSON                                               */
+/* JSON field types                                                    */
 /* ------------------------------------------------------------------ */
 
 export type PageSeo = {
@@ -50,11 +50,11 @@ export type PageTracking = {
   bodyScripts?: string;
 };
 
-/** Árvore de nós Craft de uma seção. A chave `rootNodeId` aponta o nó raiz. */
+/** Craft node tree of a section. `rootNodeId` points to the root node. */
 export type SectionNodes = SerializedNodes;
 
 /* ------------------------------------------------------------------ */
-/* Projetos                                                            */
+/* Projects                                                            */
 /* ------------------------------------------------------------------ */
 
 export const projectRole = pgEnum("project_role", ["owner", "editor"]);
@@ -63,7 +63,7 @@ export const project = pgTable("project", {
   id: id(),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
-  /** Tema global, identidade e cabeçalho/rodapé padrão do site. */
+  /** Global theme, identity, and default site header/footer. */
   settings: jsonb("settings").$type<Partial<SiteSettings>>().notNull().default({}),
   ...timestamps,
 });
@@ -84,16 +84,16 @@ export const projectMember = pgTable(
 );
 
 /* ------------------------------------------------------------------ */
-/* Páginas e seções                                                    */
+/* Pages and sections                                                  */
 /* ------------------------------------------------------------------ */
 
 export const pageStatus = pgEnum("page_status", ["draft", "published"]);
 
 /**
- * De onde vem o cabeçalho/rodapé da página:
- * - site: o padrão do projeto (muda junto em todas as páginas)
- * - none: a página não tem
- * - custom: a página tem um próprio (salvo nas seções dela)
+ * Where the page header/footer comes from:
+ * - site: the project default (changes together on every page)
+ * - none: the page has none
+ * - custom: the page has its own (stored in its sections)
  */
 export const sitePartMode = pgEnum("site_part_mode", ["site", "none", "custom"]);
 
@@ -109,11 +109,11 @@ export const page = pgTable(
     status: pageStatus("status").notNull().default("draft"),
     headerMode: sitePartMode("header_mode").notNull().default("site"),
     footerMode: sitePartMode("footer_mode").notNull().default("site"),
-    /** Nó ROOT (componente Page) serializado: estilos globais da página. */
+    /** Serialized ROOT node (Page component): page-level styles. */
     root: jsonb("root").$type<SerializedNode>().notNull(),
     seo: jsonb("seo").$type<PageSeo>().notNull().default({}),
     tracking: jsonb("tracking").$type<PageTracking>().notNull().default({}),
-    /** Incrementa a cada save. Usado para detectar edição concorrente. */
+    /** Increments on every save. Used to detect concurrent edits. */
     version: integer("version").notNull().default(1),
     publishedHtml: text("published_html"),
     publishedAt: timestamp("published_at", { withTimezone: true }),
@@ -129,8 +129,8 @@ export const page = pgTable(
 export const sectionKind = pgEnum("section_kind", ["section", "header", "footer"]);
 
 /**
- * Uma seção é um bloco independente (Section, Header ou Footer) com sua
- * própria árvore de nós. Seções globais são reutilizadas por várias páginas.
+ * A section is an independent block (Section, Header, or Footer) with its
+ * own node tree. Global sections are reused by multiple pages.
  */
 export const section = pgTable(
   "section",
@@ -166,8 +166,8 @@ export const pageSection = pgTable(
   (t) => [primaryKey({ columns: [t.pageId, t.sectionId] }), index("page_section_section_idx").on(t.sectionId)],
 );
 
-/** Modelos de seção. `projectId` nulo = modelo do sistema. */
-/** Seções salvas pelo usuário como modelo (valem em todos os projetos dele). */
+/** Section templates. Null `projectId` = system template. */
+/** Sections saved by the user as templates (available in all of their projects). */
 export const sectionTemplate = pgTable("section_template", {
   id: id(),
   userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
@@ -184,7 +184,7 @@ export const sectionTemplate = pgTable("section_template", {
 });
 
 /* ------------------------------------------------------------------ */
-/* Assets, formulários e visitas                                       */
+/* Assets, forms, and visits                                           */
 /* ------------------------------------------------------------------ */
 
 export const asset = pgTable(
@@ -236,7 +236,7 @@ export const pageView = pgTable(
 );
 
 /* ------------------------------------------------------------------ */
-/* Relações                                                            */
+/* Relations                                                           */
 /* ------------------------------------------------------------------ */
 
 export const projectRelations = relations(project, ({ many }) => ({

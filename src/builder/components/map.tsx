@@ -1,6 +1,6 @@
 /**
- * Mapa: incorporação pública do Google Maps (sem chave de API) a partir de um
- * endereço ou nome de lugar. Carrega só quando chega perto da tela.
+ * Map: public Google Maps embed (no API key) from an address or place name.
+ * Loads only when near the viewport.
  */
 import { MapPinned } from "lucide-react";
 import { Group } from "../controls/field.tsx";
@@ -16,7 +16,7 @@ import type { Border, Box, Length, Shadow } from "../core/style-types.ts";
 import type { ComponentDefinition, NodeViewProps } from "../core/types.ts";
 
 export type MapProps = {
-  /** Endereço ou nome do lugar, como se busca no Google Maps. */
+  /** Address or place name, as you would search it in Google Maps. */
   address: string;
   zoom: number;
   height: Responsive<Length>;
@@ -49,7 +49,7 @@ function MapView({ id, props, rootRef }: NodeViewProps<MapProps>) {
       ) : (
         <div className="pb-placeholder">Informe um endereço no painel</div>
       )}
-      {/* no editor, o clique seleciona o elemento em vez de mexer no mapa */}
+      {/* in the editor, click selects the element instead of panning the map */}
       {isEditor ? <div className="pb-map-shield" /> : null}
     </div>
   );

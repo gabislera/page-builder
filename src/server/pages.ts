@@ -27,7 +27,7 @@ const nodesSchema = z.record(z.string(), z.any()) as unknown as z.ZodType<Serial
 const nodeSchema = z.record(z.string(), z.any()) as unknown as z.ZodType<SerializedNode>;
 
 /* ------------------------------------------------------------------ */
-/* Listagem e criação                                                  */
+/* Listing and creation                                                */
 /* ------------------------------------------------------------------ */
 
 export const listPages = createServerFn({ method: "GET" })
@@ -49,7 +49,7 @@ export const listPages = createServerFn({ method: "GET" })
       .orderBy(desc(page.updatedAt));
   });
 
-/** Modelos de página disponíveis (para todos os usuários). */
+/** Available page templates (for all users). */
 export const listPageTemplates = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
   .handler(async () =>
@@ -60,7 +60,7 @@ export const listPageTemplates = createServerFn({ method: "GET" })
     })),
   );
 
-/** Prévia (HTML) de um modelo com o tema do projeto. */
+/** Preview (HTML) of a template with the project theme. */
 export const previewPageTemplate = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
   .validator(z.object({ projectId: z.string(), templateId: z.string() }))
@@ -78,7 +78,7 @@ export const createPage = createServerFn({ method: "POST" })
       projectId: z.string(),
       name: z.string().trim().min(1).max(120),
       slug: z.string().trim().optional(),
-      /** Modelo de página (vazio: página em branco com um hero). */
+      /** Page template (empty: blank page with a hero). */
       templateId: z.string().optional(),
     }),
   )
@@ -124,7 +124,7 @@ export const duplicatePage = createServerFn({ method: "POST" })
     const { cloneTree } = await import("#/builder/core/tree");
     const sections = await loadSections(source.id);
     const copies: SectionTree[] = sections.map((s) => {
-      // seções globais continuam compartilhadas; as demais são copiadas
+      // global sections stay shared; the rest are copied
       if (s.isGlobal) return s;
       const cloned = cloneTree(s.nodes, s.rootNodeId, "ROOT");
       return { ...s, rootNodeId: cloned.rootNodeId, nodes: cloned.nodes };
@@ -166,7 +166,7 @@ export const deletePage = createServerFn({ method: "POST" })
   });
 
 /* ------------------------------------------------------------------ */
-/* Editor: carregar e salvar                                           */
+/* Editor: load and save                                               */
 /* ------------------------------------------------------------------ */
 
 export const getEditorPage = createServerFn({ method: "GET" })
@@ -195,7 +195,7 @@ export const getEditorPage = createServerFn({ method: "GET" })
         publishedAt: row.publishedAt?.toISOString() ?? null,
       },
       site: settings,
-      /** Cabeçalho/rodapé do site, para reinserir numa página que não usa. */
+      /** Site header/footer, to reinsert on a page that does not use them. */
       siteParts: { header, footer },
       nodes: mergePage(row.root, sections),
     };
@@ -217,8 +217,8 @@ export class VersionConflictError extends Error {
 }
 
 /**
- * Salva a página inteira numa transação. `version` precisa bater com a do
- * banco; se outra aba/pessoa salvou antes, retorna conflito.
+ * Save the whole page in a transaction. `version` must match the one in
+ * the database; if another tab/person saved first, returns a conflict.
  */
 export const savePage = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
@@ -249,7 +249,7 @@ export const savePage = createServerFn({ method: "POST" })
       const own = data.sections.filter((s) => !s.sitePart);
       const { sectionIds, touchedGlobalIds } = await upsertSections(tx, current.projectId, own);
 
-      // cabeçalho/rodapé do site: seção global apontada nas configurações do projeto
+      // site header/footer: global section pointed to in project settings
       const { settings } = await loadSiteSettings(current.projectId);
       const sitePatch: Partial<SiteSettings> = {};
       const touchedParts: SitePart[] = [];
@@ -302,7 +302,7 @@ export const savePage = createServerFn({ method: "POST" })
         .where(eq(page.id, current.id))
         .returning({ version: page.version, updatedAt: page.updatedAt });
 
-      // outras páginas publicadas que usam seções globais alteradas
+      // other published pages that use the changed global sections
       const affected = touchedGlobalIds.length
         ? await tx
             .selectDistinct({ id: page.id })
@@ -317,7 +317,7 @@ export const savePage = createServerFn({ method: "POST" })
               ),
             )
         : [];
-      // páginas publicadas que usam o cabeçalho/rodapé do site alterado
+      // published pages that use the changed site header/footer
       const usingSiteParts = touchedParts.length
         ? await tx
             .select({ id: page.id })
@@ -397,7 +397,7 @@ export const updatePageSettings = createServerFn({ method: "POST" })
   });
 
 /* ------------------------------------------------------------------ */
-/* Publicação                                                          */
+/* Publishing                                                          */
 /* ------------------------------------------------------------------ */
 
 export const publishPage = createServerFn({ method: "POST" })
@@ -406,7 +406,7 @@ export const publishPage = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const row = await requirePageAccess(context.user.id, data.pageId);
     const result = await publishPageById(row.id);
-    // republica páginas afetadas por seções globais editadas nesta página
+    // republish pages affected by global sections edited on this page
     for (const id of data.republish ?? []) {
       const other = await db.query.page.findFirst({ where: eq(page.id, id) });
       if (other && other.projectId === row.projectId && other.status === "published") {
@@ -416,7 +416,7 @@ export const publishPage = createServerFn({ method: "POST" })
     return result;
   });
 
-/** Tira a página do ar: volta a rascunho e o endereço deixa de responder. */
+/** Take the page offline: revert to draft and the URL stops responding. */
 export const unpublishPage = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(z.object({ pageId: z.string() }))
@@ -427,7 +427,7 @@ export const unpublishPage = createServerFn({ method: "POST" })
   });
 
 /* ------------------------------------------------------------------ */
-/* Seções globais e modelos                                            */
+/* Global sections and templates                                       */
 /* ------------------------------------------------------------------ */
 
 export const listGlobalSections = createServerFn({ method: "GET" })
@@ -450,7 +450,7 @@ export const listGlobalSections = createServerFn({ method: "GET" })
         and(
           eq(section.projectId, data.projectId),
           eq(section.isGlobal, true),
-          // cabeçalho e rodapé do site são geridos à parte
+          // site header and footer are managed separately
           eq(section.kind, "section"),
         ),
       )

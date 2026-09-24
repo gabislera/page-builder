@@ -1,6 +1,6 @@
 /**
- * Cria (ou recria) uma página de cada modelo em um projeto, para revisão.
- * Uso: pnpm tsx --env-file=.env.local scripts/seed-templates.ts <projectId>
+ * Create (or recreate) one page per template in a project, for review.
+ * Usage: pnpm tsx --env-file=.env.local scripts/seed-templates.ts <projectId>
  */
 import { and, eq, inArray } from "drizzle-orm";
 import { buildPageTemplate, PAGE_TEMPLATES } from "#/builder/templates/pages.ts";

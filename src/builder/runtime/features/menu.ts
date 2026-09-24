@@ -1,7 +1,7 @@
 /**
- * Menu: painel do celular (abre no hambúrguer; fecha no fundo escuro, no X,
- * ao clicar num link ou com Esc; trava a rolagem da página enquanto aberto),
- * submenus recolhíveis no painel e marcação do link da página atual.
+ * Menu: mobile panel (opens on hamburger; closes on backdrop, X, a link
+ * click, or Esc; locks page scroll while open), collapsible submenus in the
+ * panel, and marking the current page link.
  */
 export const menuScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){

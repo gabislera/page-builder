@@ -1,9 +1,9 @@
 /**
- * Barra de aviso: faixa fina de destaque ("Promoção termina hoje →").
- * Fica direto na página, sempre acima do cabeçalho.
- * Pode ficar fixa no topo ao rolar e pode ser fechada pelo visitante; o site
- * lembra por alguns dias (localStorage). Um script de uma linha logo depois
- * da barra a esconde já na leitura do HTML, sem piscar.
+ * Announcement bar: thin highlight strip ("Promoção termina hoje →").
+ * Lives directly on the page, always above the header.
+ * Can stick to the top on scroll and can be dismissed by the visitor; the site
+ * remembers for a few days (localStorage). A one-line script right after
+ * the bar hides it during HTML parse, with no flash.
  */
 import { Megaphone, X } from "lucide-react";
 import { ActionField } from "../controls/action.tsx";
@@ -40,9 +40,9 @@ export type AnnouncementBarProps = {
   action: Action;
   linkStyle: "link" | "button";
   dismissible: boolean;
-  /** Por quantos dias a barra fica escondida depois de fechada. */
+  /** How many days the bar stays hidden after it is dismissed. */
   rememberDays: number;
-  /** Fica grudada no topo da tela ao rolar. */
+  /** Sticks to the top of the screen while scrolling. */
   sticky: boolean;
   align: Responsive<"center" | "space-between">;
   background: Background;
@@ -94,12 +94,12 @@ function AnnouncementBarView({ id, props, rootRef, onPropChange }: NodeViewProps
     </aside>
   );
   if (isEditor || !props.dismissible) return bar;
-  // esconde antes de pintar se o visitante já fechou (sem piscar)
+  // hide before paint if the visitor already dismissed it (no flash)
   const hideIfDismissed = `try{var e=document.currentScript.previousElementSibling,v=+localStorage.getItem(${JSON.stringify(storageKey(id))});if(v&&v>Date.now())e.hidden=true}catch(_){}`;
   return (
     <>
       {bar}
-      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: script fixo, sem conteúdo do usuário */}
+      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: fixed script, no user content */}
       <script dangerouslySetInnerHTML={{ __html: hideIfDismissed }} />
     </>
   );
@@ -179,7 +179,7 @@ export const AnnouncementBar: ComponentDefinition<AnnouncementBarProps> = {
   inToolbox: true,
   notDuplicable: true,
   runtime: ["announcement"],
-  // só direto na página, e sempre no topo (ver editor/top-bar-order)
+  // page-only, always at the top (see editor/top-bar-order)
   rules: {
     canDrop: (target) => target.data.name === "Page",
     canDrag: () => false,
@@ -264,9 +264,9 @@ export const AnnouncementBar: ComponentDefinition<AnnouncementBarProps> = {
       .set("cursor", "pointer");
     sheet.rule(" > .pb-bar-close:hover").set("opacity", "1").set("background", "rgba(255,255,255,.12)");
     applyBox(sheet, { ...p.box, padding: undefined }, "block");
-    // fixa no topo só na página publicada; no editor fica no lugar
+    // stick to the top only on the published page; stay in flow in the editor
     if (p.sticky) sheet.rule("[data-pb-live]").set("position", "sticky").set("top", "0").set("z-index", "55");
-    // cabeçalho fixo gruda logo abaixo da barra (altura medida no runtime)
+    // sticky header sits just below the bar (height measured at runtime)
     if (p.sticky)
       sheet.appendRaw(
         `${nodeSelector(id)}[data-pb-live]:not([hidden]) ~ .pb-header[data-pb-live]{top:var(--pb-bar-h,0px)}`,

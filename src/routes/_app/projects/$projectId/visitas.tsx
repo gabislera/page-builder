@@ -38,7 +38,7 @@ function VisitsPage() {
       }),
     placeholderData: (prev) => prev,
   });
-  // a lista de páginas do filtro vem da consulta sem filtro de página
+  // the page filter list comes from the query with no page filter
   const [pageOptions, setPageOptions] = useState<Insights["pages"]>([]);
   if (pageId === ALL && insights.data && insights.data.pages !== pageOptions) setPageOptions(insights.data.pages);
   const d = insights.data;
@@ -168,7 +168,7 @@ function Empty() {
   return <p className="py-6 text-center text-sm text-muted-foreground">Sem dados no período.</p>;
 }
 
-/** Barras de visitas por dia, com os leads em destaque dentro de cada barra. */
+/** Daily visit bars, with leads highlighted inside each bar. */
 function DailyChart({ daily }: { daily: Insights["daily"] }) {
   const max = Math.max(1, ...daily.map((x) => x.views));
   const label = (day: string) => {

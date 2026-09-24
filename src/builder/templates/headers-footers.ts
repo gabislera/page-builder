@@ -1,6 +1,6 @@
 /**
- * Modelos prontos de cabeçalho e rodapé, montados com elementos comuns
- * (Logo, Menu, Botão, Container, Texto...), que o usuário edita livremente.
+ * Ready-made header and footer templates, built from common elements
+ * (Logo, Menu, Button, Container, Text...), which the user can edit freely.
  */
 import { containerPresets } from "../components/container.tsx";
 import { h, type NodeSpec } from "../core/build.ts";
@@ -15,7 +15,7 @@ const WHITE = "#ffffff";
 const WHITE_MUTED = "#ffffffb3";
 
 /* ------------------------------------------------------------------ */
-/* Peças                                                               */
+/* Building blocks                                                     */
 /* ------------------------------------------------------------------ */
 
 const link = (text: string, children: string[] = []) => ({
@@ -40,7 +40,7 @@ const logo = (props: Record<string, unknown> = {}) => h("Logo", props);
 
 const menu = (props: Record<string, unknown> = {}) => h("Menu", { items: navItems(), ...props });
 
-/** Botão de chamada do cabeçalho: compacto e oculto no celular. */
+/** Header CTA button: compact and hidden on mobile. */
 const headerButton = (props: Record<string, unknown> = {}) =>
   h("Button", {
     text: "Fale conosco",
@@ -58,7 +58,7 @@ const headerButton = (props: Record<string, unknown> = {}) =>
     ...props,
   });
 
-/** Linha centralizada na largura do conteúdo (dentro de cabeçalho em largura total). */
+/** Centered content-width row (inside a full-width header). */
 const contentRow = (children: NodeSpec[], props: Record<string, unknown> = {}, name?: string) =>
   h(
     "Container",
@@ -74,7 +74,7 @@ const contentRow = (children: NodeSpec[], props: Record<string, unknown> = {}, n
     name,
   );
 
-/* Rodapé escuro */
+/* Dark footer */
 
 const footerText = (html: string, typography: Record<string, unknown> = {}) =>
   h("Text", {
@@ -160,7 +160,7 @@ const brandColumn = () =>
   ]);
 
 /* ------------------------------------------------------------------ */
-/* Modelos                                                             */
+/* Templates                                                           */
 /* ------------------------------------------------------------------ */
 
 export const HEADER_FOOTER_TEMPLATES: SectionTemplate[] = [

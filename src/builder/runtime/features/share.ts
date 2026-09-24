@@ -1,7 +1,7 @@
 /**
- * Botões de compartilhar: monta o link de cada rede com o endereço da página
- * (ou o link fixo), copia o link com aviso e usa o compartilhamento nativo
- * do celular quando existe.
+ * Share buttons: builds each network's link from the page URL (or a fixed
+ * link), copies the URL with a hint, and uses native mobile share when
+ * available.
  */
 export const shareScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){

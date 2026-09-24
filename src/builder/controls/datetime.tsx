@@ -2,7 +2,7 @@ import { Field } from "./field.tsx";
 import { DebouncedInput } from "./inputs.tsx";
 import { useField } from "./use-field.ts";
 
-/** Data e hora local ("2026-12-31T23:59") sem fuso. */
+/** Local date and time ("2026-12-31T23:59") without timezone. */
 export function DateTimeField({ path, label, hint }: { path: string; label: string; hint?: string }) {
   const f = useField<string>(path);
   return (
@@ -17,7 +17,7 @@ export function DateTimeField({ path, label, hint }: { path: string; label: stri
   );
 }
 
-/** Horário do dia ("23:59"). */
+/** Time of day ("23:59"). */
 export function TimeField({ path, label, hint }: { path: string; label: string; hint?: string }) {
   const f = useField<string>(path);
   return (
@@ -43,7 +43,7 @@ const TZ_NAMES: Record<string, string> = {
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-/** Fusos em deslocamento UTC (-12:00 a +14:00). O de Brasília vem primeiro. */
+/** Timezones as UTC offsets (-12:00 to +14:00). Brasília comes first. */
 export const TIMEZONE_OPTIONS = (() => {
   const list: { value: string; label: string }[] = [];
   for (let h = -12; h <= 14; h++) {

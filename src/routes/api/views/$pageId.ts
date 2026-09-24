@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { db } from "#/db";
 import { pageView } from "#/db/schema";
 
-/** Beacon de visualização enviado pelo runtime da página publicada. */
+/** View beacon sent by the published page runtime. */
 export const Route = createFileRoute("/api/views/$pageId")({
   server: {
     handlers: {
@@ -11,7 +11,7 @@ export const Route = createFileRoute("/api/views/$pageId")({
         try {
           body = (await request.json()) as Record<string, unknown>;
         } catch {
-          // beacon sem corpo
+          // empty-body beacon
         }
         await db
           .insert(pageView)
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/api/views/$pageId")({
               ua: request.headers.get("user-agent"),
             },
           })
-          .catch(() => undefined); // página inexistente: ignora
+          .catch(() => undefined); // missing page: ignore
         return new Response(null, { status: 204 });
       },
     },

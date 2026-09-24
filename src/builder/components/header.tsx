@@ -40,18 +40,18 @@ export type HeaderProps = {
   borderColor: string;
   shadow: Shadow;
 
-  /** Fica preso no topo ao rolar a página. */
+  /** Sticks to the top while scrolling the page. */
   sticky: boolean;
-  /** Sobreposto à primeira seção, sem fundo até rolar a página. */
+  /** Overlay the first section, with no background until the page is scrolled. */
   transparent: boolean;
-  /** Fundo do cabeçalho transparente depois de rolar (só fixo). */
+  /** Background of the transparent header after scroll (sticky only). */
   scrolledBackground: string;
-  /** Cor dos links, do logo em texto e do ícone do menu depois de rolar. */
+  /** Color of links, text logo, and menu icon after scroll. */
   scrolledTextColor: string;
   shadowOnScroll: boolean;
-  /** Esconde ao rolar para baixo e volta ao rolar para cima (só fixo). */
+  /** Hide on scroll down and show again on scroll up (sticky only). */
   hideOnScrollDown: boolean;
-  /** Reduz o espaço interno vertical depois de rolar (só fixo). */
+  /** Reduce vertical padding after scroll (sticky only). */
   shrinkOnScroll: boolean;
   shrinkPadding: Length;
 
@@ -93,8 +93,8 @@ function HeaderView({ id, props, children, rootRef }: NodeViewProps<HeaderProps>
       className={nodeClassName(id, "pb-header", props.box)}
       data-pb-node={id}
       data-pb-header=""
-      // comportamentos de rolagem só na página publicada: no editor o
-      // cabeçalho fica no fluxo normal para ser editável
+      // scroll behaviors only on the published page: in the editor the
+      // header stays in normal flow so it can be edited
       data-pb-live={isEditor ? undefined : ""}
       data-pb-hide-on-scroll={!isEditor && props.sticky && props.hideOnScrollDown ? "" : undefined}
     >
@@ -248,7 +248,7 @@ function headerCss(id: string, p: HeaderProps): string {
     .set("min-height", p.minHeight, (v) => (v === "0px" ? undefined : v))
     .set("margin", "0 auto");
 
-  // comportamentos de rolagem: só na página publicada ([data-pb-live])
+  // scroll behaviors: published page only ([data-pb-live])
   const live = sheet.rule("[data-pb-live]");
   const scrolled = sheet.rule("[data-pb-live].pb-scrolled");
   if (p.transparent) {

@@ -10,11 +10,11 @@ import type { SectionTree } from "../core/tree.ts";
 
 type SiteState = {
   settings: SiteSettings;
-  /** Cabeçalho/rodapé do site como estavam ao abrir o editor. */
+  /** Site header/footer as they were when the editor opened. */
   siteParts: { header: SectionTree | null; footer: SectionTree | null };
-  /** Mudanças de tema/identidade ainda não salvas. */
+  /** Unsaved theme/identity changes. */
   dirty: boolean;
-  /** Tema ou identidade mudaram desde a última republicação. */
+  /** Theme or identity changed since the last republish. */
   needsRepublish: boolean;
   init: (settings: SiteSettings, siteParts: SiteState["siteParts"]) => void;
   setTheme: (theme: SiteTheme) => void;
@@ -50,7 +50,7 @@ export const useSiteStore = create<SiteState>((set) => ({
     })),
   markSaved: (settings) =>
     set((s) => ({
-      // preserva edições feitas enquanto o save estava em andamento
+      // keep edits made while the save was in flight
       settings: {
         ...settings,
         theme: s.settings.theme,

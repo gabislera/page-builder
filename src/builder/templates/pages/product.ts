@@ -1,8 +1,7 @@
 /**
- * Modelo "Página de produto" (e-commerce): um produto em destaque, com
- * galeria, preço e compra na primeira dobra, depois diferenciais, ambiente,
- * detalhes em abas, kits, avaliações e dúvidas. Usa o cabeçalho e o rodapé
- * do site.
+ * "Product page" template (e-commerce): one featured product, with gallery,
+ * price, and purchase in the first fold, then features, lifestyle, details
+ * in tabs, kits, reviews, and FAQ. Uses the site header and footer.
  */
 import { h, type NodeSpec } from "../../core/build.ts";
 import { corners, defaultShadow, sides } from "../../core/defaults.ts";
@@ -39,7 +38,7 @@ const IMAGES: [string, string][] = [
   ["1558756520-22cfe5d382ca", "Fone Aura ANC com o estojo de viagem"],
 ];
 
-/* 0. Barra de aviso */
+/* 0. Announcement bar */
 const bar = (): NodeSpec =>
   h(
     "AnnouncementBar",
@@ -53,7 +52,7 @@ const bar = (): NodeSpec =>
     "Barra de aviso",
   );
 
-/* 1. Produto: galeria + compra */
+/* 1. Product: gallery + buy */
 const gallery = () =>
   h(
     "Carousel",
@@ -278,7 +277,7 @@ const productHero = (): NodeSpec =>
     },
   );
 
-/* 2. Diferenciais */
+/* 2. Features */
 const feature = (icon: string, t: string, d: string) =>
   h(
     "IconBox",
@@ -325,7 +324,7 @@ const features = (): NodeSpec =>
     },
   );
 
-/* 3. Ambiente (imagem de fundo) */
+/* 3. Lifestyle (background image) */
 const mood = (): NodeSpec =>
   section(
     "Ambiente",
@@ -358,7 +357,7 @@ const mood = (): NodeSpec =>
     },
   );
 
-/* 4. Detalhes em abas */
+/* 4. Details in tabs */
 const specs = (): NodeSpec =>
   h(
     "IconList",
@@ -515,7 +514,7 @@ const kits = (): NodeSpec =>
     { background: bg(C.surface), box: { anchorId: KITS } },
   );
 
-/* 6. Avaliações (carrossel) */
+/* 6. Reviews (carousel) */
 const REVIEWS: [string, string, string, string][] = [
   [
     "O cancelamento de ruído é absurdo. Uso no metrô e no escritório aberto e esqueço que o mundo existe.",
@@ -604,7 +603,7 @@ const reviews = (): NodeSpec =>
     ),
   ]);
 
-/* 7. Dúvidas + botão flutuante do WhatsApp */
+/* 7. FAQ + floating WhatsApp button */
 const questions = (): NodeSpec =>
   section(
     "Perguntas frequentes",
@@ -641,7 +640,7 @@ const questions = (): NodeSpec =>
     { background: bg(C.surface) },
   );
 
-/* 8. Chamada final */
+/* 8. Final CTA */
 const finalCta = (): NodeSpec =>
   section(
     "Chamada final",

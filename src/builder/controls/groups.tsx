@@ -37,7 +37,7 @@ import { useField, useNodeProps } from "./use-field.ts";
 const join = (base: string, key: string) => (base ? `${base}.${key}` : key);
 
 /* ------------------------------------------------------------------ */
-/* Lados e cantos                                                      */
+/* Sides and corners                                                   */
 /* ------------------------------------------------------------------ */
 
 const SIDE_LABELS: Record<keyof Sides, string> = {
@@ -165,7 +165,7 @@ export function CornersField({ path, label }: { path: string; label: string }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Tipografia                                                          */
+/* Typography                                                          */
 /* ------------------------------------------------------------------ */
 
 const WEIGHTS: Option[] = [
@@ -236,7 +236,7 @@ export function TypographyFields({
 }
 
 /* ------------------------------------------------------------------ */
-/* Fundo                                                               */
+/* Background                                                          */
 /* ------------------------------------------------------------------ */
 
 export function BackgroundFields({ base }: { base: string }) {
@@ -308,7 +308,7 @@ const POSITION_LABEL: Record<string, string> = {
   "center right": "Direita",
 };
 
-/** Número simples (sem unidade no valor salvo). */
+/** Plain number (no unit in the saved value). */
 export function NumberField({
   path,
   label,
@@ -357,7 +357,7 @@ export function MediaPathField({
 }
 
 /* ------------------------------------------------------------------ */
-/* Borda, sombra e hover                                               */
+/* Border, shadow, and hover                                           */
 /* ------------------------------------------------------------------ */
 
 export function BorderFields({ base }: { base: string }) {
@@ -436,7 +436,7 @@ export function HoverFields({
 }
 
 /* ------------------------------------------------------------------ */
-/* Aba Avançado (Box)                                                  */
+/* Advanced tab (Box)                                                  */
 /* ------------------------------------------------------------------ */
 
 const VISIBILITY_DEVICES = [

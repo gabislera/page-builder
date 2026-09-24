@@ -1,6 +1,6 @@
 /**
- * Construtor de árvores serializadas, usado pelos modelos de página e de
- * seção. Mescla as props informadas sobre os defaults do componente.
+ * Serialized-tree builder, used by page and section templates.
+ * Merges the given props over the component defaults.
  */
 import type { SerializedNode, SerializedNodes } from "@craftjs/core";
 import { COMPONENTS } from "../registry.ts";
@@ -16,7 +16,7 @@ export type NodeSpec = {
   children?: NodeSpec[];
 };
 
-/** Atalho: h("Heading", { text: "..." }, [...filhos]) */
+/** Shortcut: h("Heading", { text: "..." }, [...children]) */
 export const h = (
   type: string,
   props: Record<string, unknown> = {},
@@ -53,7 +53,7 @@ export function buildTree(
   return { rootNodeId: id, nodes };
 }
 
-/** Nó ROOT (Page) sem filhos. */
+/** ROOT (Page) node with no children. */
 export function buildRoot(props: Record<string, unknown> = {}): SerializedNode {
   return buildTree({ type: "Page", props }, null, ROOT_ID).nodes[ROOT_ID];
 }

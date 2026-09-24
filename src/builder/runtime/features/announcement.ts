@@ -1,7 +1,7 @@
 /**
- * Barra de aviso: o "x" esconde a barra e guarda até quando ela fica
- * escondida. O script inline logo depois da barra já esconde na leitura do
- * HTML; aqui só tratamos o clique.
+ * Announcement bar: the "x" hides the bar and stores how long it stays
+ * hidden. The inline script right after the bar already hides it while the
+ * HTML is parsed; here we only handle the click.
  */
 export const announcementScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){

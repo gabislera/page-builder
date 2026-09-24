@@ -1,7 +1,7 @@
 /**
- * Contador numérico: quando o número entra na tela, conta de `from` até o
- * valor final com desaceleração no fim. O HTML já tem o número final; sem JS
- * (ou com "reduzir movimento") ele simplesmente aparece pronto.
+ * Numeric counter: when the number enters the viewport, counts from `from`
+ * to the final value with ease-out. The HTML already has the final number;
+ * without JS (or with reduced motion) it just appears ready.
  */
 export const counterScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){

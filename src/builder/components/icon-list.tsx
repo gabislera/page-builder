@@ -34,18 +34,18 @@ type Align = "flex-start" | "center" | "flex-end";
 export type IconListProps = {
   items: IconListItem[];
   layout: Responsive<Layout>;
-  /** Espaço entre os itens. */
+  /** Space between items. */
   gap: Responsive<Length>;
   align: Responsive<Align>;
   iconSize: Responsive<Length>;
   iconColor: string;
   iconStrokeWidth: number;
-  /** Alinhamento vertical do ícone em textos de várias linhas. */
+  /** Vertical icon alignment for multi-line text. */
   iconAlign: "top" | "center";
-  /** Espaço entre o ícone e o texto. */
+  /** Space between the icon and the text. */
   iconGap: Responsive<Length>;
   typography: Typography;
-  /** Cor do texto de itens com link no hover. */
+  /** Hover text color for items with a link. */
   hoverColor: string;
   divider: boolean;
   dividerStyle: "solid" | "dashed" | "dotted";
@@ -225,7 +225,7 @@ export const IconList: ComponentDefinition<IconListProps> = {
     const sheet = createSheet(id);
     const root = sheet.root();
     root.set("display", "flex").set("list-style", "none").set("margin", "0").set("padding", "0");
-    // direção, quebra e alinhamento dependem de layout + alinhamento
+    // direction, wrap, and alignment depend on layout + align
     setPerDevice(root, (d) => {
       const horizontal = resolve(p.layout, d) === "horizontal";
       const align = resolve(p.align, d);
@@ -240,7 +240,7 @@ export const IconList: ComponentDefinition<IconListProps> = {
 
     const border = `${p.dividerWidth} ${p.dividerStyle} ${p.dividerColor}`;
     if (p.divider) {
-      // a linha fica no meio do espaço: gap + padding do mesmo tamanho
+      // the line sits in the middle of the space: gap + padding of the same size
       const next = sheet.rule(" .pb-iconlist-item + .pb-iconlist-item");
       setPerDevice(next, (d) => {
         const horizontal = resolve(p.layout, d) === "horizontal";
@@ -266,7 +266,7 @@ export const IconList: ComponentDefinition<IconListProps> = {
     const icon = sheet.rule(" .pb-iconlist-icon");
     icon.set("display", "inline-flex").set("flex-shrink", "0").set("color", p.iconColor);
     if (p.iconAlign === "top") {
-      // centraliza o ícone na primeira linha do texto
+      // center the icon on the first line of text
       icon.set("margin-top", p.iconSize, (size) => `max(0px, calc((1lh - ${size}) / 2))`);
     }
     sheet.rule(" .pb-iconlist-icon svg").set("width", p.iconSize).set("height", p.iconSize);

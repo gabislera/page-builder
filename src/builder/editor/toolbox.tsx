@@ -23,7 +23,7 @@ type ToolboxItem = {
   label: string;
   icon: ToolboxIcon;
   create: () => ReactElement;
-  /** Clique no item (além de arrastar), para elementos de lugar fixo. */
+  /** Click on the item (besides drag), for elements with a fixed place. */
   onClick?: (editor: EditorApi) => void;
   hint?: string;
 };
@@ -41,7 +41,7 @@ const simple = (type: string): ToolboxItem => {
   };
 };
 
-/** Barra de aviso: só existe um lugar (topo), então um clique já adiciona. */
+/** Announcement bar: only one place (top), so a click adds it. */
 const topBarItem = (): ToolboxItem => ({
   ...simple(TOP_BAR_TYPE),
   hint: "Clique para adicionar no topo da página",
@@ -76,7 +76,7 @@ const columns = (n: number, label: string, icon: ToolboxIcon, template = ""): To
   ),
 });
 
-/** Modal já nasce com um título, um texto e um formulário dentro. */
+/** Modal starts with a title, a text, and a form inside. */
 function modalItem(): ToolboxItem {
   const def = COMPONENTS.Modal;
   const props = (type: string, patch: Record<string, unknown> = {}) =>
@@ -113,7 +113,7 @@ function modalItem(): ToolboxItem {
   };
 }
 
-/** Miniatura das colunas na proporção real (mais clara que "1/3 + 2/3"). */
+/** Column thumbnail at the real ratio (clearer than "1/3 + 2/3"). */
 function columnsGlyph(ratios: number[]): ToolboxIcon {
   const total = ratios.reduce((a, b) => a + b, 0);
   const gap = 1.5;
@@ -126,7 +126,7 @@ function columnsGlyph(ratios: number[]): ToolboxIcon {
           const w = (width * r) / total;
           const rect = (
             <rect
-              // biome-ignore lint/suspicious/noArrayIndexKey: colunas fixas
+              // biome-ignore lint/suspicious/noArrayIndexKey: fixed columns
               key={i}
               x={x}
               y={5}
@@ -147,7 +147,7 @@ function columnsGlyph(ratios: number[]): ToolboxIcon {
   return ColumnsGlyph;
 }
 
-/** Converte um NodeSpec (usado nos modelos) em elementos do Craft. */
+/** Converts a NodeSpec (used in templates) into Craft elements. */
 function specToElement(spec: NodeSpec, key?: string): ReactElement {
   const def = COMPONENTS[spec.type];
   const props = deepMerge(structuredClone(def.defaults), spec.props ?? {}) as Record<string, unknown>;
@@ -165,7 +165,7 @@ function specToElement(spec: NodeSpec, key?: string): ReactElement {
   );
 }
 
-/** Componente composto que já nasce com itens (Acordeão, Abas, Carrossel). */
+/** Compound component that starts with items (Accordion, Tabs, Carousel). */
 const composite = (type: string, spec: () => NodeSpec): ToolboxItem => {
   const def = COMPONENTS[type];
   return {

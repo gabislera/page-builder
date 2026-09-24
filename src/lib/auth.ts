@@ -17,7 +17,7 @@ export const auth = betterAuth({
     updateAge: 60 * 60 * 24,
     cookieCache: { enabled: true, maxAge: 5 * 60 },
   },
-  // tanstackStartCookies precisa ser o último plugin
+  // tanstackStartCookies must be the last plugin
   plugins: [tanstackStartCookies()],
 });
 

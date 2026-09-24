@@ -1,7 +1,7 @@
 /**
- * Modelo "Página de captura": aula gratuita ao vivo. Uma promessa forte e o
- * formulário logo na primeira dobra; o resto da página reforça o convite
- * (o que vai aprender, quem apresenta) e leva de volta ao formulário.
+ * "Capture page" template: free live class. A strong promise and the form
+ * in the first fold; the rest of the page reinforces the invite (what you'll
+ * learn, who presents) and leads back to the form.
  */
 import { h, type NodeSpec } from "../../core/build.ts";
 import { corners, defaultShadow, sides } from "../../core/defaults.ts";
@@ -32,7 +32,7 @@ import {
 const FORM = "inscricao";
 const join = (text = "Quero minha vaga gratuita", light = false) => cta(text, { action: anchor(FORM), light });
 
-/* 1. Primeira dobra: promessa + formulário */
+/* 1. Hero: promise + form */
 const hero = (): NodeSpec =>
   section(
     "Inscrição",
@@ -185,7 +185,7 @@ const hero = (): NodeSpec =>
     },
   );
 
-/* 2. O que você vai aprender */
+/* 2. What you'll learn */
 const step = (n: string, t: string, d: string) =>
   card(
     [
@@ -247,7 +247,7 @@ const learn = (): NodeSpec =>
     { background: bg(C.surface) },
   );
 
-/* 3. Quem apresenta */
+/* 3. Presenter */
 const mini = (value: number, label: string, extra: Record<string, unknown> = {}) =>
   h(
     "StatCounter",
@@ -314,7 +314,7 @@ const host = (): NodeSpec =>
     { background: darkGlow(200) },
   );
 
-/* 4. Chamada final */
+/* 4. Final CTA */
 const finalCta = (): NodeSpec =>
   section(
     "Chamada final",

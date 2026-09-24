@@ -13,28 +13,28 @@ import type { Box } from "../core/style-types.ts";
 import type { ComponentDefinition, NodeViewProps } from "../core/types.ts";
 
 export type HtmlProps = {
-  /** HTML, CSS e JS livres. Vão para a página publicada como estão. */
+  /** Freeform HTML, CSS, and JS. Written as-is to the published page. */
   code: string;
   box: Box;
 };
 
 /**
- * Script injetado na pré-visualização do editor: informa a altura do conteúdo
- * ao documento pai. Sem `allow-same-origin` o pai não consegue medir sozinho.
+ * Script injected in the editor preview: reports content height to the parent
+ * document. Without `allow-same-origin` the parent cannot measure it itself.
  */
 const MEASURE = `<script>(function(){var last=0;function send(){var h=Math.ceil(document.documentElement.scrollHeight);if(h!==last){last=h;parent.postMessage({pbHtmlHeight:h},"*");}}
 addEventListener("load",send);if(window.ResizeObserver){new ResizeObserver(send).observe(document.documentElement);}setInterval(send,1000);send();})();</script>`;
 
 const PREVIEW_BASE = "<style>html,body{margin:0}body{overflow:hidden;font-family:system-ui,sans-serif}</style>";
 
-/** Pré-visualização isolada no editor: scripts do usuário não tocam o editor. */
+/** Isolated editor preview: user scripts cannot touch the editor. */
 function EditorPreview({ code }: { code: string }) {
   const ref = useRef<HTMLIFrameElement | null>(null);
   const [height, setHeight] = useState(40);
 
   useEffect(() => {
     const frame = ref.current;
-    // o iframe mora dentro do canvas (outro documento): escuta na janela dele
+    // the iframe lives inside the canvas (another document): listen on its window
     const win = frame?.ownerDocument.defaultView;
     if (!frame || !win) return;
     const onMessage = (e: MessageEvent) => {
@@ -69,7 +69,7 @@ function HtmlView({ id, props, rootRef }: NodeViewProps<HtmlProps>) {
       <div
         className={className}
         data-pb-node={id}
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML livre escrito pelo dono da página
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: freeform HTML written by the page owner
         dangerouslySetInnerHTML={{ __html: props.code }}
       />
     );
@@ -82,7 +82,7 @@ function HtmlView({ id, props, rootRef }: NodeViewProps<HtmlProps>) {
       ) : (
         <>
           <EditorPreview code={props.code} />
-          {/* camada transparente: o clique seleciona o nó em vez de ir para o iframe */}
+          {/* transparent overlay: click selects the node instead of hitting the iframe */}
           <div className="pb-html-shield" />
         </>
       )}

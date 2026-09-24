@@ -42,10 +42,10 @@ import {
 } from "lucide-react";
 
 /**
- * Ícones em destaque ("Populares" no seletor), com nome em português.
- * As chaves são nomes já salvos em páginas: nunca renomear nem remover.
- * Algumas são apelidos próprios (ex.: "whatsapp" → MessageCircle,
- * "check-circle" → CheckCircle2) que diferem do nome do lucide.
+ * Featured icons ("Populares" in the picker), with Portuguese names.
+ * Keys are names already saved in pages: never rename or remove them.
+ * Some are custom aliases (e.g. "whatsapp" → MessageCircle,
+ * "check-circle" → CheckCircle2) that differ from the lucide name.
  */
 export const ICONS: Record<string, { label: string; Icon: LucideIcon }> = {
   "arrow-right": { label: "Seta direita", Icon: ArrowRight },
@@ -89,12 +89,12 @@ export const ICONS: Record<string, { label: string; Icon: LucideIcon }> = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Biblioteca completa do lucide                                       */
+/* Full lucide library                                                 */
 /* ------------------------------------------------------------------ */
 
 const LUCIDE = icons as Record<string, LucideIcon>;
 
-/** Nomes do lucide que a conversão genérica não acerta. */
+/** Lucide names the generic conversion gets wrong. */
 const KEBAB_EXCEPTIONS: Record<string, string> = {
   ArrowDown01: "arrow-down-0-1",
   ArrowDown10: "arrow-down-1-0",
@@ -113,7 +113,7 @@ const KEBAB_EXCEPTIONS: Record<string, string> = {
   Grid3x3: "grid-3x3",
 };
 
-/** "BadgePercent" → "badge-percent" (nome do lucide). */
+/** "BadgePercent" → "badge-percent" (lucide name). */
 function toKebab(pascal: string): string {
   return (
     KEBAB_EXCEPTIONS[pascal] ??
@@ -132,15 +132,15 @@ const toPascal = (kebab: string) =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join("");
 
-/** Todos os ícones do lucide, por nome kebab (para o seletor). */
+/** All lucide icons, by kebab name (for the picker). */
 export const ALL_ICON_NAMES: string[] = Object.keys(LUCIDE).map(toKebab).sort();
 
-/** Nome legível: rótulo em português dos populares ou o nome do lucide. */
+/** Readable name: Portuguese label of popular icons, or the lucide name. */
 export function iconLabel(name: string): string {
   return ICONS[name]?.label ?? name.replace(/-/g, " ");
 }
 
-/** Componente de um ícone salvo: apelidos/populares, depois o lucide completo. */
+/** Component for a saved icon: aliases/popular first, then the full lucide set. */
 export function resolveIcon(name: string | undefined): LucideIcon | null {
   if (!name) return null;
   return ICONS[name]?.Icon ?? LUCIDE[toPascal(name)] ?? null;

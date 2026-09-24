@@ -40,13 +40,13 @@ const UNIT_SECONDS: Record<Unit, number> = {
 
 export type CountdownProps = {
   mode: "date" | "evergreen" | "daily";
-  /** Data final no fuso escolhido, sem fuso: "2026-12-31T23:59". */
+  /** End date in the chosen timezone, no offset: "2026-12-31T23:59". */
   endDate: string;
-  /** Deslocamento UTC do fuso: "-03:00". */
+  /** Timezone UTC offset: "-03:00". */
   timezone: string;
-  /** Evergreen: duração por visitante, em minutos. */
+  /** Evergreen: duration per visitor, in minutes. */
   durationMinutes: number;
-  /** Diário: horário em que zera, "23:59". */
+  /** Daily: reset time, "23:59". */
   dailyTime: string;
   show: Record<Unit, boolean>;
   labels: Record<Unit, string>;
@@ -68,10 +68,10 @@ export type CountdownProps = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Cálculo de tempo (o runtime da página publicada repete esta lógica) */
+/* Time math (the published-page runtime repeats this logic)           */
 /* ------------------------------------------------------------------ */
 
-/** Minutos de deslocamento de "-03:00" (→ -180). */
+/** Offset minutes from "-03:00" (→ -180). */
 export function offsetMinutes(tz: string): number {
   const m = /^([+-])(\d{2}):?(\d{2})$/.exec(tz.trim());
   if (!m) return 0;
@@ -79,7 +79,7 @@ export function offsetMinutes(tz: string): number {
   return m[1] === "-" ? -v : v;
 }
 
-/** Instante UTC (ms) de uma data local no fuso informado. */
+/** UTC instant (ms) of a local datetime in the given timezone. */
 export function zonedToUtc(local: string, tz: string): number | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/.exec(local.trim());
   if (!m) return null;
@@ -87,7 +87,7 @@ export function zonedToUtc(local: string, tz: string): number | null {
   return utc - offsetMinutes(tz) * 60000;
 }
 
-/** Próxima ocorrência (ms) de "HH:MM" no fuso informado. */
+/** Next occurrence (ms) of "HH:MM" in the given timezone. */
 export function nextDaily(time: string, tz: string, now: number): number {
   const [hh, mm] = time.split(":").map((n) => Number(n) || 0);
   const off = offsetMinutes(tz) * 60000;
@@ -97,7 +97,7 @@ export function nextDaily(time: string, tz: string, now: number): number {
   return target;
 }
 
-/** Quebra os segundos restantes nas unidades visíveis (a maior absorve o resto). */
+/** Split remaining seconds into visible units (the largest absorbs the remainder). */
 export function splitTime(totalSeconds: number, show: Record<Unit, boolean>) {
   let rest = Math.max(0, Math.floor(totalSeconds));
   const out: Partial<Record<Unit, number>> = {};
@@ -111,7 +111,7 @@ export function splitTime(totalSeconds: number, show: Record<Unit, boolean>) {
 
 const pad = (n: number | undefined) => (n === undefined ? "00" : String(n).padStart(2, "0"));
 
-/** Fim da contagem no editor (evergreen conta a partir de quando o editor abriu). */
+/** Countdown end in the editor (evergreen starts when the editor opened). */
 function editorEnd(p: CountdownProps, now: number, mountedAt: number): number | null {
   if (p.mode === "date") return zonedToUtc(p.endDate, p.timezone);
   if (p.mode === "daily") return nextDaily(p.dailyTime, p.timezone, now);
@@ -143,7 +143,7 @@ function CountdownView({ id, props: p, rootRef }: NodeViewProps<CountdownProps>)
     const end = editorEnd(p, now, mountedAt);
     parts = splitTime(end === null ? 0 : (end - now) / 1000, p.show);
   } else if (p.mode === "evergreen") {
-    // primeiro acesso: a contagem começa cheia; o runtime ajusta para quem volta
+    // first visit: the countdown starts full; the runtime adjusts for return visits
     parts = splitTime(p.durationMinutes * 60, p.show);
   }
 
@@ -309,7 +309,7 @@ function CountdownSettings() {
   );
 }
 
-/** Uma semana a partir de hoje, meia-noite, como valor inicial. */
+/** One week from today, at midnight, as the initial value. */
 function defaultEndDate() {
   const d = new Date(Date.now() + 7 * 86400000);
   const p2 = (n: number) => String(n).padStart(2, "0");
@@ -394,7 +394,7 @@ export const Countdown: ComponentDefinition<CountdownProps> = {
     applyTypography(sheet.rule(" .pb-cd-label"), p.labelTypography);
     const sep = sheet.rule(" .pb-cd-sep");
     applyTypography(sep, p.numberTypography);
-    // alinha o ":" com os números (mesmo espaço interno do topo da caixa)
+    // align ":" with the numbers (same top padding as the unit box)
     sep.set("padding", p.unitPadding, (s) => `${s.top} 0 0`);
     applyTypography(sheet.rule(" .pb-cd-message"), p.messageTypography);
     applyBox(sheet, p.box);

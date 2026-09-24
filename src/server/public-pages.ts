@@ -1,6 +1,6 @@
 /**
- * Entrega das páginas publicadas (HTML gerado na publicação), sitemap e
- * robots.txt. Só servidor.
+ * Serves published pages (HTML generated on publish), sitemap, and
+ * robots.txt. Server-only.
  */
 import { and, asc, eq, isNotNull, isNull } from "drizzle-orm";
 import { normalizeSiteSettings } from "#/builder/core/theme";
@@ -11,7 +11,7 @@ const HTML = { "Content-Type": "text/html; charset=utf-8" };
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-/** Página 404 padrão: simples, neutra e com link para o início do site. */
+/** Default 404 page: simple, neutral, with a link to the site home. */
 function defaultNotFound(homeHref: string | null) {
   return `<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Página não encontrada</title>
@@ -54,14 +54,14 @@ async function publishedPages(projectId: string) {
 type Row = Awaited<ReturnType<typeof publishedPages>>[number];
 
 /**
- * Página inicial publicada: a escolhida nas configurações; senão
- * "home"/"inicio"; senão a publicada mais antiga.
+ * Published home page: the one chosen in settings; otherwise
+ * "home"/"inicio"; otherwise the oldest published page.
  */
 function pickHome(rows: Row[], homePageId: string | null) {
   return rows.find((r) => r.id === homePageId) ?? rows.find((r) => r.slug === "home" || r.slug === "inicio") ?? rows[0];
 }
 
-/** Responde /p/:projeto (página inicial) e /p/:projeto/:pagina. */
+/** Serves /p/:project (home page) and /p/:project/:page. */
 export async function servePublished(projectSlug: string, pageSlug?: string) {
   const proj = await db.query.project.findFirst({
     where: eq(project.slug, projectSlug),
@@ -71,13 +71,13 @@ export async function servePublished(projectSlug: string, pageSlug?: string) {
   const rows = await publishedPages(proj.id);
   const found = pageSlug ? rows.find((r) => r.slug === pageSlug) : pickHome(rows, settings.homePageId);
   if (found?.html) return htmlResponse(found.html);
-  // 404: a página escolhida pelo projeto ou a padrão
+  // 404: the page chosen by the project, or the default
   const custom = rows.find((r) => r.id === settings.notFoundPageId);
   if (custom?.html) return notFound(custom.html);
   return notFound(defaultNotFound(rows.length ? `/p/${proj.slug}` : null));
 }
 
-/** sitemap.xml do projeto: páginas publicadas que podem ser indexadas. */
+/** Project sitemap.xml: published pages that can be indexed. */
 export async function serveSitemap(projectSlug: string, origin: string) {
   const proj = await db.query.project.findFirst({
     where: eq(project.slug, projectSlug),
@@ -102,7 +102,7 @@ export async function serveSitemap(projectSlug: string, origin: string) {
   );
 }
 
-/** robots.txt do domínio: libera as páginas publicadas e esconde o app. */
+/** Domain robots.txt: allow published pages and hide the app. */
 export async function serveRobots(origin: string) {
   const projects = await db
     .selectDistinct({ slug: project.slug })

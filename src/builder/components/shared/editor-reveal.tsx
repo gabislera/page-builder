@@ -1,8 +1,8 @@
 /**
- * Só no editor: avisa quando um item de um componente composto (aba, slide,
- * item do acordeão) ou algo dentro dele é selecionado, para o componente
- * mostrar esse item (ativar a aba, rolar até o slide, abrir o painel).
- * Renderizar apenas quando `useIsEditor()` for verdadeiro: usa o Craft.
+ * Editor only: notifies when an item of a composite component (tab, slide,
+ * accordion item) or something inside it is selected, so the component
+ * can show that item (activate the tab, scroll to the slide, open the panel).
+ * Render only when `useIsEditor()` is true: uses Craft.
  */
 import { useEditor } from "@craftjs/core";
 import { useEffect, useRef } from "react";

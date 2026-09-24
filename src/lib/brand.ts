@@ -1,14 +1,14 @@
-/** Nome do produto. Troque aqui para renomear em todo o app. */
+/** Product name. Change here to rename it across the app. */
 export const APP_NAME = "Page Builder";
 
 /**
- * Cor de destaque do app (painel e editor), não dos sites dos usuários. A
- * mesma cor está em --primary no styles.css; troque nos dois lugares.
+ * App accent color (dashboard and editor), not the users' sites. The
+ * same color is in --primary in styles.css; change both places.
  */
 export const UI_ACCENT = "#10b981";
-/** Texto sobre a cor de destaque. */
+/** Text on the accent color. */
 export const UI_ACCENT_FG = "#022c22";
-/** Versão clara (contorno ao passar o mouse no canvas). */
+/** Light version (hover outline on the canvas). */
 export const UI_ACCENT_SOFT = "#6ee7b7";
-/** Contorno de edição de texto no canvas (diferente da seleção). */
+/** Text-editing outline on the canvas (distinct from selection). */
 export const UI_EDITING = "#f59e0b";

@@ -79,7 +79,7 @@ function ProjectsPage() {
               <Link
                 to="/projects/$projectId"
                 params={{ projectId: p.id }}
-                // o link cobre o cartão inteiro
+                // the link covers the whole card
                 className="truncate font-medium after:absolute after:inset-0"
               >
                 {p.name}

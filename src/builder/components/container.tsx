@@ -44,8 +44,8 @@ export type ContainerProps = {
   gap: Responsive<Length>;
   columns: Responsive<number>;
   /**
-   * Proporção das colunas da grade (ex.: "1fr 2fr"). Vazio = iguais. Só vale
-   * quando o número de partes bate com o número de colunas do dispositivo.
+   * Grid column ratio (e.g. "1fr 2fr"). Empty = equal. Only applies
+   * when the number of parts matches the device's column count.
    */
   columnsTemplate: Responsive<string>;
   htmlTag: "div" | "section" | "article" | "aside" | "nav" | "ul";
@@ -68,7 +68,7 @@ function ContainerView({ id, props, children, rootRef }: NodeViewProps<Container
       ref={rootRef as React.Ref<never>}
       className={nodeClassName(id, "pb-container", props.box)}
       data-pb-node={id}
-      // clique no container inteiro é tratado pelo runtime (não aninha <a>)
+      // click on the whole container is handled by the runtime (does not nest <a>)
       data-pb-href={link?.href}
       data-pb-target={link?.target}
       data-pb-modal={link?.["data-pb-modal"]}
@@ -230,7 +230,7 @@ export const Container: ComponentDefinition<ContainerProps> = {
       .set("list-style", p.htmlTag === "ul" ? "none" : undefined)
       .set("box-shadow", shadowToCss(p.shadow))
       .set("cursor", p.action.type !== "none" ? "pointer" : undefined);
-    // colunas por dispositivo: a proporção só vale se tiver o mesmo número de partes
+    // columns per device: the ratio only applies if it has the same number of parts
     let previous = "";
     for (const device of DEVICES) {
       const value = gridColumns(resolve(p.columns, device), resolve(p.columnsTemplate ?? responsive(""), device));
@@ -241,21 +241,21 @@ export const Container: ComponentDefinition<ContainerProps> = {
     applyBorder(root, p.border);
     applyHover(sheet, p.hover);
     applyBox(sheet, p.box, "flex");
-    // em linha, cada filho divide o espaço; em grade, a grade cuida disso
+    // in a row, each child shares space; in a grid, the grid handles it
     sheet.rule(" > *").set("min-width", "0");
     return sheet.toString();
   },
   Settings: ContainerSettings,
 };
 
-/** Valor de grid-template-columns para `n` colunas com a proporção dada. */
+/** grid-template-columns value for `n` columns with the given ratio. */
 export function gridColumns(n: number, template: string): string {
   const parts = template.trim().split(/\s+/).filter(Boolean);
   if (parts.length === n) return parts.map((p) => `minmax(0, ${p})`).join(" ");
   return `repeat(${n}, minmax(0, 1fr))`;
 }
 
-/** Proporções oferecidas por número de colunas ("" = colunas iguais). */
+/** Ratios offered per column count ("" = equal columns). */
 const LAYOUT_PRESETS: Record<number, string[]> = {
   2: ["", "1fr 2fr", "2fr 1fr", "1fr 3fr", "3fr 1fr"],
   3: ["", "1fr 2fr 1fr", "2fr 1fr 1fr", "1fr 1fr 2fr"],
@@ -274,7 +274,7 @@ const PRESET_LABEL: Record<string, string> = {
   "1fr 1fr 1fr 2fr": "Última mais larga",
 };
 
-/** Número de colunas + proporção visual (por dispositivo). */
+/** Column count + visual ratio (per device). */
 function ColumnsLayoutField() {
   const columns = useField<number>("columns");
   const template = useField<string>("columnsTemplate");
@@ -313,7 +313,7 @@ function ColumnsLayoutField() {
                 >
                   {ratios.map((r, i) => (
                     <span
-                      // biome-ignore lint/suspicious/noArrayIndexKey: barras fixas da prévia
+                      // biome-ignore lint/suspicious/noArrayIndexKey: fixed preview bars
                       key={i}
                       className="rounded-sm bg-muted-foreground/40"
                       style={{ flex: r }}
@@ -335,7 +335,7 @@ function ColumnsLayoutField() {
   );
 }
 
-/** Variações prontas oferecidas na Toolbox. */
+/** Ready-made variants offered in the Toolbox. */
 export const containerPresets = {
   stack: containerDefaults(),
   row: containerDefaults({

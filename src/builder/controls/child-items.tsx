@@ -1,7 +1,7 @@
 /**
- * Gerencia os itens filhos de um componente composto (Acordeão, Abas,
- * Carrossel...). Cada item é um nó de verdade no canvas, com conteúdo livre
- * (qualquer elemento pode ser arrastado para dentro dele).
+ * Manages child items of a composite component (Accordion, Tabs,
+ * Carousel...). Each item is a real node on the canvas, with free content
+ * (any element can be dragged into it).
  */
 import { useEditor, useNode } from "@craftjs/core";
 import { ArrowDown, ArrowUp, Copy, MousePointer2, Plus, Trash2 } from "lucide-react";
@@ -12,14 +12,14 @@ import { Field } from "./field.tsx";
 
 type ChildItemsFieldProps = {
   label: string;
-  /** Tipo dos filhos (ex.: "AccordionItem"). Outros tipos são ignorados. */
+  /** Child type (e.g. "AccordionItem"). Other types are ignored. */
   childType: string;
-  /** Texto que identifica o item na lista (ex.: o título do painel). */
+  /** Text that identifies the item in the list (e.g. the panel title). */
   itemLabel: (props: Record<string, unknown>, index: number) => string;
-  /** Novo item a adicionar (com o conteúdo inicial). */
+  /** New item to add (with initial content). */
   create: (index: number) => NodeSpec;
   addLabel?: string;
-  /** Mínimo de itens (não deixa remover abaixo disso). */
+  /** Minimum items (does not allow removing below this). */
   min?: number;
 };
 
@@ -53,7 +53,7 @@ export function ChildItemsField({
     const index = siblings.indexOf(childId);
     const target = index + delta;
     if (target < 0 || target >= siblings.length) return;
-    // o Craft conta o índice antes de tirar o nó da posição atual
+    // Craft counts the index before removing the node from its current position
     editor.actions.move(childId, id, delta > 0 ? target + 1 : target);
   };
 

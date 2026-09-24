@@ -41,7 +41,7 @@ const cookieBannerInput = z.object({
   appearance: z.enum(["light", "dark"]),
 });
 
-/** Atualiza tema, identidade e/ou aviso de cookies do site. Cabeçalho/rodapé mudam pelo editor. */
+/** Update site theme, identity, and/or cookie banner. Header/footer change via the editor. */
 export const updateSiteSettings = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(
@@ -65,7 +65,7 @@ export const updateSiteSettings = createServerFn({ method: "POST" })
     return (await loadSiteSettings(data.projectId)).settings;
   });
 
-/** Republica as páginas publicadas para aplicar mudanças de tema e identidade. */
+/** Republish published pages to apply theme and identity changes. */
 export const republishSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(z.object({ projectId: z.string() }))

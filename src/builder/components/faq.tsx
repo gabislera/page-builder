@@ -33,16 +33,16 @@ import type { ComponentDefinition, NodeViewProps } from "../core/types.ts";
 export type FaqItem = {
   id: string;
   question: string;
-  /** Texto simples; quebras de linha são preservadas. */
+  /** Plain text; line breaks are preserved. */
   answer: string;
 };
 
 export type FaqProps = {
   items: FaqItem[];
-  /** Se falso, abrir um item fecha os outros (atributo `name` do <details>). */
+  /** If false, opening one item closes the others (`name` on <details>). */
   allowMultiple: boolean;
   firstOpen: boolean;
-  /** Só no editor: mostra todas as respostas abertas. */
+  /** Editor only: show all answers open. */
   editorOpenAll: boolean;
   iconStyle: "chevron" | "plus" | "none";
   iconPosition: "left" | "right";
@@ -57,7 +57,7 @@ export type FaqProps = {
   gap: Responsive<Length>;
   questionPadding: Responsive<Sides>;
   answerPadding: Responsive<Sides>;
-  /** Linha entre um item e outro (estilo lista). */
+  /** Line between items (list style). */
   dividerStyle: BorderStyle;
   dividerColor: string;
   dividerWidth: Length;
@@ -106,7 +106,7 @@ function FaqEntry({
     <details className="pb-faq-item" name={name} open={open || undefined}>
       <summary
         className="pb-faq-q"
-        // no editor o clique seleciona o nó em vez de abrir/fechar
+        // in the editor, click selects the node instead of toggling
         onClick={isEditor ? (e) => e.preventDefault() : undefined}
       >
         {props.iconPosition === "left" ? icon : null}
@@ -139,7 +139,7 @@ function FaqView({ id, props, rootRef, onPropChange }: NodeViewProps<FaqProps>) 
           item={item}
           index={i}
           props={props}
-          // no editor o `name` fecharia os outros itens abertos
+          // in the editor, `name` would close the other open items
           name={isEditor ? undefined : name}
           open={(isEditor && props.editorOpenAll) || (props.firstOpen && i === 0)}
           onPropChange={onPropChange}
@@ -326,7 +326,7 @@ export const Faq: ComponentDefinition<FaqProps> = {
       .set("display", "flex")
       .set("flex-direction", "column")
       .set("gap", p.gap)
-      // permite animar a altura até "auto" onde houver suporte
+      // allow animating height to "auto" where supported
       .set("interpolate-size", "allow-keywords");
 
     const item = sheet.rule(" .pb-faq-item");
@@ -374,7 +374,7 @@ export const Faq: ComponentDefinition<FaqProps> = {
     sheet.rule(" .pb-faq-item[open] .pb-faq-v").set("transform", "rotate(90deg)");
     applyBox(sheet, p.box, "flex");
 
-    // abertura suave onde houver ::details-content; nos demais abre direto
+    // smooth open where ::details-content exists; otherwise opens immediately
     const s = nodeSelector(id);
     const motion =
       `${s} .pb-faq-q::-webkit-details-marker{display:none}` +

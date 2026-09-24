@@ -1,6 +1,6 @@
 /**
- * "Salvar como modelo": guarda a seção selecionada na biblioteca do usuário
- * (aba "Meus modelos"), disponível em todos os projetos dele.
+ * "Salvar como modelo": saves the selected section to the user's library
+ * ("Meus modelos" tab), available in all of their projects.
  */
 import { useEditor } from "@craftjs/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -26,7 +26,7 @@ const KIND: Record<string, "section" | "header" | "footer"> = {
   Footer: "footer",
 };
 
-/** Tipos que podem virar modelo (seções de topo). */
+/** Types that can become a template (top-level sections). */
 export const canSaveAsTemplate = (type: string) => type in KIND;
 
 export function SaveAsTemplateButton({

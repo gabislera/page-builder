@@ -120,7 +120,7 @@ export const Heading: ComponentDefinition<HeadingProps> = {
     const t = p.typography;
     applyTypography(root, {
       ...t,
-      // "inherit" nos títulos usa a fonte de títulos definida na página
+      // "inherit" on headings uses the page heading font
       fontFamily: t.fontFamily === "inherit" ? undefined : t.fontFamily,
     });
     if (t.fontFamily === "inherit") root.set("font-family", "var(--pb-heading-font, inherit)");

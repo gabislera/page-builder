@@ -27,9 +27,9 @@ export type IconProps = {
   icon: IconStyle;
   align: Responsive<"flex-start" | "center" | "flex-end">;
   action: Action;
-  /** Texto para leitores de tela quando o ícone é um link. */
+  /** Screen-reader text when the icon is a link. */
   ariaLabel: string;
-  /** Zoom no hover (1 = sem zoom). */
+  /** Zoom on hover (1 = no zoom). */
   hoverScale: number;
   box: Box;
 };

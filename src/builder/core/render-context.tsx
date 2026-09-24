@@ -5,13 +5,13 @@ export type RenderMode = "editor" | "publish";
 
 export type RenderContextValue = {
   mode: RenderMode;
-  /** ID da página sendo renderizada (formulários, analytics). */
+  /** ID of the page being rendered (forms, analytics). */
   pageId: string;
-  /** URL pública de outra página do projeto, para ações do tipo "page". */
+  /** Public URL of another project page, for "page" actions. */
   pageUrl: (pageId: string) => string;
-  /** Identidade do site (nome e logo), usada pelo elemento Logo. */
+  /** Site identity (name and logo), used by the Logo element. */
   site: SiteIdentity;
-  /** URL da página inicial do site (link padrão do logo). */
+  /** URL of the site home page (default logo link). */
   homeUrl: string;
 };
 

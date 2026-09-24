@@ -69,9 +69,9 @@ export type PricingTableProps = {
   amount: string;
   cents: string;
   period: string;
-  /** Preço antigo riscado (ex.: "R$ 197"). Vazio = oculto. */
+  /** Struck-through old price (e.g. "R$ 197"). Empty = hidden. */
   oldPrice: string;
-  /** Linha abaixo do preço (ex.: "ou 12x de R$ 9,70"). */
+  /** Line below the price (e.g. "ou 12x de R$ 9,70"). */
   installments: string;
   features: PricingFeature[];
   includedIcon: string;
@@ -82,24 +82,24 @@ export type PricingTableProps = {
   ctaIcon: string;
   ctaAction: Action;
   button: ButtonStyle;
-  /** Nota abaixo do botão (ex.: garantia). */
+  /** Note below the button (e.g. guarantee). */
   footerNote: string;
   footerIcon: string;
-  /** Plano em destaque: selo, borda colorida e elevação. */
+  /** Featured plan: badge, colored border, and lift. */
   featured: boolean;
   badgeText: string;
   badgeBackground: string;
   badgeColor: string;
   featuredBorderColor: string;
-  /** Ampliação do plano em destaque (só no desktop). */
+  /** Scale of the featured plan (desktop only). */
   featuredScale: number;
   featuredShadow: Shadow;
   align: Align;
   nameTypography: Typography;
   descriptionTypography: Typography;
-  /** Tipografia do valor principal; moeda, centavos e período são proporcionais. */
+  /** Typography of the main amount; currency, cents, and period scale with it. */
   priceTypography: Typography;
-  /** Cor do preço antigo, período e parcelas. */
+  /** Color of the old price, period, and installments. */
   priceMutedColor: string;
   featuresTypography: Typography;
   noteColor: string;
@@ -459,7 +459,7 @@ export const PricingTable: ComponentDefinition<PricingTableProps> = {
         .set("border-width", "2px")
         .set("border-color", p.featuredBorderColor)
         .set("box-shadow", shadowToCss(p.featuredShadow));
-      // propriedade "scale" (não "transform"): não briga com as animações
+      // "scale" property (not "transform"): does not fight animations
       if (p.featuredScale !== 1) {
         root.setOn("desktop", "scale", String(p.featuredScale)).setOn("tablet", "scale", "1");
       }

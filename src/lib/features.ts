@@ -1,13 +1,13 @@
 /**
- * Funcionalidades que existem no código mas estão desligadas na interface.
- * Trocar para true reativa sem outras mudanças.
+ * Features that exist in code but are turned off in the UI.
+ * Set to true to re-enable with no other changes.
  */
 export const FEATURES = {
   /**
-   * Seções globais (uma seção compartilhada entre páginas). Desligada até
-   * resolver: desligar a chave não separar as páginas, e a republicação
-   * automática levar rascunhos das outras páginas ao ar. O cabeçalho e o
-   * rodapé do site usam o mesmo mecanismo e continuam ativos.
+   * Global sections (one section shared across pages). Off until we fix:
+   * turning the flag off does not split pages, and auto-republish would
+   * put other pages' drafts live. Site header and footer use the same
+   * mechanism and stay enabled.
    */
   globalSections: false,
 } as const;

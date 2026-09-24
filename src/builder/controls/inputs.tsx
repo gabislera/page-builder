@@ -13,7 +13,7 @@ import { useField } from "./use-field.ts";
 type BaseProps = { path: string; label: string; hint?: string };
 
 /* ------------------------------------------------------------------ */
-/* Texto                                                               */
+/* Text                                                                */
 /* ------------------------------------------------------------------ */
 
 export function TextField({ path, label, hint, placeholder }: BaseProps & { placeholder?: string }) {
@@ -39,7 +39,7 @@ export function TextAreaField({ path, label, hint, rows = 3 }: BaseProps & { row
   );
 }
 
-/** Input que só propaga depois de parar de digitar (evita 1 passo de undo por tecla). */
+/** Input that only commits after typing stops (avoids 1 undo step per key). */
 export function DebouncedInput({
   value,
   onChange,
@@ -69,7 +69,7 @@ export function DebouncedInput({
 }
 
 /* ------------------------------------------------------------------ */
-/* Número com unidade                                                  */
+/* Number with unit                                                    */
 /* ------------------------------------------------------------------ */
 
 export type Unit = "px" | "%" | "em" | "rem" | "vw" | "vh";
@@ -96,12 +96,12 @@ export function parseLength(value: string | undefined): {
 
 type NumberUnitProps = BaseProps & {
   units?: Unit[];
-  /** Palavras-chave aceitas além de números ("auto", "none"...). */
+  /** Keywords accepted besides numbers ("auto", "none"...). */
   keywords?: string[];
   max?: number;
   min?: number;
   step?: number;
-  /** Sem unidade (line-height, opacidade, z-index). */
+  /** Unitless (line-height, opacity, z-index). */
   unitless?: boolean;
 };
 
@@ -233,7 +233,7 @@ export function NumberUnitInput({
 }
 
 /* ------------------------------------------------------------------ */
-/* Select, segmentado e switch                                         */
+/* Select, segmented, and switch                                       */
 /* ------------------------------------------------------------------ */
 
 export type Option<T extends string = string> = {
@@ -307,7 +307,7 @@ export function SegmentedInput<T extends string>({
     >
       {options.map((o) => {
         const Icon = o.icon;
-        // title em vez de Tooltip: o Tooltip sobrescreveria o data-state do item
+        // title instead of Tooltip: Tooltip would overwrite the item's data-state
         return (
           <ToggleGroupItem
             key={o.value}

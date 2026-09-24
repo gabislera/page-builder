@@ -8,13 +8,13 @@ export type NodeViewProps<P> = {
   id: string;
   props: P;
   children?: ReactNode;
-  /** Ref do elemento raiz. No editor, conecta o nó ao Craft (seleção e drag). */
+  /** Root element ref. In the editor, connects the node to Craft (selection and drag). */
   rootRef?: Ref<HTMLElement>;
-  /** Só no editor: altera uma prop do nó (edição inline). */
+  /** Editor only: changes a node prop (inline edit). */
   onPropChange?: (path: string, value: unknown) => void;
 };
 
-/** Recursos de JS da página publicada que um componente precisa. */
+/** Published-page JS features a component needs. */
 export type RuntimeFeature =
   | "animations"
   | "modal"
@@ -42,27 +42,27 @@ type CraftRules = {
 };
 
 export type ComponentDefinition<P extends object = Record<string, unknown>> = {
-  /** Nome registrado no resolver do Craft (vai para o JSON salvo). */
+  /** Name registered in the Craft resolver (goes into the saved JSON). */
   type: string;
   displayName: string;
   category: ComponentCategory;
   icon: LucideIcon;
   defaults: P;
   isCanvas?: boolean;
-  /** Aparece na Toolbox para arrastar. */
+  /** Shown in the Toolbox for dragging. */
   inToolbox?: boolean;
-  /** Não pode ser duplicado pela barra do nó (Header, Footer). */
+  /** Cannot be duplicated from the node bar (Header, Footer). */
   notDuplicable?: boolean;
-  /** Não pode ser apagado (Page). */
+  /** Cannot be deleted (Page). */
   notDeletable?: boolean;
   View: (props: NodeViewProps<P>) => ReactNode;
   css: (id: string, props: P) => string;
   Settings: ComponentType;
   rules?: CraftRules;
   runtime?: RuntimeFeature[];
-  /** Fontes usadas pelas props, para carregar do Google Fonts. */
+  /** Fonts used by the props, to load from Google Fonts. */
   fonts?: (props: P) => string[];
 };
 
-// biome-ignore lint/suspicious/noExplicitAny: registro heterogêneo de componentes
+// biome-ignore lint/suspicious/noExplicitAny: heterogeneous component registry
 export type AnyComponentDefinition = ComponentDefinition<any>;

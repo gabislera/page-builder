@@ -18,7 +18,7 @@ const isTyping = (target: EventTarget | null) => {
   return el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName);
 };
 
-/** Atalhos do editor. Escuta no documento principal e no do canvas. */
+/** Editor shortcuts. Listens on the main document and the canvas document. */
 export function KeyboardShortcuts({ canvasDoc }: { canvasDoc: Document | null }) {
   const editor = useEditor();
 
@@ -78,7 +78,7 @@ export function KeyboardShortcuts({ canvasDoc }: { canvasDoc: Document | null })
       let parent: string | null;
       let index: number;
       if (TOP_LEVEL_TYPES.has(clipboard.type)) {
-        // seção: cola na página, logo depois da seção que contém a seleção
+        // section: paste on the page, right after the section that contains the selection
         if (clipboard.type !== "Section") return;
         let ancestor = selected;
         while (query.node(ancestor).get().data.parent !== ROOT_ID) {

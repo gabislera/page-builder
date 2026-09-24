@@ -23,7 +23,7 @@ export type GalleryItem = {
   src: string;
   alt: string;
   caption: string;
-  /** Com link, o clique segue o link em vez de abrir a imagem ampliada. */
+  /** With a link, click follows the link instead of opening the lightbox. */
   link: Action;
 };
 
@@ -31,11 +31,11 @@ type HoverEffect = "none" | "zoom" | "overlay" | "zoom-overlay";
 
 export type GalleryProps = {
   images: GalleryItem[];
-  /** grid: linhas alinhadas; masonry: colunas com alturas livres. */
+  /** grid: aligned rows; masonry: columns with free heights. */
   layout: "grid" | "masonry";
   columns: Responsive<number>;
   gap: Responsive<Length>;
-  /** Proporção no layout grade ("original" = altura livre). */
+  /** Aspect ratio in grid layout ("original" = free height). */
   ratio: "1/1" | "4/3" | "3/2" | "16/9" | "3/4" | "original";
   fit: "cover" | "contain";
   radius: Length;
@@ -43,7 +43,7 @@ export type GalleryProps = {
   overlayColor: string;
   captions: "below" | "overlay" | "none";
   captionTypography: Typography;
-  /** Abre a imagem ampliada ao clicar (na página publicada). */
+  /** Open the enlarged image on click (on the published page). */
   lightbox: boolean;
   box: Box;
 };
@@ -85,7 +85,7 @@ function GalleryView({ id, props, rootRef }: NodeViewProps<GalleryProps>) {
             </a>
           );
         } else if (props.lightbox) {
-          // o href para a imagem funciona mesmo sem JavaScript
+          // the href to the image still works without JavaScript
           media = (
             <a
               className="pb-gallery-media"
@@ -284,7 +284,7 @@ export const Gallery: ComponentDefinition<GalleryProps> = {
       .set("flex-direction", "column")
       .set("gap", "8px")
       .set("min-width", "0");
-    // mosaico: o espaço vertical vem da margem (colunas CSS não têm gap)
+    // masonry: vertical space comes from margin (CSS columns have no gap)
     if (!grid) item.set("break-inside", "avoid").set("margin-bottom", p.gap);
 
     const media = sheet.rule(" .pb-gallery-media");
@@ -305,7 +305,7 @@ export const Gallery: ComponentDefinition<GalleryProps> = {
       .set("transition", "transform .5s ease");
     if (zoom) sheet.rule(" .pb-gallery-media:hover img").set("transform", "scale(1.06)");
 
-    // escurecer no hover
+    // darken on hover
     const overlay = sheet.rule(" .pb-gallery-media::after");
     overlay
       .set("content", '""')
@@ -318,7 +318,7 @@ export const Gallery: ComponentDefinition<GalleryProps> = {
     if (overlayHover) sheet.rule(" .pb-gallery-media:hover::after").set("opacity", "1");
     else overlay.set("display", "none");
 
-    // legenda sobre a imagem
+    // caption over the image
     const cap = sheet.rule(" .pb-gallery-overlay-cap");
     applyTypography(cap, { ...p.captionTypography, color: "#ffffff" });
     cap
@@ -331,7 +331,7 @@ export const Gallery: ComponentDefinition<GalleryProps> = {
       .set("background", `linear-gradient(to top, color-mix(in srgb, ${p.overlayColor} 70%, transparent), transparent)`)
       .set("transition", "opacity .3s ease,transform .3s ease");
     if (overlayHover) {
-      // com escurecer, a legenda aparece junto no hover
+      // with darken, the caption appears on hover as well
       cap.set("opacity", "0").set("transform", "translateY(6px)");
       sheet.rule(" .pb-gallery-media:hover .pb-gallery-overlay-cap").set("opacity", "1").set("transform", "none");
     }
@@ -340,7 +340,7 @@ export const Gallery: ComponentDefinition<GalleryProps> = {
 
     applyBox(sheet, p.box, grid ? "grid" : "block");
     let css = sheet.toString();
-    // em telas de toque não há hover: legenda sobre a imagem sempre visível
+    // no hover on touch screens: overlay caption always visible
     if (overlayHover && p.captions === "overlay") {
       css += `@media (hover:none){${sheet.selector} .pb-gallery-overlay-cap{opacity:1;transform:none}}`;
     }

@@ -1,7 +1,7 @@
 /**
- * Página "vitrine-2" com os componentes de conteúdo e interativos (acordeão,
- * abas, carrossel, cards, preços, depoimentos e galeria).
- * Uso: pnpm tsx --env-file=.env.local scripts/seed-showcase-2.ts <projectId>
+ * "vitrine-2" page with content and interactive components (accordion,
+ * tabs, carousel, cards, pricing, testimonials, and gallery).
+ * Usage: pnpm tsx --env-file=.env.local scripts/seed-showcase-2.ts <projectId>
  */
 import { and, eq } from "drizzle-orm";
 import { buildRoot, buildTree } from "#/builder/core/build.ts";

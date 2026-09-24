@@ -1,9 +1,9 @@
 import { Children, Fragment, isValidElement, type ReactNode } from "react";
 
 /**
- * Lista os filhos desembrulhando Fragments. No editor o Craft entrega os
- * filhos de um canvas dentro de um Fragment; sem isso, componentes que
- * numeram os filhos (abas, acordeão, carrossel) veriam um filho só.
+ * Lists children, unwrapping Fragments. In the editor, Craft delivers
+ * canvas children inside a Fragment; without this, components that
+ * number children (tabs, accordion, carousel) would see only one child.
  */
 export function flattenChildren(children: ReactNode): ReactNode[] {
   const out: ReactNode[] = [];

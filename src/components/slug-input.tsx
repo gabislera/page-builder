@@ -2,8 +2,8 @@ import { slugDraft, slugify } from "#/lib/slug";
 import { cn } from "#/lib/utils";
 
 /**
- * Campo do endereço da página: mostra o começo fixo da URL e deixa digitar
- * só a parte final (letras minúsculas, números e hífen).
+ * Page URL field: shows the fixed URL prefix and lets the user type only
+ * the last segment (lowercase letters, numbers, and hyphen).
  */
 export function SlugInput({
   value,
@@ -14,7 +14,7 @@ export function SlugInput({
 }: {
   value: string;
   onChange: (slug: string) => void;
-  /** Parte fixa antes do slug, ex.: "/p/minha-loja/". */
+  /** Fixed prefix before the slug, e.g. "/p/minha-loja/". */
   prefix: string;
   className?: string;
   size?: "default" | "sm";

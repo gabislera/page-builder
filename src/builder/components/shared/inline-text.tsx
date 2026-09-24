@@ -1,6 +1,6 @@
 import { useInlineEdit } from "../../core/inline-edit.tsx";
 
-/** Texto simples editável com duplo clique no canvas (Logo, Menu). */
+/** Plain text editable with a double-click on the canvas (Logo, Menu). */
 export function InlineText({
   value,
   onCommit,

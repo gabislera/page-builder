@@ -1,22 +1,22 @@
 /**
- * Aviso de cookies (LGPD) da página publicada. Sem dependências.
+ * Published-page cookie notice (LGPD). No dependencies.
  *
- * No modo "block", os pixels e scripts de rastreamento vão para <template>s
- * inertes e só são ativados quando o visitante aceita (ou se já aceitou
- * antes). A escolha fica no localStorage; um link para "#cookies" reabre o
- * aviso.
+ * In "block" mode, tracking pixels and scripts go into inert <template>s
+ * and are activated only when the visitor accepts (or already accepted).
+ * The choice is stored in localStorage; a link to "#cookies" reopens the
+ * notice.
  */
 import type { CookieBanner } from "../core/theme.ts";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-/** Só http(s), caminhos relativos e âncoras: nada de javascript:. */
+/** Only http(s), relative paths, and anchors: no javascript:. */
 const safeUrl = (url: string) => (/^(https?:\/\/|\/|#|\.\/)/i.test(url.trim()) ? url.trim() : "");
 
-/** Chave da escolha no localStorage, separada por site. */
+/** localStorage key for the choice, scoped per site. */
 const storageKey = (siteKey: string) => `pb-consent:${siteKey}`;
 
-/** Ativa o conteúdo guardado nos templates (scripts precisam ser recriados). */
+/** Activates content stored in the templates (scripts must be recreated). */
 const LOADER = `
 window.pbLoadTracking=function(){
   if(window.__pbTracking)return;window.__pbTracking=1;
@@ -35,8 +35,8 @@ window.pbLoadTracking=function(){
 };`;
 
 /**
- * Rastreamento do <head> quando depende de consentimento: templates inertes
- * + carregador. Se o visitante já aceitou, carrega na hora.
+ * <head> tracking when it depends on consent: inert templates + loader.
+ * If the visitor already accepted, loads immediately.
  */
 export function gatedTracking(siteKey: string, head: string, body: string): string {
   if (!head.trim() && !body.trim()) return "";

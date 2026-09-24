@@ -18,7 +18,7 @@ import { updatePageSettings } from "#/server/pages";
 
 type PageRef = { id: string; name: string; slug: string; status: string };
 
-/** Renomear a página e trocar o endereço, direto da lista de páginas. */
+/** Rename the page and change its URL, from the page list. */
 export function PageAddressDialog({
   page,
   projectSlug,

@@ -43,7 +43,7 @@ export const richExtensions = [
   TextAlign.configure({ types: ["paragraph"] }),
 ];
 
-/** Editor inline ativo no canvas (para a barra do painel agir sobre ele). */
+/** Active inline editor on the canvas (so the panel toolbar can act on it). */
 export const useInlineRich = create<{
   nodeId: string | null;
   editor: Editor | null;
@@ -54,7 +54,7 @@ export const useInlineRich = create<{
   set: (nodeId, editor) => set({ nodeId, editor }),
 }));
 
-/** Campo de texto rico no painel. Se o nó estiver em edição inline, mostra só a barra. */
+/** Rich-text field in the panel. If the node is in inline edit, shows only the toolbar. */
 export function RichTextField({ path, label }: { path: string; label: string }) {
   const { id, props, set } = useNodeProps<Record<string, string>>();
   const inline = useInlineRich();
@@ -88,7 +88,7 @@ function PanelEditor({ value, onChange }: { value: string; onChange: (html: stri
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   });
 
-  // valor mudou por fora (undo/redo): sincroniza sem perder o cursor quando igual
+  // value changed from outside (undo/redo): sync without losing the cursor when equal
   useEffect(() => {
     if (editor && !editor.isFocused && editor.getHTML() !== value) {
       editor.commands.setContent(value, { emitUpdate: false });
@@ -199,7 +199,7 @@ export function RichToolbar({ editor }: { editor: Editor }) {
   );
 }
 
-/** Botão de link: pede a URL num popover (no lugar do prompt do navegador). */
+/** Link button: asks for the URL in a popover (instead of the browser prompt). */
 function LinkButton({ onApply }: { onApply: (href: string) => void }) {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState("");
@@ -224,7 +224,7 @@ function LinkButton({ onApply }: { onApply: (href: string) => void }) {
       <PopoverContent
         align="start"
         className="w-72 p-2"
-        // devolve o foco ao texto (a seleção continua marcada)
+        // return focus to the text (the selection stays marked)
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <form

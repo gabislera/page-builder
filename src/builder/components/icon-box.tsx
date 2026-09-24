@@ -58,7 +58,7 @@ type ContentAlign = "left" | "center" | "right";
 export type IconBoxProps = {
   icon: IconStyle;
   iconPosition: Responsive<Position>;
-  /** Alinhamento vertical do ícone quando ao lado do texto. */
+  /** Vertical icon alignment when beside the text. */
   iconVerticalAlign: "top" | "center";
   align: Responsive<ContentAlign>;
   title: string;
@@ -66,21 +66,21 @@ export type IconBoxProps = {
   titleTypography: Typography;
   description: string;
   descriptionTypography: Typography;
-  /** Texto de chamada no fim da caixa (ex.: "Saiba mais"). Vazio = oculto. */
+  /** CTA text at the end of the box (e.g. "Saiba mais"). Empty = hidden. */
   linkText: string;
   linkColor: string;
-  /** Espaço entre o ícone e o texto. */
+  /** Space between the icon and the text. */
   iconSpacing: Responsive<Length>;
-  /** Espaço entre o título e a descrição. */
+  /** Space between the title and the description. */
   titleSpacing: Responsive<Length>;
-  /** A caixa inteira vira link. */
+  /** The whole box becomes a link. */
   action: Action;
   padding: Responsive<Sides>;
   background: Background;
   border: Border;
   shadow: Shadow;
   hover: Hover;
-  /** Deslocamento para cima no hover (px). */
+  /** Lift on hover (px). */
   hoverLift: Length;
   hoverShadow: Shadow;
   box: Box;
@@ -323,7 +323,7 @@ export const IconBox: ComponentDefinition<IconBoxProps> = {
       .set("padding", p.padding, sidesToCss)
       .set("box-shadow", shadowToCss(p.shadow))
       .set("text-align", p.align);
-    // direção e alinhamento dependem da posição do ícone + alinhamento do texto
+    // direction and alignment depend on icon position + text alignment
     setPerDevice(root, (d) => {
       const position = resolve(p.iconPosition, d);
       const align = resolve(p.align, d);
@@ -337,7 +337,7 @@ export const IconBox: ComponentDefinition<IconBoxProps> = {
     applyBackground(root, p.background);
     applyBorder(root, p.border);
 
-    // hover da caixa: cores/zoom do HoverFields + subir + sombra
+    // box hover: HoverFields colors/zoom + lift + shadow
     if (p.hover.enabled) {
       root.set(
         "transition",
@@ -361,7 +361,7 @@ export const IconBox: ComponentDefinition<IconBoxProps> = {
     sheet.rule(" .pb-iconbox-content").set("min-width", "0").set("max-width", "100%");
 
     const title = sheet.rule(" .pb-iconbox-title");
-    // o alinhamento vem da caixa (prop "align")
+    // alignment comes from the box (prop "align")
     applyTypography(title, { ...p.titleTypography, textAlign: undefined });
     title.set("overflow-wrap", "break-word");
     sheet.rule(" .pb-iconbox-title + *").set("margin-top", p.titleSpacing);

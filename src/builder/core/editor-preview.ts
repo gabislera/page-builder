@@ -1,6 +1,6 @@
 /**
- * Estado de visualização só do editor (fora do histórico e do JSON salvo):
- * por exemplo, qual etapa de um formulário está sendo vista no canvas.
+ * Editor-only preview state (outside history and saved JSON):
+ * e.g. which form step is currently shown on the canvas.
  */
 import { create } from "zustand";
 

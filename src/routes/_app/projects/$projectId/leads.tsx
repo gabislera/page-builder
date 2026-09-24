@@ -95,7 +95,7 @@ function LeadsPage() {
   });
   const first = leads.data?.pages[0];
   const items = leads.data?.pages.flatMap((p) => p.items) ?? [];
-  // até 3 campos na tabela; o resto aparece nos detalhes
+  // up to 3 fields in the table; the rest appear in the details
   const columns = (first?.columns ?? []).slice(0, 3);
 
   const exportCsv = useMutation({
@@ -277,14 +277,14 @@ function LeadDialog({
   const tracking = entries.filter(([k]) => /^(utm_|fbclid|gclid|tags$)/.test(k));
   const phoneKey = fields.find(([k, v]) => isPhoneKey(k) && v)?.[0];
   const digits = phoneKey ? lead.data[phoneKey].replace(/\D/g, "") : "";
-  // número brasileiro sem DDI (DDD + número) ganha o 55
+  // Brazilian number without country code (area code + number) gets 55 prepended
   const phone = digits.length === 10 || digits.length === 11 ? `55${digits}` : digits;
   const title = lead.data.nome || lead.data.name || lead.data.email || lead.data.e_mail || "Lead";
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()}>
       <DialogContent
         className="sm:max-w-lg"
-        // sem foco automático no primeiro botão (que é o "Excluir")
+        // no auto-focus on the first button (which is "Excluir")
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>

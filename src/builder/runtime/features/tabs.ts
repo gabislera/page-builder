@@ -1,7 +1,7 @@
 /**
- * Abas: clique troca a aba ativa (`pb-tab-active` no botão e no painel);
- * setas, Home e End navegam entre as abas (tabindex móvel + aria-selected).
- * O N-ésimo botão da barra abre o N-ésimo painel.
+ * Tabs: click switches the active tab (`pb-tab-active` on the button and panel);
+ * arrows, Home, and End move between tabs (roving tabindex + aria-selected).
+ * The Nth button in the bar opens the Nth panel.
  */
 export const tabsScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
@@ -20,7 +20,7 @@ export const tabsScript = (_cfg: { viewEndpoint: string; formEndpoint: string })
         b.tabIndex=on?0:-1;
         if(panels[j])panels[j].classList.toggle('pb-tab-active',on);
       });
-      // mantém a aba ativa visível quando a barra rola na horizontal
+      // keep the active tab visible when the bar scrolls horizontally
       var b=btns[i];
       if(list.scrollWidth>list.clientWidth){
         list.scrollTo({left:b.offsetLeft-(list.clientWidth-b.offsetWidth)/2,behavior:'smooth'});

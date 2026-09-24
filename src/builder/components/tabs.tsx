@@ -1,13 +1,13 @@
 /**
- * Abas compostas: cada aba (TabItem) é um nó de verdade e o painel dela é um
- * canvas onde qualquer elemento pode ser arrastado.
+ * Composite tabs: each tab (TabItem) is a real node and its panel is a
+ * canvas where any element can be dropped.
  *
- * A barra de abas é montada pelo pai a partir dos rótulos dos itens (no
- * editor lendo o estado do Craft; na publicação, as props dos filhos). Assim
- * a barra tem um container próprio: estilo segmentado, sublinhado ou pílulas,
- * rolagem horizontal no celular e ARIA completo (tablist/tab/tabpanel).
- * Na página publicada, o runtime "tabs" troca a aba ativa; no editor, o
- * estado fica na view (React), fora do histórico de desfazer.
+ * The tab bar is built by the parent from the item labels (in the
+ * editor from Craft state; on publish, from child props). That way
+ * the bar has its own container: segmented, underline, or pills style,
+ * horizontal scroll on mobile, and full ARIA (tablist/tab/tabpanel).
+ * On the published page, the "tabs" runtime switches the active tab; in
+ * the editor, state lives in the view (React), outside the undo history.
  */
 import { useEditor } from "@craftjs/core";
 import { Folders, PanelTop } from "lucide-react";
@@ -44,25 +44,25 @@ import type { ComponentDefinition, NodeViewProps } from "../core/types.ts";
 import { RevealOnSelect } from "./shared/editor-reveal.tsx";
 
 /* ------------------------------------------------------------------ */
-/* Abas (pai)                                                          */
+/* Tabs (parent)                                                       */
 /* ------------------------------------------------------------------ */
 
 export type TabsVariant = "segmented" | "underline" | "pills";
 
 export type TabsProps = {
   variant: TabsVariant;
-  /** Abas em cima (horizontal) ou na lateral (vertical; vira horizontal no celular). */
+  /** Tabs on top (horizontal) or on the side (vertical; becomes horizontal on mobile). */
   orientation: "horizontal" | "vertical";
   justify: "flex-start" | "center" | "flex-end" | "stretch";
-  /** Largura da coluna de abas quando vertical. */
+  /** Width of the tab column when vertical. */
   navWidth: Responsive<Length>;
-  /** Espaço entre a barra de abas e o conteúdo. */
+  /** Space between the tab bar and the content. */
   navGap: Responsive<Length>;
   tabTypography: Typography;
   tabPadding: Responsive<Sides>;
   activeColor: string;
   activeBackground: string;
-  /** Cor do sublinhado (estilo sublinhado). */
+  /** Underline color (underline style). */
   indicatorColor: string;
   listBackground: string;
   panelPadding: Responsive<Sides>;
@@ -121,7 +121,7 @@ type TabsContextValue = {
   parentId: string;
   index: number;
   active: number;
-  /** Só no editor: mostra a aba quando ela (ou algo dentro) é selecionada. */
+  /** Editor only: show the tab when it (or something inside) is selected. */
   reveal?: (index: number) => void;
 };
 
@@ -134,7 +134,7 @@ function TabsView(view: NodeViewProps<TabsProps>) {
   return useIsEditor() ? <TabsEditor {...view} /> : <TabsStatic {...view} />;
 }
 
-/** Publicação: rótulos vêm das props dos filhos renderizados. */
+/** Publish: labels come from the rendered children's props. */
 function TabsStatic({ id, props, children, rootRef }: NodeViewProps<TabsProps>) {
   const items = flattenChildren(children);
   const tabs: TabInfo[] = items.map((child, i) => {
@@ -148,7 +148,7 @@ function TabsStatic({ id, props, children, rootRef }: NodeViewProps<TabsProps>) 
   return <TabsMarkup id={id} props={props} rootRef={rootRef} tabs={tabs} active={0} items={items} />;
 }
 
-/** Editor: rótulos vêm do estado do Craft; a aba ativa é estado local. */
+/** Editor: labels come from Craft state; the active tab is local state. */
 function TabsEditor({ id, props, children, rootRef }: NodeViewProps<TabsProps>) {
   const items = flattenChildren(children);
   const { tabs, actions } = useEditor((state) => ({
@@ -174,8 +174,8 @@ function TabsEditor({ id, props, children, rootRef }: NodeViewProps<TabsProps>) 
       tabs={tabs}
       active={active}
       items={items}
-      // clicar na barra troca a aba e mantém as Abas selecionadas
-      // (o conteúdo de cada aba é selecionado clicando dentro dele)
+      // clicking the bar switches the tab and keeps Tabs selected
+      // (each tab's content is selected by clicking inside it)
       onSelect={setActive}
       onRename={(i, label) =>
         actions.setProp(tabs[i].id, (p: { label: string }) => {
@@ -285,7 +285,7 @@ function TabButton({
   );
 }
 
-/** Miniaturas dos estilos prontos. */
+/** Thumbnails of the preset styles. */
 function VariantPreview({ variant }: { variant: TabsVariant }) {
   if (variant === "segmented") {
     return (
@@ -448,7 +448,7 @@ export const Tabs: ComponentDefinition<TabsProps> = {
       .set("flex-direction", vertical ? "row" : "column")
       .set("gap", p.navGap);
 
-    // barra
+    // bar
     const nav = sheet.rule(" > .pb-tabs-nav");
     nav.set("display", "flex").set("min-width", "0");
     if (vertical) nav.set("flex", "0 0 auto").set("width", p.navWidth);
@@ -507,7 +507,7 @@ export const Tabs: ComponentDefinition<TabsProps> = {
       btn.set("border-radius", "999px");
     }
 
-    // conteúdo
+    // content
     const panels = sheet.rule(" > .pb-tabs-panels");
     panels.set("flex", "1").set("min-width", "0");
     const panel = sheet.rule(" > .pb-tabs-panels > .pb-tab-panel");
@@ -523,7 +523,7 @@ export const Tabs: ComponentDefinition<TabsProps> = {
       .set("display", "flex")
       .set("animation", `pb-tab-in .35s ${ease}`);
 
-    // celular: aba lateral vira barra horizontal com rolagem
+    // mobile: side tabs become a horizontal scrolling bar
     if (vertical && DEVICE_MEDIA.mobile) {
       root.setOn("mobile", "flex-direction", "column");
       nav.setOn("mobile", "width", "100%");
@@ -542,12 +542,12 @@ export const Tabs: ComponentDefinition<TabsProps> = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Aba (filho)                                                         */
+/* Tab (child)                                                         */
 /* ------------------------------------------------------------------ */
 
 export type TabItemProps = {
   label: string;
-  /** Ícone do lucide antes do rótulo (opcional). */
+  /** Lucide icon before the label (optional). */
   icon: string;
   box: Box;
 };
@@ -615,14 +615,14 @@ export const TabItem: ComponentDefinition<TabItemProps> = {
   View: TabItemView,
   css: (id, p) => {
     const sheet = createSheet(id);
-    // a visibilidade por dispositivo é da aba ativa; aqui só a caixa
+    // per-device visibility belongs to the active tab; here only the box
     applyBox(sheet, { ...p.box, visible: undefined }, "flex");
     return sheet.toString();
   },
   Settings: TabItemSettings,
 };
 
-/** Abas iniciais (Toolbox): 3 abas com texto. */
+/** Initial tabs (Toolbox): 3 tabs with text. */
 export const tabsSpec = (): NodeSpec =>
   h(
     "Tabs",

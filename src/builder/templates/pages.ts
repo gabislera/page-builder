@@ -7,12 +7,12 @@ import { SECTION_TEMPLATES } from "./sections.ts";
 
 type PartMode = "site" | "none";
 
-/** Modelo de página: disponível para todos os usuários, em qualquer projeto. */
+/** Page template: available to all users, in any project. */
 export type PageTemplate = {
   id: string;
   name: string;
   description: string;
-  /** Usa o cabeçalho/rodapé do site ou fica sem (páginas de foco). */
+  /** Uses the site header/footer, or none (focus pages). */
   headerMode: PartMode;
   footerMode: PartMode;
   build: () => NodeSpec[];
@@ -50,7 +50,7 @@ const KIND: Record<string, SectionKind> = {
   Footer: "footer",
 };
 
-/** Monta a raiz e as seções de um modelo (ids novos a cada uso). */
+/** Builds the root and sections of a template (new ids on every use). */
 export function buildPageTemplate(template: PageTemplate): {
   root: ReturnType<typeof buildRoot>;
   sections: SectionTree[];
@@ -70,7 +70,7 @@ export function buildPageTemplate(template: PageTemplate): {
   };
 }
 
-/** Página nova: raiz + um hero centralizado. */
+/** New page: root + a centered hero. */
 export function blankPage(): {
   root: ReturnType<typeof buildRoot>;
   sections: SectionTree[];

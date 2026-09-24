@@ -6,11 +6,11 @@ export type LeftPanel = "add" | "layers" | "page" | "theme";
 
 type EditorUIState = {
   device: Device;
-  /** "fit" ajusta o canvas à largura disponível. */
+  /** "fit" scales the canvas to the available width. */
   zoom: "fit" | number;
   leftPanel: LeftPanel;
   favoriteColors: string[];
-  /** Otimiza imagens antes de enviar (WebP, tamanho máximo). */
+  /** Optimize images before upload (WebP, max size). */
   optimizeImages: boolean;
   setOptimizeImages: (v: boolean) => void;
   setDevice: (device: Device) => void;

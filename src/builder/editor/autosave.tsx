@@ -23,18 +23,18 @@ export function clearDraft(pageId: string) {
   try {
     localStorage.removeItem(draftKey(pageId));
   } catch {
-    // armazenamento indisponível
+    // storage unavailable
   }
 }
 
 /**
- * Salva sozinho alguns segundos depois da última alteração. Guarda um
- * rascunho local a cada mudança para não perder trabalho se a aba fechar.
+ * Saves a few seconds after the last change. Writes a local draft on every
+ * edit so work is not lost if the tab closes.
  */
 export function AutosaveController() {
   const { pageId, services } = useEditorContext();
   const { query } = useEditor();
-  // muda a cada alteração nos nós; vem do onNodesChange do <Editor>
+  // ticks on every node change; comes from <Editor> onNodesChange
   const changeTick = useSaveState((s) => s.changeTick);
   const savedJson = useRef<string | null>(null);
   const saving = useRef(false);
@@ -86,12 +86,12 @@ export function AutosaveController() {
     [query, services, pageId],
   );
 
-  // alteração nos nós: rascunho local + salvamento com debounce
-  // biome-ignore lint/correctness/useExhaustiveDependencies: changeTick é o gatilho da mudança
+  // node change: local draft + debounced save
+  // biome-ignore lint/correctness/useExhaustiveDependencies: changeTick is the change trigger
   useEffect(() => {
     if (!query.getNodes().ROOT) return;
     const json = query.serialize();
-    // primeira árvore carregada = estado que veio do servidor
+    // first loaded tree = state that came from the server
     if (savedJson.current === null) {
       savedJson.current = json;
       return;
@@ -103,20 +103,20 @@ export function AutosaveController() {
     try {
       localStorage.setItem(draftKey(pageId), JSON.stringify({ version, json, at: new Date().toISOString() }));
     } catch {
-      // cota cheia: segue só com o salvamento no servidor
+      // quota full: continue with server save only
     }
     const t = setTimeout(() => void save(), DEBOUNCE_MS);
     return () => clearTimeout(t);
   }, [changeTick, query, save, pageId]);
 
-  // salvar agora (Ctrl+S, antes de publicar, "sobrescrever" no conflito)
+  // save now (Ctrl+S, before publish, "overwrite" on conflict)
   useEffect(() => {
     if (flushRequest === 0) return;
     const force = useSaveState.getState().status === "conflict";
     void save(force);
   }, [flushRequest, save]);
 
-  // avisa antes de fechar com alterações não salvas
+  // warn before closing with unsaved changes
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
       const { status } = useSaveState.getState();

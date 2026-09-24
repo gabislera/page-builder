@@ -1,6 +1,6 @@
 /**
- * Estilo de botão embutido em outro componente (enviar do formulário, gatilho
- * do modal). Mesmas opções do componente Botão, aplicadas a um seletor interno.
+ * Button style embedded in another component (form submit, modal trigger).
+ * Same options as the Button component, applied to an inner selector.
  */
 import { Group } from "../../controls/field.tsx";
 import {
@@ -73,7 +73,7 @@ export const defaultButtonStyle = (overrides: Partial<ButtonStyle> = {}): Button
   ...overrides,
 });
 
-/** CSS do botão interno `selector` (ex.: ".pb-form-submit") do nó `id`. */
+/** CSS for the inner button `selector` (e.g. ".pb-form-submit") of node `id`. */
 export function buttonStyleCss(id: string, selector: string, s: ButtonStyle) {
   const sheet = new StyleSheet(`${nodeSelector(id)} ${selector}`);
   const root = sheet.root();
@@ -89,7 +89,7 @@ export function buttonStyleCss(id: string, selector: string, s: ButtonStyle) {
   return sheet.toString();
 }
 
-/** Grupos da aba Estilo para um botão interno em `base`. */
+/** Style-tab groups for an inner button at `base`. */
 export function ButtonStyleGroups({ base, title = "Botão" }: { base: string; title?: string }) {
   return (
     <>

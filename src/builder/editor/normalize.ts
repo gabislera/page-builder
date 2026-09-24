@@ -4,9 +4,9 @@ import { typeOf } from "../core/tree.ts";
 import { COMPONENTS } from "../registry.ts";
 
 /**
- * Completa as props salvas com os defaults atuais de cada componente. Assim
- * páginas criadas antes de um campo novo existir abrem com o campo preenchido
- * (e o painel mostra o valor certo em vez de vazio).
+ * Fills saved props with each component's current defaults. Pages created
+ * before a field existed open with that field set (and the panel shows the
+ * right value instead of empty).
  */
 export function normalizeNodes(nodes: SerializedNodes): SerializedNodes {
   const out: SerializedNodes = {};

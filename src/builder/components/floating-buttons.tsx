@@ -23,13 +23,13 @@ type FloatButton = {
   icon: string;
   iconColor: string;
   background: string;
-  /** Texto para leitores de tela e dica ao passar o mouse. */
+  /** Text for screen readers and the hover tooltip. */
   label: string;
 };
 
 export type FloatingButtonsProps = {
   backToTop: FloatButton & {
-    /** Aparece depois de rolar esta distância (px). */
+    /** Appears after scrolling this distance (px). */
     showAfter: number;
   };
   contact: FloatButton & {
@@ -50,7 +50,7 @@ export type FloatingButtonsProps = {
   box: Box;
 };
 
-/** No editor os botões ficam no fluxo, numa faixa identificada, para poder selecionar. */
+/** In the editor the buttons sit in flow, in a labeled strip, so they can be selected. */
 const EDITOR_STYLE: CSSProperties = {
   position: "relative",
   inset: "auto",
@@ -119,7 +119,7 @@ function FloatingButtonsView({ id, props, rootRef }: NodeViewProps<FloatingButto
             <IconView name={contact.icon || "whatsapp"} />
           </a>
         ) : (
-          // sem destino configurado: botão inerte, para não quebrar o layout
+          // no destination configured: inert button, so layout does not break
           <button type="button" className={contactClass} aria-label={contact.label || "Fale conosco"} style={lock}>
             <IconView name={contact.icon || "whatsapp"} />
           </button>
@@ -285,7 +285,7 @@ export const FloatingButtons: ComponentDefinition<FloatingButtonsProps> = {
       .set("align-items", p.side, (s) => (s === "left" ? "flex-start" : "flex-end"))
       .set("gap", p.gap)
       .set("pointer-events", "none");
-    // a distância lateral vale para o lado escolhido em cada dispositivo
+    // the side offset applies to the chosen side on each device
     for (const device of DEVICES) {
       if (!hasOwn(p.side, device) && !hasOwn(p.offset, device)) continue;
       const side = resolve(p.side, device);

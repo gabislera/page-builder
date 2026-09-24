@@ -1,7 +1,8 @@
 /**
- * Contador numérico: número grande que conta até o valor quando aparece na
- * tela ("+10.000 alunos"). O HTML já sai com o número final (funciona sem
- * JS e aparece para buscadores); o runtime "counter" só anima a contagem.
+ * Numeric counter: large number that counts up to the value when it enters
+ * the viewport ("+10.000 alunos"). The HTML already ships the final number
+ * (works without JS and is visible to search engines); the "counter" runtime
+ * only animates the count.
  */
 import { Hash } from "lucide-react";
 import { Group } from "../controls/field.tsx";
@@ -19,14 +20,14 @@ import type { ComponentDefinition, NodeViewProps } from "../core/types.ts";
 
 export type StatCounterProps = {
   value: number;
-  /** Valor de onde a contagem começa. */
+  /** Value the count starts from. */
   from: number;
   decimals: number;
   prefix: string;
   suffix: string;
-  /** Separa milhares com ponto (10.000) como no Brasil. */
+  /** Group thousands with a dot (10.000), as in Brazil. */
   thousands: boolean;
-  /** Duração da contagem (ms). */
+  /** Count duration (ms). */
   duration: number;
   label: string;
   align: Responsive<"flex-start" | "center" | "flex-end">;
@@ -36,7 +37,7 @@ export type StatCounterProps = {
   box: Box;
 };
 
-/** Formata como no Brasil: ponto nos milhares e vírgula nos decimais. */
+/** Format as in Brazil: dot for thousands and comma for decimals. */
 export function formatStat(value: number, decimals: number, thousands: boolean) {
   return value.toLocaleString("pt-BR", {
     minimumFractionDigits: decimals,
@@ -168,7 +169,7 @@ export const StatCounter: ComponentDefinition<StatCounterProps> = {
       .set("gap", p.gap);
     const number = sheet.rule(" > .pb-stat-number");
     applyTypography(number, p.numberTypography);
-    // números de largura fixa: a contagem não "treme"
+    // fixed-width digits: the count does not "jitter"
     number.set("font-variant-numeric", "tabular-nums").set("white-space", "nowrap");
     applyTypography(sheet.rule(" > .pb-stat-label"), p.labelTypography);
     applyBox(sheet, p.box, "flex");

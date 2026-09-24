@@ -27,7 +27,7 @@ export const listAssets = createServerFn({ method: "GET" })
     });
   });
 
-/** Gera URL pré-assinada. O navegador envia o arquivo direto para o S3. */
+/** Generate a presigned URL. The browser uploads the file directly to S3. */
 export const createUpload = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(
@@ -50,7 +50,7 @@ export const createUpload = createServerFn({ method: "POST" })
     return { uploadUrl, key };
   });
 
-/** Registra o asset depois que o upload terminou. */
+/** Register the asset after the upload finishes. */
 export const registerAsset = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(

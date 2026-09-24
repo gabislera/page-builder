@@ -1,7 +1,7 @@
 /**
- * Dados de demonstração para as abas Leads e Visitas: visitas e envios de
- * formulário espalhados pelos últimos 30 dias nas páginas publicadas.
- * Uso: pnpm tsx --env-file=.env.local scripts/seed-insights.ts <projectId>
+ * Demo data for the Leads and Visits tabs: views and form submissions
+ * spread over the last 30 days on published pages.
+ * Usage: pnpm tsx --env-file=.env.local scripts/seed-insights.ts <projectId>
  */
 import { and, eq, isNull } from "drizzle-orm";
 import { db } from "#/db/index.ts";
@@ -31,7 +31,7 @@ const leads: (typeof formSubmission.$inferInsert)[] = [];
 for (const p of pages) {
 	const weight = p.slug.startsWith("modelo") ? 3 : 1;
 	for (let day = 29; day >= 0; day--) {
-		// tendência de alta com variação diária
+		// upward trend with daily variation
 		const count = Math.round((20 + (29 - day) * 2 + Math.random() * 25) * weight * 0.4);
 		for (let i = 0; i < count; i++) {
 			const at = new Date(Date.now() - day * 86_400_000 - Math.random() * 86_400_000);

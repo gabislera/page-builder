@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { servePublished } from "#/server/public-pages";
 
-/** Página publicada, servida como HTML estático gerado na publicação. */
+/** Published page, served as static HTML generated on publish. */
 export const Route = createFileRoute("/p/$projectSlug/$pageSlug")({
   server: {
     handlers: {

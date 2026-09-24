@@ -1,6 +1,6 @@
 import type { Responsive } from "./responsive.ts";
 
-/** Valores CSS com unidade: "16px", "100%", "auto", "2rem"... */
+/** CSS values with a unit: "16px", "100%", "auto", "2rem"... */
 export type Length = string;
 
 export type Sides = {
@@ -53,7 +53,7 @@ export type Background = {
   color: string;
   gradient: Gradient;
   image: BackgroundImage;
-  /** Cor aplicada por cima da imagem (ex.: "#00000080"). */
+  /** Color applied over the image (e.g. "#00000080"). */
   overlay: string;
 };
 
@@ -85,14 +85,14 @@ export type Hover = {
   borderColor: string;
   /** 0–1 */
   opacity: number;
-  /** 1 = sem zoom */
+  /** 1 = no zoom */
   scale: number;
   durationMs: number;
 };
 
 export type Animation = "none" | "pulse" | "fade-in" | "fade-up";
 
-/** Propriedades de caixa comuns a todos os elementos (aba "Avançado"). */
+/** Box properties common to all elements ("Advanced" tab). */
 export type Box = {
   margin: Responsive<Sides>;
   padding: Responsive<Sides>;
@@ -104,23 +104,23 @@ export type Box = {
   animation: Animation;
   anchorId: string;
   cssClass: string;
-  /** Posicionamento (absoluto, fixo, grudado ao rolar...). */
+  /** Positioning (absolute, fixed, sticky on scroll...). */
   position: Responsive<PositionType>;
-  /** Deslocamentos usados com posição relativa/absoluta/fixa/grudada. */
+  /** Offsets used with relative/absolute/fixed/sticky position. */
   offsets: Responsive<Sides>;
-  /** Camada (z-index). Vazio = automático. */
+  /** Layer (z-index). Empty = automatic. */
   zIndex: Responsive<string>;
   transform: Transform;
   opacity: Responsive<number>;
   overflow: "visible" | "hidden" | "auto";
   scrollEffect: ScrollEffect;
-  /** CSS livre. A palavra `selector` é trocada pelo seletor deste elemento. */
+  /** Free-form CSS. The word `selector` is replaced with this element's selector. */
   customCss: string;
 };
 
 export type PositionType = "static" | "relative" | "absolute" | "fixed" | "sticky";
 
-/** Transformações independentes do hover (usam rotate/scale/translate do CSS). */
+/** Transforms independent of hover (use CSS rotate/scale/translate). */
 export type Transform = {
   rotate: number;
   scale: number;
@@ -130,11 +130,11 @@ export type Transform = {
 
 export type ScrollEffect = {
   type: "none" | "parallax";
-  /** Velocidade do parallax: negativo sobe, positivo desce (-1 a 1). */
+  /** Parallax speed: negative goes up, positive goes down (-1 to 1). */
   speed: number;
 };
 
-/** Ação de clique (botões, imagens, links de menu, containers). */
+/** Click action (buttons, images, menu links, containers). */
 export type Action =
   | { type: "none" }
   | { type: "url"; url: string; newTab: boolean }

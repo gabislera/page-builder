@@ -7,12 +7,12 @@ type SaveState = {
   version: number;
   lastSavedAt: string | null;
   publishedAt: string | null;
-  /** Outras páginas publicadas afetadas por seções globais editadas. */
+  /** Other published pages affected by edited global sections. */
   affectedPageIds: string[];
   error: string | null;
-  /** Pedido de salvar imediatamente (Ctrl+S, publicar). */
+  /** Immediate save request (Ctrl+S, publish). */
   flushRequest: number;
-  /** Incrementa a cada mudança nos nós (onNodesChange do Craft). */
+  /** Increments on every node change (Craft `onNodesChange`). */
   changeTick: number;
   set: (patch: Partial<Omit<SaveState, "set" | "requestFlush" | "markChanged">>) => void;
   markChanged: () => void;

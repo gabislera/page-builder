@@ -1,6 +1,6 @@
 /**
- * Seções prontas com os widgets de conteúdo: preços, depoimentos, cards e
- * galeria. Mesmo formato de SECTION_TEMPLATES (ids novos a cada inserção).
+ * Ready-made sections with content widgets: pricing, testimonials, cards,
+ * and gallery. Same format as SECTION_TEMPLATES (new ids on every insert).
  */
 import { containerPresets } from "../components/container.tsx";
 import { h, type NodeSpec } from "../core/build.ts";
@@ -9,7 +9,7 @@ import { responsive } from "../core/responsive.ts";
 import { C } from "../core/theme.ts";
 import type { SectionTemplate } from "./sections.ts";
 
-/** Título + subtítulo centralizados no topo da seção. */
+/** Centered title + subtitle at the top of the section. */
 const intro = (title: string, subtitle?: string): NodeSpec[] => [
   h("Heading", {
     text: title,
@@ -54,10 +54,10 @@ const grid = (n: number, children: NodeSpec[], name: string, extra: Record<strin
   h("Container", { ...containerPresets.grid(n), ...extra }, children, name);
 
 /* ------------------------------------------------------------------ */
-/* Preços                                                              */
+/* Pricing                                                             */
 /* ------------------------------------------------------------------ */
 
-/** Botão secundário (planos fora do destaque). */
+/** Secondary button (plans not featured). */
 const softButton = {
   background: {
     type: "color",
@@ -212,7 +212,7 @@ const pricing2 = (): NodeSpec =>
   );
 
 /* ------------------------------------------------------------------ */
-/* Depoimentos                                                         */
+/* Testimonials                                                        */
 /* ------------------------------------------------------------------ */
 
 const TESTIMONIALS = [
@@ -367,7 +367,7 @@ const cards2Horizontal = (): NodeSpec =>
   );
 
 /* ------------------------------------------------------------------ */
-/* Galeria                                                             */
+/* Gallery                                                             */
 /* ------------------------------------------------------------------ */
 
 const galleryImages = (n: number, captions = false) =>
@@ -426,7 +426,7 @@ const galleryMasonry = (): NodeSpec =>
   );
 
 /* ------------------------------------------------------------------ */
-/* Números                                                             */
+/* Stats                                                               */
 /* ------------------------------------------------------------------ */
 
 const STATS = [

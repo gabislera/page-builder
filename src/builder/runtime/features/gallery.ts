@@ -1,8 +1,8 @@
 /**
- * Lightbox da Galeria: abre a imagem em tela cheia com anterior/próxima,
- * fechar, teclado (setas/Esc), gesto de arrastar no celular e foco preso
- * dentro da janela. Os itens são os links [data-pb-lightbox] de cada
- * [data-pb-gallery]; itens com link próprio não entram.
+ * Gallery lightbox: opens the image fullscreen with prev/next, close,
+ * keyboard (arrows/Esc), swipe on mobile, and focus trapped in the dialog.
+ * Items are the [data-pb-lightbox] links in each [data-pb-gallery]; items
+ * with their own link are excluded.
  */
 export const galleryScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
@@ -72,7 +72,7 @@ function open(a){
   items=[].slice.call(g.querySelectorAll('a[data-pb-lightbox]'));
   idx=Math.max(0,items.indexOf(a));opener=a;
   if(!lb)build();
-  // dentro de um modal aberto, precisa estar no mesmo top layer
+  // inside an open modal, must live on the same top layer
   (a.closest('dialog[open]')||document.body).appendChild(lb);
   show();
   lb.style.display='flex';

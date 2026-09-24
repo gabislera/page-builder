@@ -5,7 +5,7 @@ type Editor = ReturnType<typeof useEditor>;
 type Query = Editor["query"];
 type Actions = Editor["actions"];
 
-/** Converte uma subárvore serializada em NodeTree preservando os ids. */
+/** Converts a serialized subtree into a NodeTree, keeping the ids. */
 export function toNodeTree(query: Query, nodes: SerializedNodes, rootNodeId: string): NodeTree {
   const out: Record<string, Node> = {};
   for (const [id, serialized] of Object.entries(nodes)) {
@@ -16,7 +16,7 @@ export function toNodeTree(query: Query, nodes: SerializedNodes, rootNodeId: str
   return { rootNodeId, nodes: out };
 }
 
-/** Insere uma subárvore (seção ou elemento) em `parentId`, na posição `index`. */
+/** Inserts a subtree (section or element) into `parentId` at `index`. */
 export function insertTree(
   editor: Editor,
   tree: { rootNodeId: string; nodes: SerializedNodes },
@@ -29,7 +29,7 @@ export function insertTree(
   if (select) editor.actions.selectNode(tree.rootNodeId);
 }
 
-/** Duplica o nó com todos os filhos logo abaixo dele. */
+/** Duplicates the node and all children right below it. */
 export function duplicateNode(editor: Editor, id: string) {
   const { query } = editor;
   const node = query.node(id).get();
@@ -41,7 +41,7 @@ export function duplicateNode(editor: Editor, id: string) {
   insertTree(editor, copy, parent, siblings.indexOf(id) + 1);
 }
 
-/** Move um filho da página para cima/baixo, respeitando Header no topo e Footer no fim. */
+/** Moves a page child up/down, keeping Header at the top and Footer at the end. */
 export function moveSection(editor: Editor, id: string, delta: -1 | 1) {
   const { query, actions } = editor;
   const siblings = query.node(ROOT_ID).get().data.nodes;
@@ -50,11 +50,11 @@ export function moveSection(editor: Editor, id: string, delta: -1 | 1) {
   if (target < 0 || target >= siblings.length) return;
   const targetType = query.node(siblings[target]).get().data.name;
   if (targetType === "Header" || targetType === "Footer") return;
-  // Craft conta o índice antes de remover o nó da posição atual
+  // Craft counts the index before removing the node from its current position
   actions.move(id, ROOT_ID, delta > 0 ? target + 1 : target);
 }
 
-/** Desvincula uma seção global: vira uma cópia local com ids novos. */
+/** Unlinks a global section: becomes a local copy with new ids. */
 export function unlinkGlobal(editor: Editor, id: string) {
   const { query, actions } = editor;
   const siblings = query.node(ROOT_ID).get().data.nodes;

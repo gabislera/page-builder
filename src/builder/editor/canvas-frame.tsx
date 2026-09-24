@@ -8,15 +8,15 @@ import { themeCss } from "../core/theme.ts";
 import { useSiteStore } from "./site-store.ts";
 import { useEditorUI } from "./store.ts";
 
-/** No editor carregamos todas as fontes oferecidas; o navegador só baixa as usadas. */
+/** The editor lists every offered font; the browser only downloads those in use. */
 const EDITOR_FONTS_HREF = googleFontsHref(Object.keys(GOOGLE_FONTS));
 
 const SRC_DOC = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body></body></html>`;
 
 /**
- * Canvas do editor: um iframe com a largura exata do dispositivo. As media
- * queries do CSS dos nós se aplicam como na página publicada. Quando o
- * dispositivo não cabe na área disponível, o iframe é reduzido com `scale`.
+ * Editor canvas: an iframe at the exact device width. Node CSS media queries
+ * apply as on the published page. When the device does not fit the available
+ * area, the iframe is scaled down.
  */
 export function CanvasFrame({
   children,
@@ -33,7 +33,7 @@ export function CanvasFrame({
   const [area, setArea] = useState({ width: 0, height: 0 });
   const theme = useSiteStore((s) => s.settings.theme);
 
-  // variáveis do tema global, atualizadas ao vivo enquanto o usuário edita a paleta
+  // global theme variables, live-updated as the user edits the palette
   useEffect(() => {
     if (!doc) return;
     let el = doc.getElementById("pb-theme");
@@ -77,7 +77,7 @@ export function CanvasFrame({
       link.href = EDITOR_FONTS_HREF;
       d.head.appendChild(link);
     }
-    // links não navegam dentro do editor
+    // links do not navigate inside the editor
     d.addEventListener(
       "click",
       (e) => {
@@ -90,14 +90,14 @@ export function CanvasFrame({
     onDocument?.(d);
   };
 
-  // em alguns navegadores o load do srcDoc acontece antes do React ligar o onLoad
+  // in some browsers srcDoc load fires before React attaches onLoad
   useEffect(() => {
     const d = iframeRef.current?.contentDocument;
     if (!doc && d?.readyState === "complete" && d.body && !d.head.querySelector("style")) handleLoad();
   });
 
   useEffect(() => {
-    // clique no fundo do canvas limpa a seleção
+    // click on the canvas background clears the selection
     if (!doc) return;
     const clear = (e: MouseEvent) => {
       if (e.target === doc.documentElement || e.target === doc.body) {

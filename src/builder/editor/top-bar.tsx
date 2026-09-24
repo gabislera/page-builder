@@ -69,7 +69,7 @@ export function TopBar({ pageName, pagePath }: { pageName: string; pagePath: str
   const publish = async () => {
     setPublishing(true);
     try {
-      // garante que o que está na tela foi salvo antes de publicar
+      // ensure what's on screen is saved before publishing
       useSaveState.getState().requestFlush();
       await waitForSaved();
       const res = await services.publishPage(useSaveState.getState().affectedPageIds);

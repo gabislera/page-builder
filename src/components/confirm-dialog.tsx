@@ -1,9 +1,9 @@
 /**
- * Confirmação do app, no lugar do window.confirm do navegador:
+ * App confirmation dialog, instead of the browser's window.confirm:
  *
  *   if (await confirm({ title: "Excluir página?", destructive: true })) ...
  *
- * O <ConfirmDialogHost /> fica montado uma vez na raiz.
+ * Mount <ConfirmDialogHost /> once at the root.
  */
 import { AlertTriangle } from "lucide-react";
 import { type ReactNode, useRef, useState } from "react";
@@ -26,9 +26,9 @@ export type ConfirmOptions = {
   description?: ReactNode;
   confirmText?: string;
   cancelText?: string;
-  /** Ação que apaga algo: botão vermelho e ícone de alerta. */
+  /** Destructive action: red button and alert icon. */
   destructive?: boolean;
-  /** Só libera o botão depois de digitar exatamente este texto. */
+  /** Enable the button only after this exact text is typed. */
   requireText?: string;
 };
 
@@ -40,10 +40,10 @@ const useConfirmStore = create<{
   open: boolean;
 }>(() => ({ request: null, open: false }));
 
-/** Abre a confirmação e resolve com true (confirmou) ou false. */
+/** Open the confirmation and resolve with true (confirmed) or false. */
 export function confirm(options: ConfirmOptions): Promise<boolean> {
   return new Promise((resolve) => {
-    // uma confirmação pendente é cancelada por uma nova
+    // a pending confirmation is cancelled by a new one
     useConfirmStore.getState().request?.resolve(false);
     useConfirmStore.setState({
       request: { ...options, id: ++nextId, resolve },
@@ -55,7 +55,7 @@ export function confirm(options: ConfirmOptions): Promise<boolean> {
 function settle(ok: boolean) {
   const { request } = useConfirmStore.getState();
   request?.resolve(ok);
-  // mantém o conteúdo durante a animação de saída
+  // keep content during the exit animation
   useConfirmStore.setState({ open: false });
 }
 
@@ -65,7 +65,7 @@ export function ConfirmDialogHost() {
   if (!request) return null;
   return (
     <AlertDialog open={open} onOpenChange={(v) => !v && settle(false)}>
-      {/* key: cada confirmação nova começa com o campo vazio */}
+      {/* key: each new confirmation starts with an empty field */}
       <ConfirmContent key={request.id} request={request} />
     </AlertDialog>
   );
@@ -78,7 +78,7 @@ function ConfirmContent({ request }: { request: Request }) {
   return (
     <AlertDialogContent
       size="sm"
-      // com texto a digitar, o foco vai para o campo (e não para "Cancelar")
+      // when text must be typed, focus the field (not "Cancelar")
       onOpenAutoFocus={(e) => {
         if (!request.requireText) return;
         e.preventDefault();

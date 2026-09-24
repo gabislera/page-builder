@@ -27,9 +27,9 @@ import { type ButtonStyle, ButtonStyleGroups, buttonStyleCss, defaultButtonStyle
 type Align = "stretch" | "flex-start" | "center" | "flex-end";
 
 export type ModalProps = {
-  /** Nome exibido no editor. */
+  /** Name shown in the editor. */
   name: string;
-  /** Mostra o conteúdo no editor (senão, só a etiqueta). */
+  /** Show the content in the editor (otherwise, only the label). */
   previewInEditor: boolean;
   maxWidth: Responsive<Length>;
   padding: Responsive<Sides>;
@@ -39,14 +39,14 @@ export type ModalProps = {
   border: Border;
   shadow: Shadow;
   backdropColor: string;
-  /** Desfoque do fundo, em px. */
+  /** Backdrop blur, in px. */
   backdropBlur: number;
   closeColor: string;
   closeSize: Length;
   autoOpen: "none" | "delay" | "exit";
-  /** Segundos até abrir sozinho (autoOpen "delay"). */
+  /** Seconds until it opens on its own (autoOpen "delay"). */
   delay: number;
-  /** Abre sozinho só uma vez por sessão do visitante. */
+  /** Open automatically only once per visitor session. */
   oncePerSession: boolean;
   showTrigger: boolean;
   triggerText: string;
@@ -56,7 +56,7 @@ export type ModalProps = {
   box: Box;
 };
 
-/** Estilos do contorno que o modal ganha só no editor. */
+/** Outline styles the modal gets only in the editor. */
 const EDITOR_FRAME: CSSProperties = {
   display: "flex",
   flexDirection: "column",
@@ -291,11 +291,11 @@ export const Modal: ComponentDefinition<ModalProps> = {
   View: ModalView,
   css: (id, p) => {
     const sheet = createSheet(id);
-    // sem botão próprio, o modal não ocupa espaço no layout publicado
+    // without its own button, the modal takes no space in the published layout
     const display = p.showTrigger ? "flex" : "contents";
     sheet.root().set("display", display).set("flex-direction", "column").set("align-items", p.triggerAlign);
 
-    // o <dialog> fechado precisa manter o display:none nativo: nada de display aqui
+    // a closed <dialog> must keep native display:none: no display here
     const panel = sheet.rule(" .pb-modal");
     panel
       .set("width", "calc(100% - 32px)")

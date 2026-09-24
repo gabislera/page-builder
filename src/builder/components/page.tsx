@@ -96,7 +96,7 @@ export const Page: ComponentDefinition<PageProps> = {
     canDrag: () => false,
     canMoveIn: (incoming, current, helpers) => {
       if (!incoming.every((n) => TOP_LEVEL_TYPES.has(n.data.name))) return false;
-      // no máximo um cabeçalho, um rodapé e uma barra de aviso por página
+      // at most one header, one footer, and one announcement bar per page
       const children = (current.data.nodes ?? []).map((id) => helpers(id).get());
       for (const kind of ["Header", "Footer", TOP_BAR_TYPE]) {
         const adding = incoming.filter((n) => n.data.name === kind);

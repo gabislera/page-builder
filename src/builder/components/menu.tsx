@@ -41,14 +41,14 @@ type MenuAlign = "flex-start" | "center" | "flex-end" | "space-between";
 
 export type MenuProps = {
   items: MenuItem[];
-  /** Vertical: lista empilhada (rodapés), nunca recolhe. */
+  /** Vertical: stacked list (footers), never collapses. */
   orientation: "horizontal" | "vertical";
   align: Responsive<MenuAlign>;
   gap: Responsive<Length>;
   itemPadding: Responsive<Sides>;
   typography: Typography;
   hoverColor: string;
-  /** Link da página atual (marcado pelo runtime). */
+  /** Current-page link (marked by the runtime). */
   activeColor: string;
   indicator: "none" | "underline" | "background" | "overline";
   indicatorColor: string;
@@ -62,7 +62,7 @@ export type MenuProps = {
   dropdownRadius: Length;
   dropdownShadow: Shadow;
 
-  /** A partir de qual dispositivo os links viram o botão hambúrguer. */
+  /** From which device the links become the hamburger button. */
   collapseOn: "tablet" | "mobile" | "never";
   toggleColor: string;
   toggleSize: Length;
@@ -84,7 +84,7 @@ const NO_LINK = { href: "#" };
 function MenuView({ id, props, rootRef, onPropChange }: NodeViewProps<MenuProps>) {
   const ctx = useRender();
   const isEditor = useIsEditor();
-  // no editor não há runtime: painel e submenus abrem com estado local
+  // no runtime in the editor: panel and submenus open with local state
   const [open, setOpen] = useState(false);
   const [openSubs, setOpenSubs] = useState<string[]>([]);
   const commit = (path: string) => onPropChange && ((v: string) => onPropChange(path, v));
@@ -214,7 +214,7 @@ function MenuView({ id, props, rootRef, onPropChange }: NodeViewProps<MenuProps>
 }
 
 /* ------------------------------------------------------------------ */
-/* Configurações                                                       */
+/* Settings                                                            */
 /* ------------------------------------------------------------------ */
 
 const newLink = (): MenuLink => ({
@@ -391,7 +391,7 @@ function menuCss(id: string, p: MenuProps): string {
   root.set("display", "flex").set("align-items", "center").set("position", "relative").set("min-width", "0");
   applyBox(sheet, p.box, "flex");
 
-  // lista principal
+  // main list
   const list = sheet.rule(" .pb-menu-list");
   list
     .set("display", "flex")
@@ -426,7 +426,7 @@ function menuCss(id: string, p: MenuProps): string {
   sheet.rule(" .pb-menu-caret").set("width", ".8em").set("height", ".8em").set("transition", `transform ${TRANSITION}`);
   sheet.rule(" .pb-menu-item:hover > .pb-menu-link .pb-menu-caret").set("transform", "rotate(180deg)");
 
-  // indicador de hover/ativo (só nos links principais)
+  // hover/active indicator (top-level links only)
   const top = " .pb-menu-list > .pb-menu-item > .pb-menu-link";
   if (p.indicator === "underline" || p.indicator === "overline") {
     sheet
@@ -452,12 +452,12 @@ function menuCss(id: string, p: MenuProps): string {
   }
 
   if (vertical) {
-    // submenu como lista aninhada
+    // submenu as a nested list
     sheet.rule(" .pb-submenu").set("list-style", "none").set("margin", "0").set("padding", "0 0 0 12px");
     return sheet.toString();
   }
 
-  // submenu suspenso
+  // dropdown submenu
   sheet
     .rule(" .pb-submenu")
     .set("position", "absolute")
@@ -496,7 +496,7 @@ function menuCss(id: string, p: MenuProps): string {
 
   if (p.collapseOn === "never") return sheet.toString();
 
-  // hambúrguer
+  // hamburger
   sheet
     .rule(" .pb-menu-toggle")
     .set("display", "none")
@@ -521,7 +521,7 @@ function menuCss(id: string, p: MenuProps): string {
     .set("border-radius", "2px")
     .set("background", "currentColor");
 
-  // painel (gaveta ou tela cheia), fixo na janela
+  // panel (drawer or fullscreen), fixed to the viewport
   sheet
     .rule(" .pb-menu-panel")
     .set("display", "none")
@@ -569,7 +569,7 @@ function menuCss(id: string, p: MenuProps): string {
     .set("opacity", fullscreen ? "1" : undefined)
     .set("transform", fullscreen ? undefined : "none");
 
-  // botão fechar (X)
+  // close button (X)
   sheet
     .rule(" .pb-menu-close")
     .set("position", "absolute")
@@ -594,7 +594,7 @@ function menuCss(id: string, p: MenuProps): string {
     .set("transform", "rotate(45deg)");
   sheet.rule(" .pb-menu-close span:last-child").set("transform", "rotate(-45deg)");
 
-  // lista do painel
+  // panel list
   sheet.rule(" .pb-menu-mlist, .pb-menu-msub").set("list-style", "none").set("margin", "0").set("padding", "0");
   sheet
     .rule(" .pb-menu-mrow")
@@ -636,7 +636,7 @@ function menuCss(id: string, p: MenuProps): string {
     .set("font-size", `calc(${p.panelFontSize} * .9)`)
     .set("opacity", ".85");
 
-  // abaixo do ponto de quebra: esconde os links e mostra o hambúrguer
+  // below the breakpoint: hide the links and show the hamburger
   const media = DEVICE_MEDIA[p.collapseOn];
   const collapsed = [
     `${S} .pb-menu-list{display:none}`,

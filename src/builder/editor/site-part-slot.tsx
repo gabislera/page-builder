@@ -1,6 +1,6 @@
 /**
- * Espaço no canvas quando a página não tem cabeçalho/rodapé: convida a
- * adicionar, oferecendo o do site (se existir) ou um modelo. Só no editor.
+ * Canvas placeholder when the page has no header/footer: invites adding one,
+ * offering the site version (if any) or a template. Editor only.
  */
 import { useEditor } from "@craftjs/core";
 import { Plus } from "lucide-react";
@@ -65,8 +65,8 @@ export function SitePartSlot({ part }: { part: SitePart }) {
 }
 
 /**
- * Filhos da página no editor, com os espaços de cabeçalho e rodapé no lugar
- * certo: barras de aviso primeiro (ficam sempre no topo), depois o cabeçalho.
+ * Page children in the editor, with header/footer slots in the right place:
+ * announcement bars first (always at the top), then the header.
  */
 export function EditorPageBody({ children, placeholder }: { children: ReactNode; placeholder: ReactNode }) {
   const { bars } = useEditor((state) => ({

@@ -1,11 +1,11 @@
 /**
- * Carrossel composto: cada slide é um nó de verdade (CarouselSlide) com
- * conteúdo livre.
+ * Composite carousel: each slide is a real node (CarouselSlide) with
+ * freeform content.
  *
- * A trilha usa scroll-snap do CSS (`overflow-x:auto` + `scroll-snap-type`),
- * então funciona sem JS (arrastar/rolar no celular). O runtime "carousel"
- * liga setas e pontos, autoplay, loop e o ponto ativo. No editor as setas e
- * os pontos rolam a trilha via React, sem autoplay.
+ * The track uses CSS scroll-snap (`overflow-x:auto` + `scroll-snap-type`),
+ * so it works without JS (drag/scroll on mobile). The "carousel" runtime
+ * wires arrows and dots, autoplay, loop, and the active dot. In the editor,
+ * arrows and dots scroll the track via React, with no autoplay.
  */
 import { GalleryHorizontalEnd, RectangleHorizontal } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -30,13 +30,13 @@ import type { ComponentDefinition, NodeViewProps } from "../core/types.ts";
 import { RevealOnSelect } from "./shared/editor-reveal.tsx";
 
 /* ------------------------------------------------------------------ */
-/* Carrossel (pai)                                                     */
+/* Carousel (parent)                                                   */
 /* ------------------------------------------------------------------ */
 
 export type CarouselProps = {
   slidesPerView: Responsive<number>;
   gap: Responsive<Length>;
-  /** "auto" = altura do conteúdo (todos os slides ficam com a do maior). */
+  /** "auto" = content height (all slides match the tallest). */
   slideHeight: Responsive<Length>;
   showArrows: Responsive<boolean>;
   arrowIcon: "chevron" | "arrow";
@@ -49,9 +49,9 @@ export type CarouselProps = {
   dotColor: string;
   dotActiveColor: string;
   dotSize: Length;
-  /** Segundos entre um slide e outro; 0 = desligado. */
+  /** Seconds between slides; 0 = off. */
   autoplay: number;
-  /** Setas voltam ao início/fim. O autoplay sempre recomeça do início. */
+  /** Arrows wrap to start/end. Autoplay always restarts from the beginning. */
   loop: boolean;
   pauseOnHover: boolean;
   box: Box;
@@ -78,14 +78,14 @@ const CAROUSEL_DEFAULTS: CarouselProps = {
   box: defaultBox({ width: responsive("100%") }),
 };
 
-/** Slides visíveis (ignora <style> do editor e slides ocultos no dispositivo). */
+/** Visible slides (ignores editor <style> and slides hidden on the device). */
 function slideElements(track: HTMLElement): HTMLElement[] {
   return Array.from(track.children).filter(
     (el): el is HTMLElement => el.classList.contains("pb-car-slide") && el.getClientRects().length > 0,
   );
 }
 
-/** Posição de rolagem que alinha o slide ao início da trilha. */
+/** Scroll position that aligns the slide to the start of the track. */
 function slideOffset(track: HTMLElement, slide: HTMLElement): number {
   return slide.getBoundingClientRect().left - track.getBoundingClientRect().left + track.scrollLeft;
 }
@@ -111,7 +111,7 @@ function readNav(track: HTMLElement): NavState {
       best = d;
       current = i;
     }
-    // último slide que ainda consegue ficar no início da trilha
+    // last slide that can still sit at the start of the track
     if (offset >= max - 2 && i < last) last = i;
   });
   const atEnd = x >= max - 2;
@@ -142,8 +142,8 @@ function CarouselView({ id, props, children, rootRef }: NodeViewProps<CarouselPr
     atEnd: count <= 1,
   });
 
-  // editor: acompanha a rolagem da trilha (pontos e setas)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: recalcula quando muda o número de slides
+  // editor: follow track scroll (dots and arrows)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: recompute when the slide count changes
   useEffect(() => {
     const track = trackRef.current;
     if (!isEditor || !track) return;
@@ -227,7 +227,7 @@ function CarouselView({ id, props, children, rootRef }: NodeViewProps<CarouselPr
         <div className="pb-car-dots">
           {slides.map((_, i) => (
             <button
-              // biome-ignore lint/suspicious/noArrayIndexKey: um ponto por posição
+              // biome-ignore lint/suspicious/noArrayIndexKey: one dot per position
               key={i}
               type="button"
               className={i === nav.current ? "pb-car-dot pb-car-dot-active" : "pb-car-dot"}
@@ -453,7 +453,7 @@ export const Carousel: ComponentDefinition<CarouselProps> = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Slide (filho)                                                       */
+/* Slide (child)                                                       */
 /* ------------------------------------------------------------------ */
 
 export type CarouselSlideProps = {
@@ -483,7 +483,7 @@ function CarouselSlideView({ id, props, children, rootRef }: NodeViewProps<Carou
         <RevealOnSelect
           id={id}
           onReveal={(selected) => {
-            // selecionar o slide (ou algo dentro dele) rola a trilha até ele
+            // selecting the slide (or something inside it) scrolls the track to it
             if (selected)
               localRef.current?.scrollIntoView({
                 behavior: "smooth",
@@ -580,7 +580,7 @@ export const CarouselSlide: ComponentDefinition<CarouselSlideProps> = {
       .set("min-height", p.minHeight, (v) => (v === "0px" ? undefined : v));
     applyBackground(root, p.background);
     applyBorder(root, p.border);
-    // largura vem do carrossel; padding e altura mínima têm campos próprios
+    // width comes from the carousel; padding and min-height have their own fields
     applyBox(
       sheet,
       {
@@ -598,12 +598,12 @@ export const CarouselSlide: ComponentDefinition<CarouselSlideProps> = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Estruturas iniciais (Toolbox e "Adicionar")                         */
+/* Initial structures (Toolbox and "Adicionar")                        */
 /* ------------------------------------------------------------------ */
 
 const centered = { textAlign: responsive("center") };
 
-/** Slide com título + texto centralizados. */
+/** Slide with centered title + text. */
 export function carouselSlideSpec(index: number): NodeSpec {
   return h("CarouselSlide", {}, [
     h("Heading", {
@@ -621,5 +621,5 @@ export function carouselSlideSpec(index: number): NodeSpec {
   ]);
 }
 
-/** Carrossel com 3 slides (título + texto). */
+/** Carousel with 3 slides (title + text). */
 export const carouselSpec = (): NodeSpec => h("Carousel", {}, [0, 1, 2].map(carouselSlideSpec));

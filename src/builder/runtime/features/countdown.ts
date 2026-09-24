@@ -1,10 +1,10 @@
 /**
- * Contador regressivo da página publicada. Lê a configuração dos atributos
- * data-pb-* (ver components/countdown.tsx) e atualiza a cada segundo.
+ * Published-page countdown. Reads config from data-pb-* attributes
+ * (see components/countdown.tsx) and ticks every second.
  *
- * - date: data-pb-end já vem em UTC (ms), com o fuso aplicado na publicação.
- * - evergreen: início salvo no localStorage por nó; recarregar não reinicia.
- * - daily: zera todo dia no horário data-pb-daily do fuso data-pb-tz.
+ * - date: data-pb-end is already UTC (ms), timezone applied at publish.
+ * - evergreen: start stored in localStorage per node; reload does not reset.
+ * - daily: resets every day at data-pb-daily in the data-pb-tz timezone.
  */
 export const countdownScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){

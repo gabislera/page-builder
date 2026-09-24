@@ -6,7 +6,7 @@ import { formSubmission, page } from "#/db/schema";
 const MAX_FIELDS = 50;
 const MAX_VALUE = 5000;
 
-/** Recebe envios dos formulários das páginas publicadas. */
+/** Receives form submissions from published pages. */
 export const Route = createFileRoute("/api/forms/$pageId")({
   server: {
     handlers: {
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/api/forms/$pageId")({
         if (!row || row.status !== "published") return Response.json({ ok: false }, { status: 404 });
 
         const form = await request.formData();
-        // honeypot: bots preenchem o campo escondido
+        // honeypot: bots fill the hidden field
         if (form.get("_pb_hp")) return Response.json({ ok: true });
 
         const data: Record<string, string> = {};

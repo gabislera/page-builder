@@ -7,7 +7,7 @@ import { Button } from "#/components/ui/button";
 import { cn } from "#/lib/utils";
 import { listProjects } from "#/server/projects";
 
-/** Projeto: título e abas (páginas, leads, visitas). */
+/** Project: title and tabs (pages, leads, visits). */
 export const Route = createFileRoute("/_app/projects/$projectId")({
   component: ProjectLayout,
 });

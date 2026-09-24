@@ -1,6 +1,6 @@
 /**
- * Seções salvas pelo usuário como modelo. Pertencem ao usuário e aparecem
- * em todos os projetos dele.
+ * Sections saved by the user as templates. They belong to the user and
+ * appear in all of their projects.
  */
 import type { SerializedNodes } from "@craftjs/core";
 import { createServerFn } from "@tanstack/react-start";
@@ -12,7 +12,7 @@ import { sectionTemplate } from "#/db/schema";
 import { requireProjectAccess } from "./access.ts";
 import { authMiddleware } from "./middleware.ts";
 
-/** Árvores muito grandes (ex.: imagem colada em base64) não são aceitas. */
+/** Trees that are too large (e.g. a base64-pasted image) are rejected. */
 const MAX_BYTES = 2_000_000;
 
 export const listSavedSections = createServerFn({ method: "GET" })
@@ -49,7 +49,7 @@ export const saveSectionAsTemplate = createServerFn({ method: "POST" })
     const nodes = data.nodes as SerializedNodes;
     if (!nodes[data.rootNodeId]) throw new Error("Seção inválida");
     if (JSON.stringify(nodes).length > MAX_BYTES) throw new Error("Seção grande demais para salvar como modelo");
-    // cópia solta: sem vínculo de seção global nem de cabeçalho/rodapé do site
+    // loose copy: no link to a global section or the site header/footer
     const tree = cloneTree(nodes, data.rootNodeId, null);
     const [row] = await db
       .insert(sectionTemplate)

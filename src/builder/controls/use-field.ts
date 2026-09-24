@@ -4,7 +4,7 @@ import { getPath, setPath } from "../core/path.ts";
 import { assign, type Device, hasOwn, isResponsive, resolve, unassign } from "../core/responsive.ts";
 import { useEditorUI } from "../editor/store.ts";
 
-/** Props do nó selecionado + setter por caminho. */
+/** Selected node props + setter by path. */
 export function useNodeProps<P extends object>() {
   const {
     id,
@@ -33,19 +33,19 @@ export function useNodeProps<P extends object>() {
 
 export type FieldState<T> = {
   value: T;
-  /** O valor salvo é responsivo (varia por dispositivo). */
+  /** The saved value is responsive (varies by device). */
   responsive: boolean;
   device: Device;
-  /** Há valor próprio no dispositivo atual (não herdado). */
+  /** There is an own value on the current device (not inherited). */
   overridden: boolean;
   set: (value: T, opts?: { throttle?: boolean }) => void;
-  /** Volta a herdar do dispositivo maior. Só existe fora do desktop. */
+  /** Falls back to the larger device. Only exists off desktop. */
   reset?: () => void;
 };
 
 /**
- * Liga um controle a uma prop. Se a prop for responsiva, lê e escreve o valor
- * do dispositivo selecionado no editor.
+ * Binds a control to a prop. If the prop is responsive, reads and writes
+ * the value of the device selected in the editor.
  */
 export function useField<T>(path: string): FieldState<T> {
   const device = useEditorUI((s) => s.device);

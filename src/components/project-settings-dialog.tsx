@@ -21,7 +21,7 @@ import { deleteProject, getProjectSettings, updateProject } from "#/server/proje
 
 const AUTO = "__auto";
 
-/** Nome, endereço, página inicial e exclusão do projeto. */
+/** Project name, URL, home page, and deletion. */
 export function ProjectSettingsDialog({
   projectId,
   open,

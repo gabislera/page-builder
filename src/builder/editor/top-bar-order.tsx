@@ -1,6 +1,6 @@
 /**
- * Mantém a barra de aviso no topo da página: se ela for solta (ou o
- * cabeçalho inserido) em outro lugar, volta para o início, antes de tudo.
+ * Keeps the announcement bar at the top of the page: if it is dropped (or
+ * the header is inserted) elsewhere, it moves back to the start.
  */
 import { useEditor } from "@craftjs/core";
 import { useEffect } from "react";
@@ -14,11 +14,11 @@ export function TopBarOrder() {
       .join(""),
   }));
   useEffect(() => {
-    // "_b" em qualquer ponto = barra fora do topo
+    // "_b" anywhere = bar is not at the top
     if (!order.includes("_b")) return;
     const ids = query.node(ROOT_ID).get().data.nodes;
     const bars = ids.filter((id) => query.node(id).get().data.name === TOP_BAR_TYPE);
-    // junta no mesmo passo de desfazer da ação que a tirou do lugar
+    // merge into the same undo step as the action that moved it
     bars.forEach((id, i) => {
       actions.history.merge().move(id, ROOT_ID, i);
     });

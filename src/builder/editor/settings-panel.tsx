@@ -11,10 +11,10 @@ import { unlinkGlobal } from "./node-actions.ts";
 import { canSaveAsTemplate, SaveAsTemplateButton } from "./save-template.tsx";
 import { SitePartCard } from "./site-parts.tsx";
 
-/** Componentes compostos: o filho selecionado ganha atalho para o pai. */
+/** Compound components: the selected child gets a shortcut to the parent. */
 const COMPOUND_PARENTS = new Set(["Tabs", "Accordion", "Carousel"]);
 
-/** Ids da seção (filho da Página) até o nó, em ordem. */
+/** Ids from the section (Page child) down to the node, in order. */
 function ancestors(nodes: Record<string, Node>, id: string): string[] {
   const out: string[] = [];
   let current: string | null | undefined = id;
@@ -25,7 +25,7 @@ function ancestors(nodes: Record<string, Node>, id: string): string[] {
   return out;
 }
 
-/** Painel direito: configurações do nó selecionado. */
+/** Right panel: settings for the selected node. */
 export function SettingsPanel() {
   const editor = useEditor((state) => {
     const [id] = state.events.selected;
@@ -42,7 +42,7 @@ export function SettingsPanel() {
         sitePart: node.data.custom?.sitePart as string | undefined,
         isSiteBlock: node.data.name === "Header" || node.data.name === "Footer",
         settings: node.related?.settings,
-        // caminho da página até o nó (sem a Página): Seção › Abas › Aba
+        // path from the page to the node (without Page): Section › Tabs › Tab
         path: ancestors(state.nodes, id).map((ancestorId) => {
           const n = state.nodes[ancestorId];
           return {
@@ -185,7 +185,7 @@ function GlobalToggle({
   );
 }
 
-/** Configurações da página (nó ROOT) no painel esquerdo. */
+/** Page settings (ROOT node) in the left panel. */
 export function PageStylesPanel() {
   const { settings } = useEditor((state) => ({
     settings: state.nodes[ROOT_ID]?.related?.settings,

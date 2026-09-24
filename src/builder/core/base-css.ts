@@ -1,6 +1,6 @@
 /**
- * CSS base aplicado igualmente no canvas do editor e na página publicada.
- * Mantém os dois idênticos: nada de reset do Tailwind dentro do canvas.
+ * Base CSS applied equally on the editor canvas and the published page.
+ * Keeps both identical: no Tailwind reset inside the canvas.
  */
 import { UI_ACCENT, UI_ACCENT_SOFT, UI_EDITING } from "#/lib/brand";
 
@@ -30,7 +30,7 @@ ul,ol{margin:0;padding-left:1.25em}
 @media (prefers-reduced-motion:reduce){.pb-anim-pulse{animation:none}.pb-anim-fade-in,.pb-anim-fade-up{opacity:1;transform:none;transition:none}}
 `;
 
-/** CSS só do editor: contornos de seleção, placeholders e elementos ocultos. */
+/** Editor-only CSS: selection outlines, placeholders, and hidden elements. */
 export const EDITOR_CSS = `
 html{scroll-behavior:auto}
 ::-webkit-scrollbar{width:10px;height:10px}

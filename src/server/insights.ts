@@ -1,5 +1,5 @@
 /**
- * Leads (envios de formulário) e visitas das páginas publicadas, por projeto.
+ * Leads (form submissions) and visits from published pages, per project.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { and, desc, eq, gte, isNull, sql } from "drizzle-orm";
@@ -9,11 +9,11 @@ import { formSubmission, page, pageView } from "#/db/schema";
 import { requireProjectAccess } from "./access.ts";
 import { authMiddleware } from "./middleware.ts";
 
-/** Dias agrupados no horário de Brasília. */
+/** Days grouped in Brasília time. */
 const TZ = "America/Sao_Paulo";
 /**
- * O fuso vai literal no SQL (é constante): como parâmetro, o SELECT e o
- * GROUP BY viram $1 e $2 e o Postgres não os reconhece como a mesma coluna.
+ * Timezone is inlined in SQL (it's a constant): as a parameter, SELECT and
+ * GROUP BY become $1 and $2 and Postgres does not treat them as the same column.
  */
 const TZ_SQL = sql.raw(`'${TZ}'`);
 const PAGE_SIZE = 50;
@@ -28,7 +28,7 @@ const leadFilters = z.object({
   projectId: z.string(),
   pageId: z.string().optional(),
   formName: z.string().optional(),
-  /** Últimos N dias; vazio = tudo. */
+  /** Last N days; empty = all. */
   days: z.number().int().positive().max(3650).optional(),
   q: z.string().trim().max(200).optional(),
 });
@@ -46,7 +46,7 @@ function leadWhere(f: LeadFilters) {
   );
 }
 
-/** Campos mais comuns primeiro, na ordem em que costumam aparecer. */
+/** Most common fields first, in the order they usually appear. */
 const PREFERRED = ["nome", "name", "email", "e_mail", "whatsapp", "telefone", "phone"];
 function orderColumns(keys: Iterable<string>) {
   const all = [...new Set(keys)].filter((k) => !/^(utm_|fbclid|gclid|tags$)/.test(k));
@@ -58,7 +58,7 @@ function orderColumns(keys: Iterable<string>) {
   });
 }
 
-/** Origem do lead: utm_source ou o domínio de quem indicou. */
+/** Lead source: utm_source or the referring domain. */
 function leadSource(data: Record<string, string>) {
   return data.utm_source || null;
 }
@@ -103,7 +103,7 @@ export const listLeads = createServerFn({ method: "GET" })
       ...r,
       createdAt: r.createdAt.toISOString(),
       source: leadSource(r.data),
-      /** Endereço de onde o formulário foi enviado (com UTMs). */
+      /** URL the form was submitted from (with UTMs). */
       url: str(meta.url),
       userAgent: str(meta.ua),
     }));
@@ -119,12 +119,12 @@ export const listLeads = createServerFn({ method: "GET" })
 
 const csvCell = (v: unknown) => {
   const s = v == null ? "" : String(v);
-  // evita que planilhas executem fórmulas vindas do formulário
+  // prevent spreadsheets from executing formulas from the form
   const safe = /^[=+\-@]/.test(s) ? `'${s}` : s;
   return /[";\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 };
 
-/** CSV (separado por ";", como o Excel em português espera). */
+/** CSV (semicolon-separated, as Portuguese Excel expects). */
 export const exportLeadsCsv = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
   .validator(leadFilters)
@@ -150,7 +150,7 @@ export const exportLeadsCsv = createServerFn({ method: "GET" })
         .map(csvCell)
         .join(";"),
     );
-    // BOM: o Excel reconhece acentos
+    // BOM: Excel recognizes accents
     return `﻿${[header.map(csvCell).join(";"), ...lines].join("\r\n")}`;
   });
 
@@ -166,14 +166,14 @@ export const deleteLead = createServerFn({ method: "POST" })
   });
 
 /* ------------------------------------------------------------------ */
-/* Visitas                                                             */
+/* Visits                                                              */
 /* ------------------------------------------------------------------ */
 
 const HOST_NOISE = new Set(["www", "m", "l", "lm", "mobile", "com", "br", "net", "org", "co"]);
 
 /**
- * Nome de quem indicou, no mesmo formato do utm_source: "l.instagram.com" e
- * "www.google.com.br" viram "instagram" e "google".
+ * Referrer name in the same format as utm_source: "l.instagram.com" and
+ * "www.google.com.br" become "instagram" and "google".
  */
 function refHost(ref: unknown): string | null {
   if (typeof ref !== "string" || !ref) return null;
@@ -235,7 +235,7 @@ export const getInsights = createServerFn({ method: "GET" })
         .innerJoin(page, eq(page.id, formSubmission.pageId))
         .where(and(pagesOfProject, gte(formSubmission.createdAt, from)))
         .groupBy(formSubmission.pageId),
-      // origens e dispositivos: poucos campos de cada visita do período
+      // sources and devices: a few fields from each visit in the period
       db
         .select({ meta: pageView.meta })
         .from(pageView)
@@ -245,7 +245,7 @@ export const getInsights = createServerFn({ method: "GET" })
         .limit(100_000),
     ]);
 
-    // série diária completa (dias sem visita aparecem com zero)
+    // full daily series (days with no visits show as zero)
     const views = new Map(viewsByDay.map((r) => [r.day, r.n]));
     const leads = new Map(leadsByDay.map((r) => [r.day, r.n]));
     const daily: { day: string; views: number; leads: number }[] = [];

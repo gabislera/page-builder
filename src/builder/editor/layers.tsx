@@ -6,7 +6,7 @@ import { cn } from "#/lib/utils";
 import { ROOT_ID } from "../core/tree.ts";
 import { COMPONENTS } from "../registry.ts";
 
-/** Árvore de camadas: seleção, visibilidade e navegação pela estrutura. */
+/** Layer tree: selection, visibility, and structure navigation. */
 export function LayersPanel() {
   const { rootChildren } = useEditor((state) => ({
     rootChildren: state.nodes[ROOT_ID]?.data.nodes ?? [],

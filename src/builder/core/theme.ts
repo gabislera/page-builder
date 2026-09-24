@@ -1,10 +1,10 @@
 /**
- * Estilos globais do site (paleta, fontes e identidade).
+ * Site-wide styles (palette, fonts, and identity).
  *
- * Os componentes não guardam a cor da marca em hex: guardam uma referência
- * como `var(--pb-c-primary)`. A página publicada e o canvas do editor definem
- * essas variáveis a partir do tema do projeto, então trocar a paleta muda o
- * site inteiro.
+ * Components do not store the brand color as hex: they store a reference
+ * like `var(--pb-c-primary)`. The published page and editor canvas define
+ * these variables from the project theme, so changing the palette updates
+ * the whole site.
  */
 
 import { FONT_OPTIONS, fontStack, GOOGLE_FONTS } from "./style-engine.ts";
@@ -13,7 +13,7 @@ export type ThemeColor = {
   id: string;
   name: string;
   value: string;
-  /** Cores do sistema não podem ser removidas (só editadas). */
+  /** System colors cannot be removed (only edited). */
   system?: boolean;
 };
 
@@ -22,32 +22,32 @@ export type SiteTheme = {
   fonts: { heading: string; body: string };
 };
 
-/** Identidade do site: usada pelo elemento Logo e no título das páginas. */
+/** Site identity: used by the Logo element and in page titles. */
 export type SiteIdentity = {
   name: string;
   logoUrl: string;
-  /** Logo alternativo para fundos escuros (opcional). */
+  /** Alternate logo for dark backgrounds (optional). */
   logoLightUrl: string;
 };
 
 export type SiteSettings = {
   theme: SiteTheme;
   identity: SiteIdentity;
-  /** Seção usada como cabeçalho padrão do site. */
+  /** Section used as the site's default header. */
   headerSectionId: string | null;
-  /** Seção usada como rodapé padrão do site. */
+  /** Section used as the site's default footer. */
   footerSectionId: string | null;
-  /** Página aberta no endereço do site (/p/projeto). Vazio: automática. */
+  /** Page opened at the site address (/p/project). Empty: automatic. */
   homePageId: string | null;
-  /** Página mostrada quando o endereço não existe. Vazio: página padrão. */
+  /** Page shown when the address does not exist. Empty: default page. */
   notFoundPageId: string | null;
   cookieBanner: CookieBanner;
 };
 
-/** Aviso de cookies (LGPD), igual em todas as páginas do site. */
+/** Cookie notice (LGPD), the same on every page of the site. */
 export type CookieBanner = {
   enabled: boolean;
-  /** "block": pixels e scripts só carregam depois de aceitar. */
+  /** "block": pixels and scripts load only after accept. */
   mode: "block" | "notice";
   text: string;
   acceptText: string;
@@ -100,7 +100,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   cookieBanner: DEFAULT_COOKIE_BANNER,
 };
 
-/** Completa configurações salvas com os padrões (projetos antigos, campos novos). */
+/** Fills saved settings with defaults (old projects, new fields). */
 export function normalizeSiteSettings(input: Partial<SiteSettings> | null | undefined): SiteSettings {
   const theme = input?.theme;
   const saved = new Map((theme?.colors ?? []).map((c) => [c.id, c]));
@@ -124,27 +124,27 @@ export function normalizeSiteSettings(input: Partial<SiteSettings> | null | unde
 }
 
 /* ------------------------------------------------------------------ */
-/* Referências                                                         */
+/* References                                                          */
 /* ------------------------------------------------------------------ */
 
 const COLOR_VAR = /^var\(--pb-c-([a-z0-9-]+)\)$/;
 
-/** Referência a uma cor global, para usar como valor de prop. */
+/** Reference to a global color, for use as a prop value. */
 export const colorVar = (id: string) => `var(--pb-c-${id})`;
 
-/** Id da cor global referenciada pelo valor, ou null se for uma cor comum. */
+/** Id of the global color referenced by the value, or null if it is a plain color. */
 export function colorRefId(value: string | undefined): string | null {
   return value ? (COLOR_VAR.exec(value)?.[1] ?? null) : null;
 }
 
-/** Cor efetiva (hex) de um valor que pode ser referência global. */
+/** Effective color (hex) of a value that may be a global reference. */
 export function resolveColor(value: string | undefined, theme: SiteTheme): string {
   const id = colorRefId(value);
   if (!id) return value ?? "";
   return theme.colors.find((c) => c.id === id)?.value ?? "";
 }
 
-/** Troca referências a cores globais pelo valor real (ex.: para exibir no painel). */
+/** Replaces global color references with the real value (e.g. to show in the panel). */
 export function resolveThemeVars(value: string, theme: SiteTheme): string {
   return value.replace(
     /var\(--pb-c-([a-z0-9-]+)\)/g,
@@ -152,7 +152,7 @@ export function resolveThemeVars(value: string, theme: SiteTheme): string {
   );
 }
 
-/** Fontes globais: valores de `fontFamily` aceitos pelos componentes. */
+/** Global fonts: `fontFamily` values accepted by components. */
 export const FONT_HEADING = "var(--pb-font-heading)";
 export const FONT_BODY = "var(--pb-font-body)";
 
@@ -162,8 +162,8 @@ export const GLOBAL_FONT_LABELS: Record<string, string> = {
 };
 
 /**
- * Opções do seletor de fonte: as fontes globais primeiro, depois as demais.
- * `inherit` herda do elemento pai.
+ * Font picker options: global fonts first, then the rest.
+ * `inherit` inherits from the parent element.
  */
 export function fontChoices(opts: { inherit?: boolean } = {}) {
   return [
@@ -177,7 +177,7 @@ export function fontChoices(opts: { inherit?: boolean } = {}) {
   ];
 }
 
-/** Atalhos usados nos defaults dos componentes. */
+/** Shortcuts used in component defaults. */
 export const C = {
   primary: colorVar("primary"),
   secondary: colorVar("secondary"),
@@ -195,7 +195,7 @@ export const C = {
 
 const safeId = (id: string) => id.replace(/[^a-z0-9-]/g, "");
 
-/** Variáveis CSS do tema, aplicadas em `:root`. */
+/** Theme CSS variables, applied on `:root`. */
 export function themeCss(theme: SiteTheme): string {
   const vars = [
     ...theme.colors.map((c) => `--pb-c-${safeId(c.id)}:${c.value}`),
@@ -205,7 +205,7 @@ export function themeCss(theme: SiteTheme): string {
   return `:root{${vars.join(";")}}`;
 }
 
-/** Fontes do Google usadas pelo tema. */
+/** Google fonts used by the theme. */
 export function themeFonts(theme: SiteTheme): string[] {
   return [theme.fonts.heading, theme.fonts.body].filter((f) => f in GOOGLE_FONTS);
 }

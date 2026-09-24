@@ -61,24 +61,24 @@ export type FormFieldType =
   | "select"
   | "checkbox"
   | "hidden"
-  /** Não é um campo: começa uma nova etapa (o rótulo é o título dela). */
+  /** Not a field: starts a new step (the label is the step title). */
   | "step";
 
 export type FormField = {
   id: string;
   type: FormFieldType;
-  /** Chave do campo no envio. Vazio: gerada a partir do rótulo. */
+  /** Field key on submit. Empty: generated from the label. */
   name: string;
   label: string;
   placeholder: string;
   required: boolean;
-  /** Opções do select, uma por linha. */
+  /** Select options, one per line. */
   options: string;
-  /** Valor do campo oculto. */
+  /** Hidden field value. */
   value: string;
-  /** Telefone: mostra o seletor de DDI. */
+  /** Phone: show the country-code picker. */
   showCountry: boolean;
-  /** Telefone: DDI padrão, só dígitos ("55"). */
+  /** Phone: default country code, digits only ("55"). */
   country: string;
 };
 
@@ -87,9 +87,9 @@ type Align = "flex-start" | "center" | "flex-end" | "stretch";
 export type FormProps = {
   formName: string;
   fields: FormField[];
-  /** Tags separadas por vírgula, enviadas no campo oculto "tags". */
+  /** Comma-separated tags, sent in the hidden "tags" field. */
   tags: string;
-  /** Envia utm_*, fbclid e gclid da URL junto com os dados. */
+  /** Send utm_*, fbclid, and gclid from the URL with the data. */
   captureUtm: boolean;
   showLabels: boolean;
   requiredMark: boolean;
@@ -116,7 +116,7 @@ export type FormProps = {
   errorMessage: string;
   redirect: Action;
   appendQuery: boolean;
-  /** Etapas: como mostrar o progresso. */
+  /** Steps: how to show progress. */
   stepProgress: "bar" | "steps" | "none";
   nextText: string;
   prevText: string;
@@ -140,7 +140,7 @@ const TYPE_LABEL: Record<FormFieldType, string> = {
 
 type Step = { title: string; fields: { f: FormField; index: number }[] };
 
-/** Divide os campos em etapas a cada "Nova etapa". Etapas vazias somem. */
+/** Split fields into steps at each "Nova etapa". Empty steps are dropped. */
 export function splitSteps(fields: FormField[]): Step[] {
   const steps: Step[] = [{ title: "", fields: [] }];
   fields.forEach((f, index) => {
@@ -193,7 +193,7 @@ const splitOptions = (text: string) =>
     .map((o) => o.trim())
     .filter(Boolean);
 
-/** Campo de armadilha para bots: invisível, fora da ordem de tabulação. */
+/** Bot honeypot: invisible, out of the tab order. */
 const HONEYPOT_STYLE: CSSProperties = {
   position: "absolute",
   width: 1,
@@ -209,13 +209,13 @@ function FormView({ id, props, rootRef }: NodeViewProps<FormProps>) {
   const ctx = useRender();
   const steps = splitSteps(props.fields);
   const multi = steps.length > 1;
-  // no editor, a etapa visível vem do painel/canvas; publicado começa na 1ª
+  // in the editor, the visible step comes from the panel/canvas; published starts at the 1st
   const previewStep = useEditorPreview((s) => s.formStep[id] ?? 0);
   const setPreviewStep = useEditorPreview((s) => s.setFormStep);
   const active = isEditor ? Math.min(previewStep, steps.length - 1) : 0;
   const last = steps.length - 1;
   const redirect = props.afterSubmit === "redirect" ? actionLink(props.redirect, ctx) : null;
-  // no editor os campos não recebem foco nem clique: o clique seleciona o nó
+  // in the editor, fields get no focus or click: click selects the node
   const lock = isEditor ? { tabIndex: -1 } : {};
   const lockStyle: CSSProperties | undefined = isEditor ? { pointerEvents: "none" } : undefined;
   const required = (f: FormField) =>
@@ -328,7 +328,7 @@ function FormView({ id, props, rootRef }: NodeViewProps<FormProps>) {
     }
 
     return (
-      // telefone: o <label> focaria o seletor de DDI, então usa div + aria-label
+      // phone: <label> would focus the country picker, so use div + aria-label
       f.type === "tel" ? (
         <div key={f.id} className="pb-form-field">
           {label}
@@ -356,8 +356,8 @@ function FormView({ id, props, rootRef }: NodeViewProps<FormProps>) {
       data-pb-append-query={props.appendQuery ? "1" : undefined}
       data-pb-utm={props.captureUtm ? "1" : undefined}
       data-pb-loading={props.loadingText || undefined}
-      // com etapas, a validação é feita por etapa no runtime; a nativa
-      // barraria o Enter por causa dos campos das etapas escondidas
+      // with steps, validation is per-step at runtime; native validation
+      // would block Enter because of fields in hidden steps
       noValidate={multi || undefined}
       onSubmit={isEditor ? (e) => e.preventDefault() : undefined}
     >
@@ -370,7 +370,7 @@ function FormView({ id, props, rootRef }: NodeViewProps<FormProps>) {
           <StepProgress props={props} steps={steps} active={active} />
           {steps.map((step, i) => (
             <fieldset
-              // biome-ignore lint/suspicious/noArrayIndexKey: etapas não têm id próprio
+              // biome-ignore lint/suspicious/noArrayIndexKey: steps have no id of their own
               key={i}
               className="pb-form-step"
               data-pb-step={i}
@@ -443,7 +443,7 @@ function SubmitButton({
   );
 }
 
-/** Progresso das etapas. O runtime atualiza texto, barra e passos. */
+/** Step progress. The runtime updates text, bar, and numbered steps. */
 function StepProgress({ props, steps, active }: { props: FormProps; steps: Step[]; active: number }) {
   if (props.stepProgress === "none") return null;
   const total = steps.length;
@@ -452,7 +452,7 @@ function StepProgress({ props, steps, active }: { props: FormProps; steps: Step[
       <ol className="pb-form-progress pb-form-dots" aria-hidden="true">
         {steps.map((s, i) => (
           <li
-            // biome-ignore lint/suspicious/noArrayIndexKey: etapas não têm id próprio
+            // biome-ignore lint/suspicious/noArrayIndexKey: steps have no id of their own
             key={i}
             data-pb-dot={i}
             className={i === active ? "pb-active" : i < active ? "pb-done" : undefined}
@@ -485,7 +485,7 @@ function StepProgress({ props, steps, active }: { props: FormProps; steps: Step[
 }
 
 /* ------------------------------------------------------------------ */
-/* Configurações                                                       */
+/* Settings                                                            */
 /* ------------------------------------------------------------------ */
 
 function FieldItem({ itemPath, field }: { itemPath: string; field: FormField }) {
@@ -578,14 +578,14 @@ function StepsGroup() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Campos e etapas                                                     */
+/* Fields and steps                                                    */
 /* ------------------------------------------------------------------ */
 
 const newField = (): FormField => field({ type: "text", label: "Novo campo", options: "Opção 1\nOpção 2" });
 
 const stepMarker = (label: string) => field({ type: "step", label });
 
-/** Uma etapa na tela de edição: o marcador (título) e os campos dela. */
+/** One step in the editor: the marker (title) and its fields. */
 type StepGroup = {
   id: string;
   marker: FormField | null;
@@ -593,7 +593,7 @@ type StepGroup = {
   items: { f: FormField; index: number }[];
 };
 
-/** Agrupa a lista plana (campos + marcadores "step") por etapa. */
+/** Group the flat list (fields + "step" markers) by step. */
 function groupSteps(fields: FormField[]): StepGroup[] {
   const groups: StepGroup[] = [];
   fields.forEach((f, index) => {
@@ -601,22 +601,22 @@ function groupSteps(fields: FormField[]): StepGroup[] {
       groups.push({ id: f.id, marker: f, markerIndex: index, items: [] });
       return;
     }
-    // campos antes do primeiro marcador formam a 1ª etapa
+    // fields before the first marker form the 1st step
     if (!groups.length) groups.push({ id: "__first", marker: null, markerIndex: -1, items: [] });
     groups[groups.length - 1].items.push({ f, index });
   });
   return groups;
 }
 
-/** Volta para a lista plana salva nas props. */
+/** Flatten back to the list stored in props. */
 const flatten = (groups: StepGroup[]) =>
   groups.flatMap((g, i) => [g.marker ?? stepMarker(`Etapa ${i + 1}`), ...g.items.map((it) => it.f)]);
 
 const fieldLabel = (item: FormField) => `${item.label || item.name} · ${TYPE_LABEL[item.type]}`;
 
 /**
- * Lista de campos. Sem etapas: uma lista simples. Com etapas: uma lista de
- * etapas, cada uma abre com o título e os campos dela.
+ * Field list. Without steps: a simple list. With steps: a list of
+ * steps, each opening with its title and fields.
  */
 function FieldsEditor() {
   const { id, props, update } = useNodeProps<FormProps>();
@@ -665,7 +665,7 @@ function StepsEditor({
 }) {
   const setPreviewStep = useEditorPreview((s) => s.setFormStep);
   const groups = groupSteps(fields);
-  /** Etapa i no canvas (etapas sem campos não aparecem). */
+  /** Step i on the canvas (steps with no fields do not appear). */
   const renderIndex = (i: number) =>
     groups.slice(0, i).filter((g) => g.items.some((it) => it.f.type !== "hidden")).length;
 
@@ -854,7 +854,7 @@ function FormSettings() {
   );
 }
 
-/** Etapas: navegação, barra de progresso e passos numerados. */
+/** Steps: navigation, progress bar, and numbered steps. */
 function stepsCss(sheet: ReturnType<typeof createSheet>, id: string, p: FormProps) {
   const accent = p.progressColor || "var(--pb-c-primary)";
   sheet
@@ -893,7 +893,7 @@ function stepsCss(sheet: ReturnType<typeof createSheet>, id: string, p: FormProp
     .set("transition", "opacity .15s ease");
   sheet.rule(" .pb-form-prev:hover").set("opacity", "1");
 
-  // barra
+  // bar
   sheet.rule(" .pb-form-bar").set("display", "flex").set("flex-direction", "column").set("gap", "8px");
   sheet
     .rule(" .pb-form-bar-head")
@@ -917,7 +917,7 @@ function stepsCss(sheet: ReturnType<typeof createSheet>, id: string, p: FormProp
     .set("background", accent)
     .set("transition", "width .35s ease");
 
-  // passos numerados, ligados por uma linha
+  // numbered steps, joined by a line
   sheet.rule(" .pb-form-dots").set("display", "flex").set("margin", "0").set("padding", "0").set("list-style", "none");
   sheet
     .rule(" .pb-form-dots > li")
@@ -975,12 +975,12 @@ function stepsCss(sheet: ReturnType<typeof createSheet>, id: string, p: FormProp
     .set("white-space", "nowrap")
     .set("max-width", "100%");
   sheet.rule(" .pb-form-dots > li.pb-active .pb-form-dot-label").set("opacity", "1");
-  // no celular os títulos dos passos ocupariam espaço demais
+  // on mobile the step titles would take too much space
   sheet.appendRaw(`@media (max-width: 600px){${nodeSelector(id)} .pb-form-dot-label{display:none}}`);
 }
 
 /* ------------------------------------------------------------------ */
-/* Definição                                                           */
+/* Definition                                                          */
 /* ------------------------------------------------------------------ */
 
 const field = (f: Partial<FormField> & Pick<FormField, "type" | "label">): FormField => ({
@@ -1181,7 +1181,7 @@ export const Form: ComponentDefinition<FormProps> = {
   fonts: (p) => [p.labelTypography.fontFamily, p.inputTypography.fontFamily, p.submit.typography.fontFamily],
 };
 
-/** Modelo "Formulário em etapas": 3 etapas curtas, com passos numerados. */
+/** "Formulário em etapas" template: 3 short steps, with numbered steps. */
 export const multiStepFormProps = (): Partial<FormProps> => ({
   formName: "Formulário em etapas",
   stepProgress: "steps",

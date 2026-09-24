@@ -58,24 +58,24 @@ type ContentAlign = "left" | "center" | "right";
 
 export type CardProps = {
   showImage: boolean;
-  /** Imagem por dispositivo (tablet/celular podem usar outra). */
+  /** Image per device (tablet/mobile can use another). */
   image: Responsive<string>;
   imageAlt: string;
   imagePosition: Responsive<ImagePosition>;
-  /** Imagem ao lado vira imagem no topo no celular. */
+  /** Side image stacks to the top on mobile. */
   stackOnMobile: boolean;
-  /** Proporção da imagem no topo ("16/9", "auto"...). */
+  /** Aspect ratio of the top image ("16/9", "auto"...). */
   imageRatio: string;
-  /** Largura da imagem ao lado do conteúdo. */
+  /** Width of the image beside the content. */
   imageWidth: Responsive<Length>;
   imageFit: "cover" | "contain";
-  /** Imagem de fundo: cor do degradê por cima da imagem. */
+  /** Background image: overlay gradient color. */
   overlayColor: string;
-  /** Imagem de fundo: cor dos textos. */
+  /** Background image: text color. */
   overlayTextColor: string;
-  /** Imagem de fundo: altura mínima do card. */
+  /** Background image: card min-height. */
   backgroundMinHeight: Responsive<Length>;
-  /** Selo (ex.: "Novo"). Vazio = oculto. */
+  /** Badge (e.g. "Novo"). Empty = hidden. */
   badge: string;
   badgeBackground: string;
   badgeColor: string;
@@ -84,27 +84,27 @@ export type CardProps = {
   titleTypography: Typography;
   text: string;
   textTypography: Typography;
-  /** Chamada: botão, link de texto ou nenhuma. */
+  /** CTA: button, text link, or none. */
   ctaType: "button" | "link" | "none";
   ctaText: string;
   ctaIcon: string;
   ctaAction: Action;
   button: ButtonStyle;
   linkColor: string;
-  /** O card inteiro vira link. */
+  /** The whole card becomes a link. */
   cardAction: Action;
   align: Responsive<ContentAlign>;
-  /** Espaço interno do conteúdo (texto). */
+  /** Inner padding of the content (text). */
   padding: Responsive<Sides>;
-  /** Espaço entre os elementos do conteúdo. */
+  /** Space between content elements. */
   gap: Responsive<Length>;
   background: Background;
   border: Border;
   shadow: Shadow;
-  /** Deslocamento para cima no hover ("0px" = desligado). */
+  /** Lift on hover ("0px" = off). */
   hoverLift: Length;
   hoverShadow: Shadow;
-  /** Zoom suave da imagem no hover. */
+  /** Gentle image zoom on hover. */
   imageZoom: boolean;
   box: Box;
 };
@@ -115,7 +115,7 @@ const TEXT_TO_FLEX: Record<ContentAlign, string> = {
   right: "flex-end",
 };
 
-/** Posição efetiva da imagem em um dispositivo (empilha no celular). */
+/** Effective image position on a device (stacks on mobile). */
 function positionOn(p: CardProps, d: Device): ImagePosition {
   const pos = resolve(p.imagePosition, d);
   if (d === "mobile" && p.stackOnMobile && (pos === "left" || pos === "right")) return "top";
@@ -493,7 +493,7 @@ export const Card: ComponentDefinition<CardProps> = {
       p.hoverLift && Number.parseFloat(p.hoverLift) !== 0 ? `translateY(-${p.hoverLift})` : undefined;
     sheet.rule(":hover").set("transform", hoverTransform).set("box-shadow", shadowToCss(p.hoverShadow));
 
-    // imagem
+    // image
     if (p.showImage) {
       const ratio = p.imageRatio === "auto" ? "auto" : p.imageRatio;
       const media = sheet.rule(" .pb-card-media");
@@ -536,7 +536,7 @@ export const Card: ComponentDefinition<CardProps> = {
         };
       });
       if (p.imageZoom) sheet.rule(":hover .pb-card-media img").set("transform", "scale(1.05)");
-      // sobreposição só com a imagem de fundo
+      // overlay only with the background image
       const overlay = sheet.rule(" .pb-card-media::after");
       overlay
         .set("content", '""')
@@ -552,7 +552,7 @@ export const Card: ComponentDefinition<CardProps> = {
       }));
     }
 
-    // selo
+    // badge
     const badge = sheet.rule(" .pb-card-badge");
     badge
       .set("display", "inline-flex")
@@ -571,7 +571,7 @@ export const Card: ComponentDefinition<CardProps> = {
       badge.set("align-self", p.align, (v) => TEXT_TO_FLEX[v]);
     }
 
-    // conteúdo
+    // content
     const body = sheet.rule(" .pb-card-body");
     body
       .set("position", "relative")
@@ -594,7 +594,7 @@ export const Card: ComponentDefinition<CardProps> = {
     applyTypography(text, { ...p.textTypography, textAlign: undefined });
     text.set("overflow-wrap", "break-word");
     if (p.showImage) {
-      // textos claros sobre a imagem de fundo
+      // light text over the background image
       setPerDevice(title, (d) => ({
         color: imageOn(d) === "background" ? p.overlayTextColor : p.titleTypography.color,
       }));

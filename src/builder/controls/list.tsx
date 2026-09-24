@@ -9,22 +9,22 @@ import { getPath } from "../core/path.ts";
 import { Field } from "./field.tsx";
 import { useNodeProps } from "./use-field.ts";
 
-/** Itens de lista precisam de um id estável para o drag-and-drop. */
+/** List items need a stable id for drag-and-drop. */
 export type ListItem = { id: string };
 
 export const newItemId = () => Math.random().toString(36).slice(2, 10);
 
 type ListFieldProps<T extends ListItem> = {
-  /** Caminho do array nas props (ex.: "items"). */
+  /** Path of the array in props (e.g. "items"). */
   path: string;
   label: string;
-  /** Cria um item novo. */
+  /** Creates a new item. */
   create: () => T;
-  /** Título mostrado no cabeçalho recolhido do item. */
+  /** Title shown in the item's collapsed header. */
   itemLabel: (item: T, index: number) => string;
   /**
-   * Campos de um item. `itemPath` é o caminho completo do item
-   * (ex.: "items.2"), para usar com os demais controles: `${itemPath}.label`.
+   * Fields of an item. `itemPath` is the item's full path
+   * (e.g. "items.2"), for use with other controls: `${itemPath}.label`.
    */
   renderItem: (itemPath: string, item: T, index: number) => ReactNode;
   addLabel?: string;
@@ -33,8 +33,8 @@ type ListFieldProps<T extends ListItem> = {
 };
 
 /**
- * Editor de lista ligado a uma prop: adicionar, duplicar, remover e
- * reordenar arrastando. Cada item abre/fecha para mostrar seus campos.
+ * List editor bound to a prop: add, duplicate, remove, and
+ * reorder by dragging. Each item expands/collapses to show its fields.
  */
 export function ListField<T extends ListItem>({ path, label, renderItem, ...rest }: ListFieldProps<T>) {
   const { props, update } = useNodeProps<Record<string, unknown>>();
@@ -61,25 +61,25 @@ export function ListField<T extends ListItem>({ path, label, renderItem, ...rest
 
 export type ListEditorProps<T extends ListItem> = {
   items: T[];
-  /** Recebe uma função que transforma a lista atual na nova. */
+  /** Receives a function that turns the current list into the next one. */
   onChange: (fn: (list: T[]) => T[]) => void;
   create: () => T;
   itemLabel: (item: T, index: number) => string;
   renderItem: (item: T, index: number) => ReactNode;
-  /** Cópia de um item (padrão: clone com id novo). */
+  /** Copy of an item (default: clone with a new id). */
   duplicate?: (item: T) => T;
-  /** Chamado quando um item é aberto. */
+  /** Called when an item is opened. */
   onOpen?: (item: T, index: number) => void;
-  /** Detalhe à direita do título (ex.: "3 campos"). */
+  /** Detail to the right of the title (e.g. "3 campos"). */
   itemMeta?: (item: T, index: number) => ReactNode;
   addLabel?: string;
   min?: number;
   max?: number;
-  /** Visual dos itens: "card" (padrão) ou "section" (mais destacado). */
+  /** Item look: "card" (default) or "section" (more emphasized). */
   variant?: "card" | "section";
 };
 
-/** Lista editável sem ligação direta com as props (controlada). */
+/** Editable list with no direct binding to props (controlled). */
 export function ListEditor<T extends ListItem>({
   items,
   onChange,

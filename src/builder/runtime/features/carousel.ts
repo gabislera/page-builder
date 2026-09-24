@@ -1,9 +1,9 @@
 /**
- * Carrossel: a trilha já rola sozinha com scroll-snap (sem JS). Aqui ficam
- * setas e pontos (rolam um slide / vão até o slide), ponto ativo e setas
- * desabilitadas conforme a rolagem, pontos inalcançáveis ocultos (vários
- * slides por vez), loop nas setas e autoplay (pausa com o mouse em cima,
- * com foco dentro, com a aba oculta e respeita prefers-reduced-motion).
+ * Carousel: the track already scrolls with scroll-snap (no JS). This adds
+ * arrows and dots (one slide / jump to slide), active dot and disabled
+ * arrows from scroll, hidden unreachable dots (several slides at once),
+ * looping arrows, and autoplay (pauses on hover, inner focus, hidden tab,
+ * and respects prefers-reduced-motion).
  */
 export const carouselScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){

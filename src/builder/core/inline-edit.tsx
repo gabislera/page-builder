@@ -10,13 +10,13 @@ export function mergeRefs<T>(...refs: (Ref<T> | undefined)[]) {
   };
 }
 
-/** Texto simples com quebras de linha preservadas. */
+/** Plain text with line breaks preserved. */
 export function Lines({ text }: { text: string }) {
   const parts = text.split("\n");
   return (
     <>
       {parts.map((line, i) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: linhas não reordenam
+        // biome-ignore lint/suspicious/noArrayIndexKey: lines are not reordered
         <span key={i}>
           {line}
           {i < parts.length - 1 ? <br /> : null}
@@ -27,8 +27,8 @@ export function Lines({ text }: { text: string }) {
 }
 
 /**
- * Edição inline de texto simples no canvas. Duplo clique entra em edição,
- * Esc ou clique fora confirma. Na página publicada não faz nada.
+ * Inline edit of plain text on the canvas. Double-click enters edit,
+ * Esc or click outside commits. On the published page it does nothing.
  */
 export function useInlineEdit(
   value: string,
@@ -43,7 +43,7 @@ export function useInlineEdit(
     elRef.current = el;
   }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: entra em edição com o valor do momento
+  // biome-ignore lint/correctness/useExhaustiveDependencies: enters edit with the current value
   useEffect(() => {
     const el = elRef.current;
     if (!el || !editing) return;
@@ -100,7 +100,7 @@ export function useInlineEdit(
   };
 }
 
-/** Substitui tokens dinâmicos do texto (ex.: `{ano}` → ano atual). */
+/** Replaces dynamic text tokens (e.g. `{ano}` → current year). */
 export function fillTokens(text: string): string {
   return text.replaceAll("{ano}", String(new Date().getFullYear()));
 }

@@ -8,7 +8,7 @@ type LinkAttrs = Pick<AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "target"
 
 export const sectionAnchor = (sectionId: string) => `s-${sectionId}`;
 
-/** Converte uma ação em atributos de link. `null` quando não há ação. */
+/** Converts an action into link attributes. `null` when there is no action. */
 export function actionLink(action: Action | undefined, ctx: RenderContextValue): LinkAttrs | null {
   if (!action) return null;
   const blank = { target: "_blank", rel: "noopener noreferrer" };

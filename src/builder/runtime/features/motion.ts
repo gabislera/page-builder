@@ -1,6 +1,6 @@
 /**
- * Efeitos ao rolar (parallax). O elemento recebe `--pb-py`, somado ao
- * `translate` dele no CSS; a velocidade vem de `--pb-parallax`.
+ * Scroll effects (parallax). The element gets `--pb-py`, added to its CSS
+ * `translate`; speed comes from `--pb-parallax`.
  */
 export const motionScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){

@@ -15,15 +15,15 @@ export function IconField({ path, label, allowNone }: { path: string; label: str
   );
 }
 
-/** Máximo de ícones renderizados de uma vez (a biblioteca tem ~1700). */
+/** Max icons rendered at once (the library has ~1700). */
 const MAX_RESULTS = 120;
 const COLS = 7;
 
 const POPULAR = Object.keys(ICONS);
 
 /**
- * Termos em português → termos do lucide, para buscar na biblioteca completa
- * (os nomes do lucide são em inglês).
+ * Portuguese terms → lucide terms, to search the full library
+ * (lucide names are in English).
  */
 const PT_TERMS: Record<string, string[]> = {
   seta: ["arrow", "chevron"],
@@ -147,14 +147,14 @@ const PT_TERMS: Record<string, string[]> = {
 
 const normalize = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 
-/** Busca por nome do lucide, rótulo em português e termos traduzidos. */
+/** Search by lucide name, Portuguese label, and translated terms. */
 function searchIcons(query: string): { names: string[]; total: number } {
   const q = normalize(query);
   if (!q) return { names: POPULAR, total: POPULAR.length };
   const words = q.split(/\s+/);
   const kebabQuery = words.join("-");
 
-  // termos em inglês equivalentes às palavras digitadas em português
+  // English terms equivalent to the words typed in Portuguese
   const translated = new Set<string>();
   for (const w of words) {
     for (const [pt, terms] of Object.entries(PT_TERMS)) {
@@ -237,7 +237,7 @@ function IconPicker({
   const gridRef = useRef<HTMLDivElement>(null);
   const { names, total } = useMemo(() => searchIcons(query), [query]);
   const searching = query.trim() !== "";
-  // "" = opção "Nenhum"
+  // "" = "Nenhum" option
   const options = useMemo(() => (allowNone && !searching ? ["", ...names] : names), [allowNone, searching, names]);
 
   useEffect(() => {
@@ -269,7 +269,7 @@ function IconPicker({
       <div className="flex items-center gap-2 border-b border-border px-3">
         <Search className="size-3.5 shrink-0 text-muted-foreground" />
         <input
-          // biome-ignore lint/a11y/noAutofocus: foco na busca ao abrir o seletor
+          // biome-ignore lint/a11y/noAutofocus: focus the search when the picker opens
           autoFocus
           className="h-9 w-full bg-transparent text-xs outline-none placeholder:text-muted-foreground"
           placeholder="Buscar ícone (ex.: seta, check, gift)"

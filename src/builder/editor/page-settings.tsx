@@ -20,7 +20,7 @@ export type PageMeta = {
   tracking: PageTracking;
 };
 
-/** SEO, endereço e rastreamento. Salvos à parte do conteúdo (botão salvar). */
+/** SEO, URL, and tracking. Saved separately from content (save button). */
 export function PageMetaPanel({ initial, onSaved }: { initial: PageMeta; onSaved: (meta: PageMeta) => void }) {
   const { services, projectSlug } = useEditorContext();
   const [meta, setMeta] = useState(initial);

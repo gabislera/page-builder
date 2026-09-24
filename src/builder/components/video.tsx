@@ -18,25 +18,25 @@ type AspectRatio = "16/9" | "9/16" | "4/3" | "1/1" | "custom" | "auto";
 
 export type VideoProps = {
   source: VideoSource;
-  /** Link do YouTube ou do Vimeo (qualquer formato). */
+  /** YouTube or Vimeo URL (any format). */
   url: string;
-  /** Arquivo enviado (mp4/webm). */
+  /** Uploaded file (mp4/webm). */
   file: string;
-  /** Código de incorporação (iframe/embed) colado pelo usuário. */
+  /** Embed code (iframe/embed) pasted by the user. */
   embedCode: string;
   autoplay: boolean;
   muted: boolean;
   loop: boolean;
   controls: boolean;
   playsinline: boolean;
-  /** Começar em (segundos). */
+  /** Start at (seconds). */
   start: number;
   aspect: AspectRatio;
-  /** Proporção livre, ex.: "21/9". */
+  /** Custom aspect ratio, e.g. "21/9". */
   customAspect: string;
-  /** YouTube: mostra a miniatura e só carrega o player ao clicar. */
+  /** YouTube: show the thumbnail and load the player only on click. */
   lite: boolean;
-  /** Miniatura própria. Se definida, o player só carrega ao clicar. */
+  /** Custom thumbnail. If set, the player loads only on click. */
   thumbnail: string;
   playIconSize: Length;
   playIconColor: string;
@@ -51,7 +51,7 @@ export type VideoProps = {
 /* URLs                                                                */
 /* ------------------------------------------------------------------ */
 
-/** Extrai o id de qualquer link do YouTube (watch, youtu.be, shorts, embed, live). */
+/** Extract the id from any YouTube URL (watch, youtu.be, shorts, embed, live). */
 export function youtubeId(url: string): string | null {
   const u = url.trim();
   if (/^[\w-]{11}$/.test(u)) return u;
@@ -62,7 +62,7 @@ export function youtubeId(url: string): string | null {
   return m ? m[1] : null;
 }
 
-/** Id (e hash de vídeos privados) de um link do Vimeo. */
+/** Id (and hash for private videos) from a Vimeo URL. */
 export function vimeoId(url: string): { id: string; hash?: string } | null {
   const u = url.trim();
   if (/^\d+$/.test(u)) return { id: u };
@@ -77,8 +77,8 @@ const flag = (params: URLSearchParams, key: string, on: boolean) => {
 };
 
 /**
- * URL do player. `autoplay` já vem resolvido (no editor é sempre falso).
- * Autoplay força o áudio mudo, senão o navegador bloqueia.
+ * Player URL. `autoplay` is already resolved (always false in the editor).
+ * Autoplay forces muted audio, otherwise the browser blocks it.
  */
 export function playerUrl(p: VideoProps, autoplay: boolean): string | null {
   const muted = p.muted || autoplay;
@@ -92,7 +92,7 @@ export function playerUrl(p: VideoProps, autoplay: boolean): string | null {
     flag(params, "playsinline", p.playsinline);
     if (!p.controls) params.set("controls", "0");
     if (p.loop) {
-      // o YouTube só repete com a playlist apontando para o próprio vídeo
+      // YouTube only loops when the playlist points at this same video
       params.set("loop", "1");
       params.set("playlist", id);
     }
@@ -151,7 +151,7 @@ function VideoView({ id, props: p, rootRef }: NodeViewProps<VideoProps>) {
 
   if (p.source === "youtube" || p.source === "vimeo") {
     const embedSrc = playerUrl(p, false);
-    // com autoplay na página publicada o player precisa carregar direto
+    // on the published page with autoplay, the player must load immediately
     const useFacade = Boolean(thumb) && (isEditor || (!p.autoplay && (Boolean(p.thumbnail) || p.lite)));
     if (!embedSrc) {
       empty = true;
@@ -204,7 +204,7 @@ function VideoView({ id, props: p, rootRef }: NodeViewProps<VideoProps>) {
     content = (
       <div
         className="pb-video-embed"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: código de incorporação colado pelo dono da página
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: embed code pasted by the page owner
         dangerouslySetInnerHTML={{ __html: p.embedCode }}
       />
     );
@@ -223,7 +223,7 @@ function VideoView({ id, props: p, rootRef }: NodeViewProps<VideoProps>) {
     <div ref={rootRef as React.Ref<HTMLDivElement>} className={className} data-pb-node={id}>
       <div className="pb-video-frame">
         {content}
-        {/* no editor, uma camada por cima garante que o clique seleciona o nó */}
+        {/* in the editor, an overlay ensures the click selects the node */}
         {isEditor ? <div className="pb-video-shield" /> : null}
       </div>
     </div>
@@ -398,11 +398,11 @@ export const Video: ComponentDefinition<VideoProps> = {
       .set("aspect-ratio", aspectCss(p))
       .set("box-shadow", shadowToCss(p.shadow));
     applyBorder(frame, p.border);
-    // cada seletor precisa do prefixo do nó (a regra não separa por vírgula)
+    // each selector needs the node prefix (the rule does not split on commas)
     const media = [" .pb-video-frame > iframe", " .pb-video-frame > video", " .pb-video-facade", " .pb-video-embed"];
     for (const suffix of media) {
       const rule = sheet.rule(suffix).set("display", "block").set("width", "100%").set("border", "0");
-      // na proporção automática o conteúdo define a altura
+      // in automatic aspect ratio, the content sets the height
       if (p.aspect !== "auto") rule.set("position", "absolute").set("inset", "0").set("height", "100%");
     }
     if (p.aspect === "auto") sheet.rule(" .pb-video-frame > iframe").set("aspect-ratio", "16 / 9");

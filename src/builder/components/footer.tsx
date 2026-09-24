@@ -19,7 +19,7 @@ export type FooterProps = {
   gap: Responsive<Length>;
   minHeight: Responsive<Length>;
   alignItems: Responsive<"stretch" | "flex-start" | "center" | "flex-end">;
-  /** Cor herdada pelos elementos que usam "cor do texto" (`color`). */
+  /** Color inherited by elements that use "text color" (`color`). */
   textColor: string;
   background: Background;
   border: Border;

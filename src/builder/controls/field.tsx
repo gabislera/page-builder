@@ -20,11 +20,11 @@ const DEVICE_LABEL: Record<Device, string> = {
 type FieldProps = {
   label: string;
   children: ReactNode;
-  /** Mostra o indicador de dispositivo (campo responsivo). */
+  /** Shows the device indicator (responsive field). */
   responsive?: boolean;
   overridden?: boolean;
   onReset?: () => void;
-  /** Label ao lado do controle em vez de acima. */
+  /** Label beside the control instead of above. */
   inline?: boolean;
   hint?: string;
   className?: string;
@@ -90,7 +90,7 @@ function DeviceBadge({ overridden, onReset }: { overridden?: boolean; onReset?: 
   );
 }
 
-/** Grupo recolhível dentro de uma aba de configurações. */
+/** Collapsible group inside a settings tab. */
 export function Group({
   title,
   children,

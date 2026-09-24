@@ -8,21 +8,21 @@ import type { StyleRule, StyleSheet } from "../../core/style-engine.ts";
 import type { Length } from "../../core/style-types.ts";
 import { C } from "../../core/theme.ts";
 
-/** Aparência de um ícone com forma opcional (Ícone, Card com ícone). */
+/** Appearance of an icon with an optional shape (Icon, Icon Card). */
 export type IconStyle = {
   name: string;
   size: Responsive<Length>;
   color: string;
   strokeWidth: number;
-  /** default: só o ícone; stacked: forma preenchida; framed: forma com borda. */
+  /** default: icon only; stacked: filled shape; framed: shape with border. */
   view: "default" | "stacked" | "framed";
   shape: "circle" | "square" | "rounded";
-  /** Espaço entre o ícone e a borda da forma. */
+  /** Space between the icon and the shape edge. */
   padding: Responsive<Length>;
   background: string;
   borderColor: string;
   borderWidth: Length;
-  /** Graus. */
+  /** Degrees. */
   rotate: number;
   hoverColor: string;
   hoverBackground: string;
@@ -54,8 +54,8 @@ const RADIUS: Record<IconStyle["shape"], string> = {
 };
 
 /**
- * CSS do ícone: `selector` é o elemento que envolve o <svg> (a forma) e
- * `hoverSelector` o seletor que dispara o hover (a própria forma ou o card).
+ * Icon CSS: `selector` is the element wrapping the <svg> (the shape) and
+ * `hoverSelector` is the selector that triggers hover (the shape itself or the card).
  */
 export function applyIconStyle(sheet: StyleSheet, selector: string, hoverSelector: string, s: IconStyle) {
   const shaped = s.view !== "default";
@@ -85,8 +85,8 @@ export function applyIconStyle(sheet: StyleSheet, selector: string, hoverSelecto
 }
 
 /**
- * Define propriedades calculadas por dispositivo (quando dependem de mais de
- * uma prop responsiva). Só emite o que muda em relação ao dispositivo maior.
+ * Set properties computed per device (when they depend on more than
+ * one responsive prop). Only emits what differs from the larger device.
  */
 export function setPerDevice(rule: StyleRule, compute: (device: Device) => Record<string, string | undefined>) {
   let previous: Record<string, string | undefined> = {};
@@ -99,7 +99,7 @@ export function setPerDevice(rule: StyleRule, compute: (device: Device) => Recor
   }
 }
 
-/** Opções de alinhamento horizontal (justify-content). */
+/** Horizontal alignment options (justify-content). */
 export const ALIGN_OPTIONS = [
   {
     value: "flex-start" as const,
@@ -115,10 +115,10 @@ export const ALIGN_OPTIONS = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Controles                                                           */
+/* Controls                                                            */
 /* ------------------------------------------------------------------ */
 
-/** Campos de aparência do ícone (aba Estilo). */
+/** Icon appearance fields (Style tab). */
 export function IconStyleFields({ base }: { base: string }) {
   const view = useField<IconStyle["view"]>(`${base}.view`);
   return (
@@ -161,7 +161,7 @@ export function IconStyleFields({ base }: { base: string }) {
   );
 }
 
-/** Cores do ícone no hover. */
+/** Icon colors on hover. */
 export function IconHoverFields({ base }: { base: string }) {
   const view = useField<IconStyle["view"]>(`${base}.view`);
   return (

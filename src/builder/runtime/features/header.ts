@@ -1,8 +1,8 @@
 /**
- * Cabeçalho: marca `pb-scrolled` quando a página rolou (fundo, sombra e
- * encolhimento via CSS) e, com `data-pb-hide-on-scroll`, esconde o cabeçalho
- * ao rolar para baixo (`pb-header-hidden`) e o mostra de volta ao subir.
- * O menu hambúrguer fica no runtime do Menu.
+ * Header: adds `pb-scrolled` after the page scrolls (background, shadow, and
+ * shrink via CSS) and, with `data-pb-hide-on-scroll`, hides the header on
+ * scroll down (`pb-header-hidden`) and shows it again on scroll up.
+ * The hamburger menu lives in the Menu runtime.
  */
 export const headerScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
@@ -13,7 +13,7 @@ export const headerScript = (_cfg: { viewEndpoint: string; formEndpoint: string 
   function update(){
     ticking=false;
     var y=window.scrollY||window.pageYOffset||0;
-    // com um menu aberto a página não rola: mantém o cabeçalho como está
+    // with a menu open the page does not scroll: keep the header as-is
     var locked=!!document.querySelector('[data-pb-menu].pb-menu-open');
     hs.forEach(function(h){
       h.classList.toggle('pb-scrolled',y>8);

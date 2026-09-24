@@ -1,11 +1,11 @@
 import { create } from "zustand";
 
-/** Controla o diálogo da biblioteca de seções e onde a seção será inserida. */
+/** Controls the section library dialog and where the section will be inserted. */
 export const useSectionPicker = create<{
   isOpen: boolean;
-  /** Posição entre os filhos da página. `undefined` = no fim (antes do rodapé). */
+  /** Index among page children. `undefined` = end (before the footer). */
   index: number | undefined;
-  /** Categoria aberta ao exibir o diálogo (ex.: "Cabeçalho"). */
+  /** Category opened with the dialog (e.g. "Cabeçalho"). */
   category: string | undefined;
   open: (index?: number, category?: string) => void;
   close: () => void;

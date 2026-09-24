@@ -21,7 +21,7 @@ import type { Box, Length } from "../core/style-types.ts";
 import { C } from "../core/theme.ts";
 import type { ComponentDefinition, NodeViewProps } from "../core/types.ts";
 
-/** Redes e contatos oferecidos, com a cor oficial de cada um. */
+/** Offered networks and contacts, with each one's official color. */
 export const SOCIAL_NETWORKS: Record<string, { color: string }> = {
   instagram: { color: "#E4405F" },
   facebook: { color: "#1877F2" },
@@ -39,7 +39,7 @@ export type SocialItem = { id: string; network: string; url: string };
 export type SocialIconsProps = {
   items: SocialItem[];
   shape: "none" | "circle" | "rounded" | "square";
-  /** Tamanho do botão (com forma) ou área clicável (sem forma). */
+  /** Button size (with shape) or clickable area (no shape). */
   size: Responsive<Length>;
   iconSize: Responsive<Length>;
   gap: Responsive<Length>;
@@ -54,7 +54,7 @@ export type SocialIconsProps = {
   box: Box;
 };
 
-/** Link de cada rede: e-mail, telefone e WhatsApp aceitam só o contato. */
+/** Link for each network: email, phone, and WhatsApp accept just the contact. */
 export function socialHref(network: string, url: string): string {
   const v = url.trim();
   if (!v) return "#";
@@ -285,7 +285,7 @@ export const SocialIcons: ComponentDefinition<SocialIconsProps> = {
         .set("color", p.hoverIconColor || undefined)
         .set("background-color", filled ? p.hoverBackground || undefined : undefined);
     } else {
-      // oficiais: ícone na cor da marca, ou ícone branco sobre a cor da marca
+      // official: icon in the brand color, or white icon on the brand color
       const networks = new Set(p.items.map((i) => i.network));
       for (const n of networks) {
         const color = SOCIAL_NETWORKS[n]?.color ?? C.primary;

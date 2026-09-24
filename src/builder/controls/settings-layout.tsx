@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 
-/** Abas padrão do painel de configurações: Conteúdo / Estilo / Avançado. */
+/** Default settings panel tabs: Conteúdo / Estilo / Avançado. */
 export function SettingsTabs({
   content,
   style,

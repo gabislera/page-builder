@@ -17,14 +17,14 @@ export type RenderInput = {
   pageId: string;
   nodes: SerializedNodes;
   pageUrl: (pageId: string) => string;
-  /** Tema e identidade do site: viram variáveis CSS e alimentam o Logo. */
+  /** Site theme and identity: become CSS variables and feed the Logo. */
   site: SiteSettings;
   homeUrl: string;
 };
 
-/** Renderiza a árvore de nós em HTML + CSS usando as mesmas views do editor. */
+/** Renders the node tree to HTML + CSS using the same views as the editor. */
 export function renderBody({ pageId, nodes, pageUrl, site, homeUrl }: RenderInput) {
-  // variáveis do tema vêm antes do CSS dos nós, que as referencia
+  // theme variables come before node CSS, which references them
   const css: string[] = [themeCss(site.theme)];
   const fonts = new Set<string>(themeFonts(site.theme));
   const features = new Set<RuntimeFeature>();
@@ -33,12 +33,12 @@ export function renderBody({ pageId, nodes, pageUrl, site, homeUrl }: RenderInpu
     const node = nodes[id];
     if (!node || node.hidden) return null;
     const def = getDefinition(typeOf(node));
-    if (!def) return null; // componente removido: ignora em vez de quebrar a publicação
+    if (!def) return null; // removed component: skip instead of breaking publish
     const props = deepMerge(structuredClone(def.defaults), node.props);
     css.push(def.css(id, props));
     for (const f of def.fonts?.(props) ?? []) fonts.add(f);
     for (const f of def.runtime ?? []) features.add(f);
-    // recursos que dependem da aba Avançado, não do tipo do componente
+    // features that depend on the Advanced tab, not the component type
     if (props.box?.scrollEffect?.type === "parallax") features.add("motion");
     const children = (node.nodes ?? []).map(renderNode);
     return (
@@ -68,13 +68,13 @@ export type RenderPageInput = RenderInput & {
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-/** Documento HTML completo da página publicada. */
+/** Full HTML document of the published page. */
 export function renderPageHtml(input: RenderPageInput): string {
   const { html, css, fonts, features } = renderBody(input);
   const { seo, tracking } = input;
   const cb = input.site.cookieBanner;
   const banner = cb?.enabled ? cb : null;
-  // escolha do visitante vale para o site todo (todas as páginas do projeto)
+  // visitor choice applies to the whole site (all pages in the project)
   const siteKey = input.homeUrl;
   const trackingHtml = [trackingHead(tracking), tracking.headScripts ?? ""].filter(Boolean).join("\n");
   const bodyScripts = tracking.bodyScripts ?? "";

@@ -1,7 +1,7 @@
 /**
- * Modelo "Página de vendas": curso online (infoproduto). Estrutura clássica
- * de alta conversão: promessa + vídeo, prova, para quem é, conteúdo,
- * professor, depoimentos, oferta com urgência, garantia, dúvidas e CTA final.
+ * "Sales page" template: online course (infoproduct). Classic high-conversion
+ * structure: promise + video, proof, who it's for, content, instructor,
+ * testimonials, offer with urgency, guarantee, FAQ, and final CTA.
  */
 import { h, type NodeSpec } from "../../core/build.ts";
 import { corners, defaultShadow, sides } from "../../core/defaults.ts";
@@ -33,7 +33,7 @@ const OFFER = "oferta";
 const buy = (text = "Quero garantir minha vaga", light = false, align: "center" | "flex-start" = "center") =>
   cta(text, { action: anchor(OFFER), light, align });
 
-/* 1. Hero escuro: promessa, vídeo e CTA */
+/* 1. Dark hero: promise, video, and CTA */
 const hero = (): NodeSpec =>
   section(
     "Hero",
@@ -97,7 +97,7 @@ const hero = (): NodeSpec =>
     },
   );
 
-/* 2. Números (prova social) */
+/* 2. Stats (social proof) */
 const stat = (value: number, label: string, extra: Record<string, unknown> = {}) =>
   h(
     "StatCounter",
@@ -146,7 +146,7 @@ const stats = (): NodeSpec =>
     },
   );
 
-/* 3. Para quem é */
+/* 3. Who it's for */
 const forWho = (): NodeSpec =>
   section("Para quem é", [
     grid(
@@ -181,7 +181,7 @@ const forWho = (): NodeSpec =>
     ),
   ]);
 
-/* 4. O que você vai aprender */
+/* 4. What you'll learn */
 const skill = (icon: string, t: string, d: string) =>
   h(
     "IconBox",
@@ -256,7 +256,7 @@ const skills = (): NodeSpec =>
     { background: bg(C.surface) },
   );
 
-/* 5. Grade de módulos */
+/* 5. Module grid */
 const MODULES: [string, string][] = [
   ["Módulo 1 · Fundamentos da web", "Como a internet funciona, HTML semântico, CSS e seu primeiro site no ar."],
   ["Módulo 2 · Layouts responsivos", "Flexbox, Grid, unidades relativas e design que funciona em qualquer tela."],
@@ -301,7 +301,7 @@ const modules = (): NodeSpec =>
     ),
   ]);
 
-/* 6. Professor */
+/* 6. Instructor */
 const teacher = (): NodeSpec =>
   section(
     "Professor",
@@ -341,7 +341,7 @@ const teacher = (): NodeSpec =>
     { background: darkGlow(200) },
   );
 
-/* 7. Depoimentos */
+/* 7. Testimonials */
 const review = (quote: string, name: string, role: string, avatar: string) =>
   h(
     "Testimonial",
@@ -402,7 +402,7 @@ const reviews = (): NodeSpec =>
     { background: bg(C.surface) },
   );
 
-/* 8. Oferta */
+/* 8. Offer */
 const offer = (): NodeSpec =>
   section(
     "Oferta",
@@ -499,7 +499,7 @@ const offer = (): NodeSpec =>
     { background: darkGlow(20), box: { anchorId: OFFER } },
   );
 
-/* 9. Garantia */
+/* 9. Guarantee */
 const guarantee = (): NodeSpec =>
   section(
     "Garantia",
@@ -545,7 +545,7 @@ const guarantee = (): NodeSpec =>
     { padding: r(sides("88px", "24px"), undefined, sides("56px", "16px")) },
   );
 
-/* 10. Dúvidas */
+/* 10. FAQ */
 const questions = (): NodeSpec =>
   section(
     "Perguntas frequentes",
@@ -578,7 +578,7 @@ const questions = (): NodeSpec =>
     { background: bg(C.surface) },
   );
 
-/* 11. Chamada final */
+/* 11. Final CTA */
 const finalCta = (): NodeSpec =>
   section(
     "Chamada final",

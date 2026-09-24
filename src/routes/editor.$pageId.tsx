@@ -18,7 +18,7 @@ import { getSession } from "#/server/session";
 import { republishSite, updateSiteSettings } from "#/server/site";
 
 export const Route = createFileRoute("/editor/$pageId")({
-  // o Craft.js roda só no navegador
+  // Craft.js runs in the browser only
   ssr: false,
   beforeLoad: async () => {
     const session = await getSession();

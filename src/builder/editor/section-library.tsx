@@ -40,11 +40,11 @@ const CATEGORIES = [
   "Rodapé",
 ];
 
-/** Diálogo com modelos de seção e seções globais do projeto. */
+/** Dialog with section templates and the project's global sections. */
 export function SectionLibraryDialog() {
   const { isOpen, index, close, category: requested } = useSectionPicker();
   const [category, setCategory] = useState<string>(SECTION_CATEGORIES[0]);
-  // ao abrir pedindo uma categoria (ex.: "Cabeçalho" no painel Site), vai direto nela
+  // when opened with a category (e.g. "Cabeçalho" in the Site panel), jump to it
   useEffect(() => {
     if (isOpen && requested) setCategory(requested);
   }, [isOpen, requested]);
@@ -75,8 +75,8 @@ export function SectionLibraryDialog() {
   const typeAt = (id: string) => editor.query.node(id).get().data.name;
 
   /**
-   * Posição de inserção. Cabeçalho vai sempre no topo e rodapé no fim;
-   * seções nunca entram acima do cabeçalho nem abaixo do rodapé.
+   * Insertion index. Header always goes to the top and footer to the end;
+   * sections never go above the header or below the footer.
    */
   const insertAt = (kind: SectionTemplate["kind"] = "section") => {
     const children = editor.query.node(ROOT_ID).get().data.nodes;
@@ -89,7 +89,7 @@ export function SectionLibraryDialog() {
     return Math.min(Math.max(wanted, first), last);
   };
 
-  /** Só existe um cabeçalho e um rodapé: o novo substitui o atual. */
+  /** Only one header and one footer: the new one replaces the current. */
   const removeExisting = (kind: SectionTemplate["kind"]) => {
     if (kind === "section") return;
     const type = kind === "header" ? "Header" : "Footer";
@@ -102,7 +102,7 @@ export function SectionLibraryDialog() {
   const footerPart = useSitePart("footer");
   const partOf = (kind: SitePart) => (kind === "header" ? headerPart : footerPart);
 
-  /** Cabeçalho/rodapé esperando a escolha "todas as páginas / só esta". */
+  /** Header/footer waiting for the "all pages / this page only" choice. */
   type Pending = {
     kind: SitePart;
     make: () => { rootNodeId: string; nodes: SerializedNodes };
@@ -130,7 +130,7 @@ export function SectionLibraryDialog() {
         kind: template.kind,
         make: () => buildTree(template.build(), ROOT_ID),
       };
-      // sem cabeçalho/rodapé no site ainda: este vira o do site sem perguntar
+      // no site header/footer yet: this becomes the site one without asking
       if (!partOf(template.kind).stored) applyPart(p, "site");
       else setPending(p);
       return;
@@ -139,7 +139,7 @@ export function SectionLibraryDialog() {
     close();
   };
 
-  /** Modelo salvo: entra como cópia nova (ids novos, sem vínculos). */
+  /** Saved template: inserted as a fresh copy (new ids, no links). */
   const insertSaved = (s: SavedSection) => {
     const make = () => cloneTree(s.nodes, s.rootNodeId, ROOT_ID);
     if (s.kind !== "section") {
@@ -280,7 +280,7 @@ export function SectionLibraryDialog() {
 const sitePartOfCategory = (category: string): SitePart | null =>
   category === PART_CATEGORY.header ? "header" : category === PART_CATEGORY.footer ? "footer" : null;
 
-/** Primeiro cartão das categorias Cabeçalho/Rodapé: o que o site usa hoje. */
+/** First card in Header/Footer categories: what the site uses today. */
 function CurrentSitePartCard({ part, onDone }: { part: SitePart; onDone: () => void }) {
   const { stored, current, label, applySiteVersion } = useSitePart(part);
   if (!stored) return null;
@@ -298,7 +298,7 @@ function CurrentSitePartCard({ part, onDone }: { part: SitePart; onDone: () => v
   );
 }
 
-/** Pergunta onde aplicar o novo cabeçalho/rodapé. */
+/** Asks where to apply the new header/footer. */
 function ScopeChoice({
   label,
   onChoose,
@@ -355,7 +355,7 @@ function TemplateCard({ id, title, onClick }: { id: string; title: string; onCli
   return <SectionCard title={title} tree={tree} onClick={onClick} />;
 }
 
-/** Prévia real da seção: renderizada pelo mesmo renderizador da publicação. */
+/** Live section preview: rendered by the same renderer as publish. */
 function SectionCard({
   title,
   badge,
@@ -383,7 +383,7 @@ function SectionCard({
     return `<!doctype html><html><head>${href ? `<link rel="stylesheet" href="${href}">` : ""}<style>${BASE_CSS}${css}.pb-page{min-height:0}</style></head><body>${html}</body></html>`;
   }, [tree, site]);
 
-  // a prévia é renderizada a 1280px e reduzida para a largura do cartão
+  // preview is rendered at 1280px and scaled down to the card width
   const boxRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(400);
   useLayoutEffect(() => {

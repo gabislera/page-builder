@@ -20,7 +20,7 @@ export function ColorField({
   path: string;
   label: string;
   hint?: string;
-  /** Permite "sem cor" (herda do CSS). */
+  /** Allows "no color" (inherits from CSS). */
   allowEmpty?: boolean;
 }) {
   const f = useField<string>(path);
@@ -41,14 +41,14 @@ export function ColorInput({
   value: string | undefined;
   onChange: (value: string, throttle?: boolean) => void;
   allowEmpty?: boolean;
-  /** Oferece as cores globais do site (desligado no próprio editor de paleta). */
+  /** Offers the site's global colors (off in the palette editor itself). */
   allowGlobal?: boolean;
   className?: string;
 }) {
   const theme = useSiteStore((s) => s.settings.theme);
   const refId = colorRefId(value);
   const globalColor = refId ? theme.colors.find((c) => c.id === refId) : null;
-  // o painel fica fora do canvas: referências ao tema são trocadas pelo valor real
+  // the panel sits outside the canvas: theme references are swapped for the real value
   const shown = resolveThemeVars(value ?? "", theme);
   const label = globalColor ? globalColor.name : value && !value.startsWith("#") ? "personalizada" : value || "nenhuma";
   const favorites = useEditorUI((s) => s.favoriteColors);
@@ -61,12 +61,12 @@ export function ColorInput({
 
   const pickFromScreen = async () => {
     try {
-      // biome-ignore lint/suspicious/noExplicitAny: EyeDropper ainda não está no lib.dom
+      // biome-ignore lint/suspicious/noExplicitAny: EyeDropper is not yet in lib.dom
       const dropper = new (window as any).EyeDropper();
       const result = await dropper.open();
       onChange(result.sRGBHex);
     } catch {
-      // usuário cancelou
+      // user cancelled
     }
   };
 

@@ -46,7 +46,7 @@ export const createProject = createServerFn({ method: "POST" })
     });
   });
 
-/** Nome, endereço e página inicial do projeto (tela de configurações). */
+/** Project name, URL, and home page (settings screen). */
 export const getProjectSettings = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
   .validator(z.object({ projectId: z.string() }))
@@ -78,9 +78,9 @@ export const updateProject = createServerFn({ method: "POST" })
       projectId: z.string(),
       name: z.string().trim().min(2).max(80).optional(),
       slug: z.string().trim().optional(),
-      /** Vazio (null): página inicial automática. */
+      /** Empty (null): automatic home page. */
       homePageId: z.string().nullable().optional(),
-      /** Vazio (null): página 404 padrão. */
+      /** Empty (null): default 404 page. */
       notFoundPageId: z.string().nullable().optional(),
     }),
   )
@@ -111,8 +111,8 @@ export const updateProject = createServerFn({ method: "POST" })
     await db.transaction(async (tx) => {
       await tx.update(project).set(patch).where(eq(project.id, row.id));
       if (slugChanged) {
-        // links internos das páginas já publicadas passam a usar o
-        // endereço novo (sem republicar, para não levar rascunhos ao ar)
+        // internal links in already-published pages switch to the
+        // new URL (without republishing, so drafts stay off the live site)
         const from = `/p/${row.slug}`;
         const to = `/p/${slug}`;
         await tx
@@ -126,7 +126,7 @@ export const updateProject = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-/** Exclui o projeto com páginas, leads, visitas e arquivos. Só o dono. */
+/** Delete the project with pages, leads, visits, and files. Owner only. */
 export const deleteProject = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(z.object({ projectId: z.string() }))
@@ -135,7 +135,7 @@ export const deleteProject = createServerFn({ method: "POST" })
     if (member.role !== "owner") throw new ForbiddenError("Só o dono pode excluir o projeto");
     const files = await db.select({ key: asset.key }).from(asset).where(eq(asset.projectId, data.projectId));
     await db.delete(project).where(eq(project.id, data.projectId));
-    // arquivos no armazenamento: melhor esforço (o banco já foi limpo)
+    // files in storage: best effort (the database is already cleaned up)
     await Promise.allSettled(files.map((f) => deleteObject(f.key)));
     return { ok: true };
   });

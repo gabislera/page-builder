@@ -29,7 +29,7 @@ export type ProgressBarProps = {
   radius: Responsive<Length>;
   striped: boolean;
   stripesAnimated: boolean;
-  /** Na página publicada, a barra cresce de 0 até o valor ao aparecer na tela. */
+  /** On the published page, the bar grows from 0 to the value when it appears. */
   animateOnAppear: boolean;
   durationMs: number;
   titleTypography: Typography;

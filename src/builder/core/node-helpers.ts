@@ -1,7 +1,7 @@
 import { nodeClass } from "./style-engine.ts";
 import type { Box } from "./style-types.ts";
 
-/** Classes do elemento raiz de um nó: base + id + animação + classe custom. */
+/** Root element classes of a node: base + id + animation + custom class. */
 export function nodeClassName(id: string, base: string, box?: Partial<Box>) {
   return [
     base,
@@ -14,8 +14,8 @@ export function nodeClassName(id: string, base: string, box?: Partial<Box>) {
     .join(" ");
 }
 
-/** Barra de aviso: filho direto da página e sempre antes do cabeçalho. */
+/** Announcement bar: direct child of the page and always before the header. */
 export const TOP_BAR_TYPE = "AnnouncementBar";
 
-/** Tipos que só podem ser filhos diretos da página. */
+/** Types that can only be direct children of the page. */
 export const TOP_LEVEL_TYPES = new Set(["Section", "Header", "Footer", TOP_BAR_TYPE]);

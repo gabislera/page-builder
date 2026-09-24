@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { servePublished } from "#/server/public-pages";
 
-/** Endereço do site (/p/projeto): mostra a página inicial publicada. */
+/** Site URL (/p/project): shows the published home page. */
 export const Route = createFileRoute("/p/$projectSlug/")({
   server: {
     handlers: {

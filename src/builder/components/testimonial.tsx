@@ -49,21 +49,21 @@ export type TestimonialProps = {
   quote: string;
   name: string;
   role: string;
-  /** Foto (vazio = iniciais do nome). */
+  /** Photo (empty = name initials). */
   avatar: string;
   showAvatar: boolean;
   avatarSize: Responsive<Length>;
-  /** 0 a 5 estrelas (0 = oculto). */
+  /** 0 to 5 stars (0 = hidden). */
   rating: number;
   starColor: string;
   starEmptyColor: string;
   starSize: Length;
   /**
-   * card: citação e autor abaixo; centered: foto no topo e tudo centralizado;
-   * bubble: balão de fala e autor abaixo.
+   * card: quote and author below; centered: photo on top and everything centered;
+   * bubble: speech balloon and author below.
    */
   layout: Layout;
-  /** Alinhamento nos layouts card e bubble. */
+  /** Alignment in card and bubble layouts. */
   align: ContentAlign;
   showQuoteIcon: boolean;
   quoteIcon: string;
@@ -72,9 +72,9 @@ export type TestimonialProps = {
   quoteTypography: Typography;
   nameTypography: Typography;
   roleTypography: Typography;
-  /** Espaço entre os blocos. */
+  /** Space between blocks. */
   gap: Responsive<Length>;
-  /** Caixa (no layout balão, aplica-se ao balão). */
+  /** Box (in the balloon layout, applies to the balloon). */
   padding: Responsive<Sides>;
   background: Background;
   border: Border;
@@ -379,7 +379,7 @@ export const Testimonial: ComponentDefinition<TestimonialProps> = {
     const root = sheet.root();
     const bubble = p.layout === "bubble";
     const align: ContentAlign = p.layout === "centered" ? "center" : p.align;
-    // no balão, a caixa (fundo/borda/sombra/espaço) é o próprio balão
+    // in the balloon, the box (bg/border/shadow/padding) is the balloon itself
     const boxRule = bubble ? sheet.rule(" .pb-testi-bubble") : root;
 
     root
@@ -395,7 +395,7 @@ export const Testimonial: ComponentDefinition<TestimonialProps> = {
     applyBorder(boxRule, p.border);
 
     if (bubble && p.background.type !== "none") {
-      // ponta do balão, na mesma cor do fundo
+      // balloon tip, same color as the background
       const tipColor = p.background.type === "color" ? p.background.color : C.surface;
       const tipSide = align === "center" ? "calc(50% - 10px)" : align === "right" ? "auto" : "32px";
       sheet

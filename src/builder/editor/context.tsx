@@ -25,11 +25,11 @@ export type GlobalSectionItem = {
 };
 
 /**
- * Serviços do servidor usados pelos controles. Injetados pela rota do editor
- * para que os componentes do builder não importem o backend (evita ciclo
- * servidor → renderizador → componentes → servidor).
+ * Server services used by controls. Injected by the editor route so builder
+ * components do not import the backend (avoids a server → renderer →
+ * components → server cycle).
  */
-/** Seção salva pelo usuário como modelo. */
+/** User-saved section template. */
 export type SavedSection = {
   id: string;
   name: string;

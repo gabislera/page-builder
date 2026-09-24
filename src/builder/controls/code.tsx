@@ -12,9 +12,9 @@ const LANGUAGES = { html: [html()], css: [css()] };
 const DEBOUNCE_MS = 600;
 
 /**
- * Editor de código (HTML, CSS e JS) com tema escuro. Propaga as mudanças só
- * depois de parar de digitar, para não criar um passo de undo por tecla.
- * Tem um modo "tela cheia" num diálogo.
+ * Code editor (HTML, CSS, and JS) with a dark theme. Commits changes only
+ * after typing stops, so it does not create an undo step per key.
+ * Has a fullscreen mode in a dialog.
  */
 export function CodeField({
   path,
@@ -32,7 +32,7 @@ export function CodeField({
   const extensions = LANGUAGES[language];
   const [draft, setDraft] = useState(value);
   const [fullscreen, setFullscreen] = useState(false);
-  // último valor enviado, para distinguir mudanças externas (undo/redo)
+  // last sent value, to tell external changes (undo/redo) apart
   const sent = useRef(value);
   const pending = useRef<string | null>(null);
 
@@ -46,7 +46,7 @@ export function CodeField({
     [path, set],
   );
 
-  // valor mudou por fora: sincroniza o rascunho
+  // value changed from outside: sync the draft
   useEffect(() => {
     if (value !== sent.current) {
       sent.current = value;
@@ -61,7 +61,7 @@ export function CodeField({
     return () => clearTimeout(t);
   }, [draft, commit]);
 
-  // não perde a última digitação se o painel fechar antes do debounce
+  // do not lose the last keystrokes if the panel closes before debounce
   const commitRef = useRef(commit);
   commitRef.current = commit;
   useEffect(

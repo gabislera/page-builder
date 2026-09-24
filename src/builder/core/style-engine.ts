@@ -1,9 +1,9 @@
 /**
- * Motor de estilos: transforma props em CSS com media queries.
+ * Style engine: turns props into CSS with media queries.
  *
- * É a mesma função no editor e na publicação. Como o canvas do editor é um
- * iframe com a largura do dispositivo, as media queries se aplicam
- * naturalmente, e o que se vê no editor é o que vai ao ar.
+ * Same function in the editor and at publish. Because the editor canvas
+ * is an iframe at the device width, media queries apply naturally, and
+ * what you see in the editor is what goes live.
  */
 
 import { DEVICE_MEDIA, DEVICES, type Device, hasOwn, isResponsive, type Responsive, resolve } from "./responsive.ts";
@@ -35,7 +35,7 @@ export class StyleRule {
 
   constructor(readonly selector: string) {}
 
-  /** Define uma propriedade, aceitando valor fixo ou responsivo. */
+  /** Sets a property, accepting a fixed or responsive value. */
   set<T>(
     property: string,
     value: MaybeResponsive<T> | undefined,
@@ -56,7 +56,7 @@ export class StyleRule {
     return this;
   }
 
-  /** Define uma propriedade apenas em um dispositivo. */
+  /** Sets a property on a single device only. */
   setOn(device: Device, property: string, value: string | undefined): this {
     if (!isEmpty(value)) this.decls[device].set(property, value as string);
     return this;
@@ -73,23 +73,23 @@ export class StyleSheet {
 
   constructor(private readonly base: string) {}
 
-  /** Seletor do nó (ex.: ".n-abc123"). */
+  /** Node selector (e.g. ".n-abc123"). */
   get selector(): string {
     return this.base;
   }
 
-  /** CSS livre anexado depois das regras geradas (ex.: CSS personalizado). */
+  /** Free-form CSS appended after generated rules (e.g. custom CSS). */
   appendRaw(css: string): this {
     if (css.trim()) this.extra.push(css);
     return this;
   }
 
-  /** Regra do próprio nó. */
+  /** Rule for the node itself. */
   root(): StyleRule {
     return this.rule("");
   }
 
-  /** Regra para um seletor relativo ao nó (":hover", " .label"...). */
+  /** Rule for a selector relative to the node (":hover", " .label"...). */
   rule(suffix: string): StyleRule {
     const selector = `${this.base}${suffix}`;
     let rule = this.rules.find((r) => r.selector === selector);
@@ -100,7 +100,7 @@ export class StyleSheet {
     return rule;
   }
 
-  /** Regra com seletor livre (ex.: "@keyframes" não entra aqui). */
+  /** Rule with a free selector (e.g. "@keyframes" does not go here). */
   raw(selector: string): StyleRule {
     const rule = new StyleRule(selector);
     this.rules.push(rule);
@@ -124,14 +124,14 @@ export class StyleSheet {
   }
 }
 
-/** Seletor de classe usado por cada nó no editor e na página publicada. */
+/** Class selector used by each node in the editor and on the published page. */
 export const nodeClass = (id: string) => `n-${id}`;
 export const nodeSelector = (id: string) => `.${nodeClass(id)}`;
 
 export const createSheet = (id: string) => new StyleSheet(nodeSelector(id));
 
 /* ------------------------------------------------------------------ */
-/* Formatadores                                                        */
+/* Formatters                                                          */
 /* ------------------------------------------------------------------ */
 
 export const sidesToCss = (s: Sides) => `${s.top} ${s.right} ${s.bottom} ${s.left}`;
@@ -151,7 +151,7 @@ export const textShadowToCss = (s: TextShadow) => (s.enabled ? `${s.x}px ${s.y}p
 const cssUrl = (url: string) => `url("${url.replace(/"/g, "%22")}")`;
 
 /* ------------------------------------------------------------------ */
-/* Aplicadores de grupos de props                                      */
+/* Prop-group appliers                                                 */
 /* ------------------------------------------------------------------ */
 
 export function applyTypography(rule: StyleRule, t: Partial<Typography>) {
@@ -224,17 +224,17 @@ export function applyHover(
 }
 
 /**
- * Valor usado para ocultar um elemento por dispositivo (visibilidade da aba
- * Avançado). O comentário marca a regra para o editor mostrar o elemento
- * translúcido em vez de sumir com ele; outros "display:none" não são afetados.
+ * Value used to hide an element per device (Advanced tab visibility).
+ * The comment marks the rule so the editor shows the element translucent
+ * instead of removing it; other "display:none" values are unaffected.
  */
 export const HIDDEN_DISPLAY = "none/*pb-hidden*/";
 export const EDITOR_HIDDEN_STYLE = "opacity:.35;outline:1px dashed #a1a1aa";
 
 /**
- * Aplica as props de caixa. `display` é o valor usado quando o elemento está
- * visível. Ele é reaplicado nos dispositivos onde a visibilidade volta a ser
- * verdadeira depois de ter sido ocultado em um dispositivo maior.
+ * Applies box props. `display` is the value used when the element is
+ * visible. It is reapplied on devices where visibility becomes true
+ * after being hidden on a larger device.
  */
 export function applyBox(sheet: StyleSheet, box: Partial<Box> | undefined, display = "block") {
   if (!box) return;
@@ -252,7 +252,7 @@ export function applyBox(sheet: StyleSheet, box: Partial<Box> | undefined, displ
   setWithOverride(rule, "opacity", box.opacity, 1);
   if (box.overflow && box.overflow !== "visible") rule.set("overflow", box.overflow);
 
-  // deslocamentos só fazem sentido quando a posição não é estática
+  // offsets only make sense when position is not static
   if (box.position && box.offsets) {
     for (const device of DEVICES) {
       const pos = resolve(box.position, device);
@@ -269,7 +269,7 @@ export function applyBox(sheet: StyleSheet, box: Partial<Box> | undefined, displ
   applyTransform(rule, box);
 
   if (box.customCss?.trim()) {
-    // "selector" aponta para este elemento; "</" não pode fechar a tag <style>
+    // "selector" points to this element; "</" must not close the <style> tag
     sheet.appendRaw(box.customCss.replaceAll("selector", sheet.selector).replaceAll("</", "<\\/"));
   }
 
@@ -290,9 +290,9 @@ export function applyBox(sheet: StyleSheet, box: Partial<Box> | undefined, displ
 }
 
 /**
- * Define uma propriedade omitindo o valor padrão no desktop, mas mantendo-o
- * nos dispositivos menores quando ele desfaz um valor herdado (ex.: posição
- * relativa no desktop e padrão no celular).
+ * Sets a property, omitting the default on desktop but keeping it on
+ * smaller devices when it undoes an inherited value (e.g. relative
+ * position on desktop and default on mobile).
  */
 function setWithOverride<T>(
   rule: StyleRule,
@@ -303,7 +303,7 @@ function setWithOverride<T>(
 ) {
   if (value === undefined) return;
   const values = isResponsive<T>(value) ? value : { desktop: value as T };
-  // o navegador já começa no padrão; só escreve quando muda em relação ao herdado
+  // the browser already starts at the default; only write when it differs from inherited
   let inherited = fallback;
   for (const device of DEVICES) {
     const own = values[device];
@@ -316,9 +316,9 @@ function setWithOverride<T>(
 }
 
 /**
- * Rotação, escala e deslocamento usando as propriedades individuais do CSS
- * (`rotate`, `scale`, `translate`), que não brigam com o `transform` do hover.
- * O deslocamento soma a variável `--pb-py`, usada pelo efeito parallax.
+ * Rotation, scale, and translate using individual CSS properties
+ * (`rotate`, `scale`, `translate`), which do not clash with hover `transform`.
+ * Translate adds `--pb-py`, used by the parallax effect.
  */
 function applyTransform(rule: StyleRule, box: Partial<Box>) {
   const t = box.transform;
@@ -333,7 +333,7 @@ function applyTransform(rule: StyleRule, box: Partial<Box>) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Fontes                                                              */
+/* Fonts                                                               */
 /* ------------------------------------------------------------------ */
 
 export const SYSTEM_FONTS: Record<string, string> = {
@@ -347,8 +347,8 @@ export const SYSTEM_FONTS: Record<string, string> = {
 };
 
 /**
- * Fontes do Google oferecidas no editor, com os pesos que cada uma possui.
- * Pesos inexistentes fazem a API do Google Fonts recusar a requisição.
+ * Google fonts offered in the editor, with the weights each one has.
+ * Missing weights make the Google Fonts API reject the request.
  */
 export const GOOGLE_FONTS: Record<string, string> = {
   Inter: "300;400;500;600;700;800;900",
@@ -377,7 +377,7 @@ export const FONT_OPTIONS = ["inherit", ...Object.keys(SYSTEM_FONTS), ...Object.
 
 export function fontStack(family: string): string {
   if (family === "inherit") return "inherit";
-  // referência a uma fonte global do tema (var(--pb-font-...))
+  // reference to a global theme font (var(--pb-font-...))
   if (family.startsWith("var(")) return family;
   if (SYSTEM_FONTS[family]) return SYSTEM_FONTS[family];
   return `'${family}', ${SYSTEM_FONTS["Sans-serif"]}`;

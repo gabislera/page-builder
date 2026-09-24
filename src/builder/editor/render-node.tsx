@@ -12,9 +12,9 @@ import { useSectionPicker } from "./section-picker-store.ts";
 type Rect = { top: number; left: number; width: number; height: number };
 
 /**
- * Envolve cada nó no canvas: aplica as classes de hover/seleção e desenha a
- * barra de ações. A barra vive dentro do iframe (portal no body dele), então
- * acompanha rolagem e zoom sem cálculo de coordenadas entre documentos.
+ * Wraps each canvas node: applies hover/selection classes and draws the
+ * action bar. The bar lives inside the iframe (portal on its body), so it
+ * follows scroll and zoom without cross-document coordinate math.
  */
 export function RenderNode({ render }: { render: ReactNode }) {
   const editor = useEditor();
@@ -161,7 +161,7 @@ function NodeBar({
     fn();
   };
 
-  // a barra de aviso tem lugar fixo (topo): sem mover nem inserir abaixo
+  // announcement bar has a fixed place (top): no move or insert-below
   const isTopBar = editor.query.node(id).get()?.data.name === TOP_BAR_TYPE;
   const indexInRoot = isTopLevel ? editor.query.node(ROOT_ID).get().data.nodes.indexOf(id) : -1;
 

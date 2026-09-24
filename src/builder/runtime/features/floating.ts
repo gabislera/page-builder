@@ -1,6 +1,6 @@
 /**
- * Runtime dos botões flutuantes: mostra o "voltar ao topo" depois de rolar
- * (data-pb-offset, em px) e rola suavemente até o topo ao clicar.
+ * Floating-button runtime: shows "back to top" after scrolling
+ * (data-pb-offset, in px) and smooth-scrolls to the top on click.
  */
 export const floatingScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){

@@ -8,7 +8,7 @@ import { renderPageHtml } from "../renderer/render-page.tsx";
 import { useEditorContext } from "./context.tsx";
 import { useSiteStore } from "./site-store.ts";
 
-/** Prévia do estado atual (inclusive não salvo), com o HTML final da publicação. */
+/** Preview of the current state (including unsaved), with the published HTML. */
 export function PreviewDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const { query } = useEditor();
   const { pageId } = useEditorContext();

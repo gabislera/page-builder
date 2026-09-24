@@ -15,10 +15,10 @@ import { useEditorContext } from "./context.tsx";
 import { useSiteStore } from "./site-store.ts";
 
 /* ------------------------------------------------------------------ */
-/* Salvamento automático das configurações do site                     */
+/* Autosave of site settings                                           */
 /* ------------------------------------------------------------------ */
 
-/** Salva tema e identidade pouco depois de cada alteração. */
+/** Saves theme and identity shortly after each change. */
 export function SiteSettingsController() {
   const { services } = useEditorContext();
   const dirty = useSiteStore((s) => s.dirty);
@@ -47,7 +47,7 @@ export function SiteSettingsController() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Painel                                                              */
+/* Panel                                                               */
 /* ------------------------------------------------------------------ */
 
 export function ThemePanel() {
@@ -112,7 +112,7 @@ function RepublishBanner() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Aviso de cookies                                                    */
+/* Cookie notice                                                       */
 /* ------------------------------------------------------------------ */
 
 function CookieBannerFields() {
@@ -192,7 +192,7 @@ function CookieBannerFields() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Identidade                                                          */
+/* Identity                                                            */
 /* ------------------------------------------------------------------ */
 
 function IdentityFields() {
@@ -226,7 +226,7 @@ function IdentityFields() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Cores                                                               */
+/* Colors                                                              */
 /* ------------------------------------------------------------------ */
 
 function ColorsEditor() {
@@ -270,7 +270,7 @@ function ColorRow({
   onChange: (c: ThemeColor) => void;
   onRemove?: () => void;
 }) {
-  // nome editado localmente e confirmado ao sair do campo
+  // name edited locally and committed on blur
   const [name, setName] = useState(color.name);
   const last = useRef(color.name);
   if (last.current !== color.name) {
@@ -306,7 +306,7 @@ function ColorRow({
 }
 
 /* ------------------------------------------------------------------ */
-/* Fontes                                                              */
+/* Fonts                                                               */
 /* ------------------------------------------------------------------ */
 
 const FONT_SELECT = FONT_OPTIONS.filter((f) => f !== "inherit").map((f) => ({
@@ -323,7 +323,7 @@ function FontsEditor() {
   const href = googleFontsHref([theme.fonts.heading, theme.fonts.body]);
   return (
     <>
-      {/* carrega as fontes escolhidas para a prévia abaixo */}
+      {/* load the chosen fonts for the preview below */}
       {href ? <link rel="stylesheet" href={href} precedence="default" /> : null}
       <Field label="Títulos">
         <SelectInput value={theme.fonts.heading} options={FONT_SELECT} onChange={(v) => setFont("heading", v)} />

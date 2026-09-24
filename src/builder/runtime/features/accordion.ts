@@ -1,8 +1,9 @@
 /**
- * Acordeão: liga a animação suave. Sem este script o <details> nativo abre e
- * fecha na hora; com ele, o acordeão ganha `pb-acc-js` e a altura anima via
- * `grid-template-rows` (classe `is-open`). Ao fechar, o atributo `open` só sai
- * quando a transição termina, para a animação aparecer também no fechamento.
+ * Accordion: enables the smooth animation. Without this script native
+ * <details> snaps open/closed; with it, the accordion gets `pb-acc-js` and
+ * height animates via `grid-template-rows` (`is-open` class). On close, the
+ * `open` attribute is removed only after the transition so the close
+ * animation is visible too.
  */
 export const accordionScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){
@@ -29,7 +30,7 @@ export const accordionScript = (_cfg: { viewEndpoint: string; formEndpoint: stri
     function open(d){
       if(acc.hasAttribute('data-pb-exclusive'))items.forEach(function(o){if(o!==d)close(o);});
       d.open=true;
-      // dois frames: o navegador desenha o painel fechado antes de animar
+      // two frames: the browser paints the closed panel before animating
       requestAnimationFrame(function(){requestAnimationFrame(function(){d.classList.add('is-open');});});
     }
     items.forEach(function(d){

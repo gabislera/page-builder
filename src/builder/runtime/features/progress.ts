@@ -1,6 +1,6 @@
 /**
- * Barra de progresso: cresce de 0 até o valor quando entra na tela.
- * Sem JS (ou com movimento reduzido) a barra já aparece no valor final.
+ * Progress bar: grows from 0 to the value when it enters the viewport.
+ * Without JS (or with reduced motion) the bar already shows the final value.
  */
 export const progressScript = (_cfg: { viewEndpoint: string; formEndpoint: string }) => `
 (function(){

@@ -17,17 +17,17 @@ import type { ComponentDefinition, NodeViewProps } from "../core/types.ts";
 import { InlineText } from "./shared/inline-text.tsx";
 
 export type LogoProps = {
-  /** "site": logo e nome da identidade do site; "custom": imagem própria. */
+  /** "site": logo and name from site identity; "custom": own image. */
   source: "site" | "custom";
-  /** "light": usa o logo para fundos escuros, quando existir. */
+  /** "light": use the dark-background logo when it exists. */
   variant: "default" | "light";
   src: string;
   alt: string;
-  /** Texto quando não há imagem. Vazio: nome do site. */
+  /** Text when there is no image. Empty: site name. */
   text: string;
   width: Responsive<Length>;
   maxHeight: Responsive<Length>;
-  /** "home": página inicial; "custom": ação própria; "none": sem link. */
+  /** "home": home page; "custom": own action; "none": no link. */
   link: "home" | "custom" | "none";
   action: Action;
   typography: Typography;

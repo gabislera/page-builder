@@ -36,7 +36,7 @@ import { Text } from "./components/text.tsx";
 import { Video } from "./components/video.tsx";
 import type { AnyComponentDefinition } from "./core/types.ts";
 
-/** Todos os componentes do builder. A chave é o `resolvedName` salvo no JSON. */
+/** All builder components. The key is the `resolvedName` stored in JSON. */
 export const COMPONENTS: Record<string, AnyComponentDefinition> = Object.fromEntries(
   [
     Page,

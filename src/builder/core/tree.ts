@@ -1,9 +1,10 @@
 /**
- * Operações sobre a árvore serializada do Craft (SerializedNodes).
+ * Operations on Craft's serialized tree (SerializedNodes).
  *
- * No banco, a página guarda só o nó ROOT, e cada filho direto do ROOT
- * (Section, Header ou Footer) vira uma linha em `section` com sua subárvore.
- * Isso permite reutilizar a mesma seção (seção global) em várias páginas.
+ * In the database, the page stores only the ROOT node, and each direct
+ * child of ROOT (Section, Header, or Footer) becomes a `section` row
+ * with its subtree. This lets the same section (global section) be reused
+ * across pages.
  */
 
 import type { SerializedNode, SerializedNodes } from "@craftjs/core";
@@ -21,8 +22,8 @@ export type SectionTree = {
   name: string;
   isGlobal: boolean;
   /**
-   * Cabeçalho/rodapé do site: vem das configurações do projeto e aparece em
-   * todas as páginas que usam o padrão. Não entra na lista de seções da página.
+   * Site header/footer: comes from project settings and appears on
+   * every page that uses the default. Not listed among the page's sections.
    */
   sitePart?: SitePart;
   nodes: SerializedNodes;
@@ -38,13 +39,13 @@ export const newNodeId = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyzABC
 
 export const typeOf = (node: SerializedNode) => (typeof node.type === "string" ? node.type : node.type.resolvedName);
 
-/** A seção é uma barra de aviso (vai antes do cabeçalho). */
+/** Whether the section is an announcement bar (placed before the header). */
 export const isTopBar = (s: Pick<SectionTree, "rootNodeId" | "nodes">) => {
   const node = s.nodes[s.rootNodeId];
   return Boolean(node) && typeOf(node) === "AnnouncementBar";
 };
 
-/** Todos os ids da subárvore de `id`, incluindo ele mesmo. */
+/** All ids in the subtree of `id`, including itself. */
 export function descendants(nodes: SerializedNodes, id: string): string[] {
   const out: string[] = [];
   const walk = (nodeId: string) => {
@@ -64,7 +65,7 @@ export function subtree(nodes: SerializedNodes, id: string): SerializedNodes {
   return out;
 }
 
-/** Divide a árvore completa da página em ROOT + seções, na ordem. */
+/** Splits the full page tree into ROOT + sections, in order. */
 export function splitPage(nodes: SerializedNodes): {
   root: SerializedNode;
   sections: SectionTree[];
@@ -86,7 +87,7 @@ export function splitPage(nodes: SerializedNodes): {
   return { root: { ...root, nodes: [] }, sections };
 }
 
-/** Remonta a árvore completa a partir do ROOT salvo e das seções ordenadas. */
+/** Rebuilds the full tree from the saved ROOT and ordered sections. */
 export function mergePage(
   root: SerializedNode,
   sections: Pick<SectionTree, "rootNodeId" | "nodes" | "isGlobal" | "sitePart">[],
@@ -117,8 +118,8 @@ export function mergePage(
 }
 
 /**
- * Copia uma subárvore com ids novos. Usado para inserir modelos de seção,
- * duplicar e desvincular seções globais.
+ * Copies a subtree with new ids. Used to insert section templates,
+ * duplicate, and unlink global sections.
  */
 export function cloneTree(
   nodes: SerializedNodes,

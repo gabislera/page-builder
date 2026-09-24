@@ -1,6 +1,6 @@
 /**
- * Cabeçalho e rodapé: ações e UI para decidir se a página usa o do site
- * (igual em todas as páginas), um próprio, ou nenhum.
+ * Header and footer: actions and UI to choose whether the page uses the
+ * site version (same on every page), its own, or none.
  */
 
 import type { SerializedNodes } from "@craftjs/core";
@@ -24,12 +24,12 @@ export const PART_LABEL: Record<SitePart, string> = {
   footer: "Rodapé",
 };
 
-/** Categoria da biblioteca de seções para cada parte. */
+/** Section library category for each part. */
 export const PART_CATEGORY = PART_LABEL;
 
 export type PartScope = "site" | "page";
 
-/** Estado e ações do cabeçalho ou rodapé da página aberta. */
+/** State and actions for the open page's header or footer. */
 export function useSitePart(part: SitePart) {
   const editor = useEditor();
   const stored = useSiteStore((s) => s.siteParts[part]);
@@ -42,14 +42,14 @@ export function useSitePart(part: SitePart) {
   });
   const label = PART_LABEL[part];
 
-  /** Cabeçalho logo depois das barras de aviso; rodapé no fim. */
+  /** Header right after announcement bars; footer at the end. */
   const indexFor = () => {
     const ids = editor.query.node(ROOT_ID).get().data.nodes;
     if (part === "footer") return ids.length;
     return ids.filter((id) => editor.query.node(id).get().data.name === TOP_BAR_TYPE).length;
   };
 
-  /** Guarda a versão do site antes de tirá-la da página, para poder voltar. */
+  /** Stashes the site version before removing it from the page, so it can be restored. */
   const stash = (id: string) => {
     const tree: SectionTree = {
       rootNodeId: id,
@@ -70,7 +70,7 @@ export function useSitePart(part: SitePart) {
     editor.actions.delete(current.id);
   };
 
-  /** Coloca na página o cabeçalho/rodapé do site. */
+  /** Puts the site header/footer on the page. */
   const applySiteVersion = () => {
     if (!stored) return;
     removeCurrent();
@@ -87,11 +87,11 @@ export function useSitePart(part: SitePart) {
     insertTree(editor, { rootNodeId: stored.rootNodeId, nodes }, ROOT_ID, indexFor());
   };
 
-  /** Muda onde o cabeçalho/rodapé atual aparece. */
+  /** Changes where the current header/footer appears. */
   const setScope = (scope: PartScope) => {
     if (!current) return;
     if (scope === "page" && current.isSite) {
-      // vira uma cópia só desta página; o do site continua igual nas outras
+      // becomes a copy for this page only; the site version stays on the others
       stash(current.id);
       unlinkGlobal(editor, current.id);
       toast.success(`${label} agora é só desta página`, {
@@ -109,7 +109,7 @@ export function useSitePart(part: SitePart) {
     }
   };
 
-  /** Insere um modelo novo, no lugar do atual. */
+  /** Inserts a new template in place of the current one. */
   const insertTemplate = (tree: { rootNodeId: string; nodes: SerializedNodes }, scope: PartScope) => {
     removeCurrent();
     if (scope === "site") {
@@ -131,10 +131,10 @@ export function useSitePart(part: SitePart) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Painel de configurações: "Exibir em"                                */
+/* Settings panel: "Exibir em"                                         */
 /* ------------------------------------------------------------------ */
 
-/** Bloco mostrado no topo das configurações do cabeçalho/rodapé selecionado. */
+/** Block shown at the top of the selected header/footer settings. */
 export function SitePartCard({ part }: { part: SitePart }) {
   const { current, label, setScope, removeCurrent } = useSitePart(part);
   const openPicker = useSectionPicker((s) => s.open);

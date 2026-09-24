@@ -1,11 +1,11 @@
 /**
- * Acordeão composto: cada item (AccordionItem) é um nó de verdade e o corpo
- * dele é um canvas onde qualquer elemento pode ser arrastado.
+ * Composite accordion: each item (AccordionItem) is a real node and its
+ * body is a canvas where any element can be dropped.
  *
- * Marcação: <details><summary>…</summary><div class="pb-acc-panel">…</div>.
- * Sem JS, o <details> nativo abre e fecha normalmente. Com o runtime (ou no
- * editor), o acordeão ganha a classe `pb-acc-js` e a altura do painel anima
- * com `grid-template-rows: 0fr → 1fr`, tanto ao abrir quanto ao fechar.
+ * Markup: <details><summary>…</summary><div class="pb-acc-panel">…</div>.
+ * Without JS, native <details> opens and closes as usual. With the runtime
+ * (or in the editor), the accordion gets the `pb-acc-js` class and the panel
+ * height animates with `grid-template-rows: 0fr → 1fr`, both opening and closing.
  */
 import { ListCollapse, PanelTopOpen } from "lucide-react";
 import { createContext, isValidElement, useCallback, useContext, useState } from "react";
@@ -48,18 +48,18 @@ import type { ComponentDefinition, NodeViewProps } from "../core/types.ts";
 import { RevealOnSelect } from "./shared/editor-reveal.tsx";
 
 /* ------------------------------------------------------------------ */
-/* Acordeão (pai)                                                      */
+/* Accordion (parent)                                                  */
 /* ------------------------------------------------------------------ */
 
 export type AccordionVariant = "list" | "cards" | "bordered";
 
 export type AccordionProps = {
-  /** Estilo pronto escolhido (os demais campos podem ser ajustados depois). */
+  /** Chosen preset style (other fields can be tweaked later). */
   variant: AccordionVariant;
-  /** Abrir um item fecha os outros. */
+  /** Opening one item closes the others. */
   exclusive: boolean;
   firstOpen: boolean;
-  /** Duração da animação de abrir/fechar (ms). */
+  /** Open/close animation duration (ms). */
   duration: number;
   iconStyle: "plus-circle" | "plus" | "chevron" | "none";
   iconPosition: "left" | "right";
@@ -68,7 +68,7 @@ export type AccordionProps = {
   activeIconColor: string;
   activeIconBackground: string;
   titleTypography: Typography;
-  /** Cor do título ao passar o mouse e quando aberto. */
+  /** Title color on hover and when open. */
   activeTitleColor: string;
   titlePadding: Responsive<Sides>;
   bodyPadding: Responsive<Sides>;
@@ -79,14 +79,14 @@ export type AccordionProps = {
   shadow: Shadow;
   openShadow: Shadow;
   gap: Responsive<Length>;
-  /** Linha entre os itens (estilo lista de perguntas). */
+  /** Line between items (FAQ list style). */
   dividerStyle: BorderStyle;
   dividerColor: string;
   dividerWidth: Length;
   box: Box;
 };
 
-/** Cada estilo pronto é um conjunto de valores aplicado de uma vez. */
+/** Each preset style is a set of values applied at once. */
 const VARIANTS: Record<AccordionVariant, Partial<AccordionProps>> = {
   list: {
     gap: responsive("0px"),
@@ -165,7 +165,7 @@ const ACCORDION_DEFAULTS = {
 type AccordionContextValue = {
   props: AccordionProps;
   index: number;
-  /** Só no editor: abertura controlada pela view do acordeão. */
+  /** Editor only: open state controlled by the accordion view. */
   isOpen?: (index: number, initial: boolean) => boolean;
   toggle?: (index: number, initial: boolean) => void;
   reveal?: (index: number) => void;
@@ -179,7 +179,7 @@ const initiallyOpen = (p: AccordionProps, index: number, openByDefault: boolean)
 function AccordionView({ id, props, children, rootRef }: NodeViewProps<AccordionProps>) {
   const isEditor = useIsEditor();
   const items = flattenChildren(children);
-  // no editor, quem está aberto fica aqui (fora do histórico de desfazer)
+  // in the editor, which items are open lives here (outside undo history)
   const [openMap, setOpenMap] = useState<Record<number, boolean>>({});
   const isOpen = useCallback((index: number, initial: boolean) => openMap[index] ?? initial, [openMap]);
   const setOpen = useCallback(
@@ -219,7 +219,7 @@ function AccordionView({ id, props, children, rootRef }: NodeViewProps<Accordion
   );
 }
 
-/** Miniaturas dos estilos prontos. */
+/** Thumbnails of the preset styles. */
 function VariantPreview({ variant }: { variant: AccordionVariant }) {
   const row = {
     list: "h-3 border-b border-muted-foreground/30",
@@ -404,7 +404,7 @@ export const Accordion: ComponentDefinition<AccordionProps> = {
     sheet.root().set("display", "flex").set("flex-direction", "column").set("gap", p.gap);
 
     const I = " > .pb-acc-item";
-    // "aberto": classe is-open com JS; atributo [open] sem JS
+    // "open": is-open class with JS; [open] attribute without JS
     const open = (suffix = "") => `${S}${I}.is-open${suffix}, ${S}:not(.pb-acc-js)${I}[open]${suffix}`;
 
     const item = sheet.rule(I);
@@ -421,7 +421,7 @@ export const Accordion: ComponentDefinition<AccordionProps> = {
       sheet.rule(`${I}:first-child`).set("border-top", line);
     }
 
-    // título
+    // title
     const title = sheet.rule(`${I} > .pb-acc-title`);
     title
       .set("display", "flex")
@@ -447,7 +447,7 @@ export const Accordion: ComponentDefinition<AccordionProps> = {
       .set("width", "1.15em")
       .set("height", "1.15em");
 
-    // indicador: "+" que gira e vira "×", ou seta que vira para cima
+    // indicator: "+" that rotates into "×", or an arrow that flips up
     const ind = `${I} > .pb-acc-title > .pb-acc-ind`;
     sheet
       .rule(ind)
@@ -459,7 +459,7 @@ export const Accordion: ComponentDefinition<AccordionProps> = {
       .set("transition", `transform ${ms} ${ease}, background-color ${ms} ${ease}, color ${ms} ${ease}`);
     sheet.rule(`${ind} > svg`).set("width", "18px").set("height", "18px");
     const indOpen = sheet.raw(open(" > .pb-acc-title > .pb-acc-ind"));
-    // seta/"+" simples acompanham a cor do título aberto; no círculo, a cor própria
+    // plain arrow/"+" follow the open title color; the circle uses its own color
     indOpen.set("color", p.iconStyle === "plus-circle" ? p.activeIconColor : p.activeTitleColor);
     if (p.iconStyle === "plus-circle") {
       sheet
@@ -474,7 +474,7 @@ export const Accordion: ComponentDefinition<AccordionProps> = {
       indOpen.set("transform", p.iconStyle === "plus" ? "rotate(45deg)" : "rotate(180deg)");
     }
 
-    // painel: altura anima de 0fr a 1fr (fechar também anima)
+    // panel: height animates from 0fr to 1fr (closing animates too)
     sheet.rule(`${I} > .pb-acc-panel`).set("display", "grid").set("grid-template-rows", "1fr");
     sheet
       .raw(`${S}.pb-acc-js${I} > .pb-acc-panel`)
@@ -488,7 +488,7 @@ export const Accordion: ComponentDefinition<AccordionProps> = {
       .set("flex-direction", "column")
       .set("gap", p.bodyGap)
       .set("padding", p.bodyPadding, sidesToCss);
-    // conteúdo aparece com um leve fade enquanto o painel abre
+    // content fades in slightly while the panel opens
     sheet
       .raw(`${S}.pb-acc-js${I} > .pb-acc-panel > .pb-acc-clip > .pb-acc-body`)
       .set("opacity", "0")
@@ -508,12 +508,12 @@ export const Accordion: ComponentDefinition<AccordionProps> = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Item do acordeão (filho)                                            */
+/* Accordion item (child)                                              */
 /* ------------------------------------------------------------------ */
 
 export type AccordionItemProps = {
   title: string;
-  /** Ícone do lucide antes do título (opcional). */
+  /** Lucide icon before the title (optional). */
   icon: string;
   openByDefault: boolean;
   box: Box;
@@ -553,7 +553,7 @@ function AccordionItemView({ id, props, children, rootRef, onPropChange }: NodeV
       ref={rootRef as React.Ref<HTMLDetailsElement>}
       className={cn(nodeClassName(id, "pb-acc-item", props.box), open && "is-open")}
       data-pb-node={id}
-      // no editor fica sempre "open": quem mostra/esconde é a classe is-open
+      // in the editor it stays "open": is-open class shows/hides the panel
       open={isEditor || open || undefined}
     >
       <summary
@@ -613,7 +613,7 @@ function AccordionItemSettings() {
   );
 }
 
-/** Tipos que não podem ir para dentro de um item (evita aninhar acordeões). */
+/** Types that cannot go inside an item (avoids nesting accordions). */
 const ITEM_BLOCKED = new Set(["Page", "Accordion", "AccordionItem"]);
 
 export const AccordionItem: ComponentDefinition<AccordionItemProps> = {
@@ -642,7 +642,7 @@ export const AccordionItem: ComponentDefinition<AccordionItemProps> = {
   Settings: AccordionItemSettings,
 };
 
-/** Acordeão inicial (Toolbox): 3 perguntas com resposta. */
+/** Initial accordion (Toolbox): 3 questions with answers. */
 export const accordionSpec = (): NodeSpec =>
   h(
     "Accordion",
@@ -654,7 +654,7 @@ export const accordionSpec = (): NodeSpec =>
     ].map(([title, answer]) => h("AccordionItem", { title }, [h("Text", { html: `<p>${answer}</p>` })])),
   );
 
-/** "Perguntas frequentes" da Toolbox: o acordeão já com perguntas e respostas. */
+/** Toolbox "Perguntas frequentes": accordion already filled with Q&A. */
 export const faqSpec = (): NodeSpec =>
   h(
     "Accordion",
