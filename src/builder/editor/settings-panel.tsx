@@ -2,10 +2,8 @@ import { type Node, NodeProvider, useEditor } from "@craftjs/core";
 import {
 	ArrowUpToLine,
 	ChevronRight,
-	ClipboardPaste,
 	Globe,
 	MousePointer2,
-	Paintbrush,
 	Unlink,
 } from "lucide-react";
 import { createElement } from "react";
@@ -17,8 +15,6 @@ import { COMPONENTS } from "../registry.ts";
 import { unlinkGlobal } from "./node-actions.ts";
 import { canSaveAsTemplate, SaveAsTemplateButton } from "./save-template.tsx";
 import { SitePartCard } from "./site-parts.tsx";
-import { useStyleActions } from "./style-actions.ts";
-import { useStyleClipboard } from "./style-clipboard.ts";
 
 /** Componentes compostos: o filho selecionado ganha atalho para o pai. */
 const COMPOUND_PARENTS = new Set(["Tabs", "Accordion", "Carousel"]);
@@ -126,7 +122,6 @@ export function SettingsPanel() {
 				<div className="flex items-center gap-2">
 					{Icon ? <Icon className="size-4 text-primary" /> : null}
 					<span className="text-xs font-semibold">{selected.displayName}</span>
-					{selected.id !== ROOT_ID ? <StyleButtons id={selected.id} /> : null}
 				</div>
 				{selected.id !== ROOT_ID ? (
 					<DebouncedInput
@@ -173,43 +168,6 @@ export function SettingsPanel() {
 					{createElement(selected.settings)}
 				</NodeProvider>
 			) : null}
-		</div>
-	);
-}
-
-/** Copiar/colar estilo do elemento selecionado. */
-function StyleButtons({ id }: { id: string }) {
-	const { copyStyle, pasteStyle, canPaste } = useStyleActions();
-	// reage ao que está copiado (inclusive vindo de outra aba/página)
-	const copied = useStyleClipboard((s) => s.style);
-	const pastable = Boolean(copied) && canPaste(id);
-	const btn =
-		"flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-35";
-	return (
-		<div className="ml-auto flex items-center gap-0.5">
-			<button
-				type="button"
-				className={btn}
-				title="Copiar estilo (Ctrl+Alt+C)"
-				onClick={() => copyStyle(id)}
-			>
-				<Paintbrush className="size-3.5" />
-			</button>
-			<button
-				type="button"
-				className={btn}
-				title={
-					pastable
-						? "Colar estilo (Ctrl+Alt+V)"
-						: copied
-							? "O estilo copiado não combina com este elemento"
-							: "Copie o estilo de outro elemento primeiro"
-				}
-				disabled={!pastable}
-				onClick={() => pasteStyle(id)}
-			>
-				<ClipboardPaste className="size-3.5" />
-			</button>
 		</div>
 	);
 }
