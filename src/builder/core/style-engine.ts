@@ -371,6 +371,21 @@ export const GOOGLE_FONTS: Record<string, string> = {
   Lora: "400;500;600;700",
   "Space Grotesk": "300;400;500;600;700",
   Outfit: "300;400;500;600;700;800;900",
+  "Plus Jakarta Sans": "300;400;500;600;700;800",
+  Figtree: "300;400;500;600;700;800;900",
+  Archivo: "300;400;500;600;700;800;900",
+  Sora: "300;400;500;600;700;800",
+  Syne: "400;500;600;700;800",
+  "Bricolage Grotesque": "300;400;500;600;700;800",
+  Unbounded: "300;400;500;600;700;800;900",
+  Fredoka: "300;400;500;600;700",
+  "Baloo 2": "400;500;600;700;800",
+  Quicksand: "300;400;500;600;700",
+  Fraunces: "300;400;500;600;700;800;900",
+  "Young Serif": "400",
+  "DM Serif Display": "400",
+  "Instrument Serif": "400",
+  Caveat: "400;500;600;700",
 };
 
 export const FONT_OPTIONS = ["inherit", ...Object.keys(SYSTEM_FONTS), ...Object.keys(GOOGLE_FONTS)];

@@ -3,8 +3,9 @@
  * `ai.ts` so the browser bundle never pulls in the SDK or the database.
  */
 import { createOpenAI } from "@ai-sdk/openai";
-import type { LanguageModelUsage } from "ai";
+import { generateText, jsonSchema, type LanguageModelUsage, Output, zodSchema } from "ai";
 import { and, count, eq, gt } from "drizzle-orm";
+import type { z } from "zod";
 import { db } from "#/db";
 import { aiGeneration } from "#/db/schema";
 
@@ -23,16 +24,34 @@ export function aiModel(tier: AiTier) {
   return { id, model: createOpenAI({ apiKey })(id) };
 }
 
-/** Generations per user in 24h (each variation counts as one). */
+/**
+ * Schema for OpenAI strict mode. Reused parts go in `$defs` (inline, the
+ * section schema is ~4x bigger); zod writes draft-7 `definitions`,
+ * renamed to the `$defs` OpenAI documents.
+ */
+export function strictSchema<T>(schema: z.ZodType<T>) {
+  const base = zodSchema(schema, { useReferences: true });
+  return jsonSchema<T>(
+    async () => {
+      const json = JSON.stringify(await base.jsonSchema)
+        .replaceAll('"#/definitions/', '"#/$defs/')
+        .replace('"definitions":', '"$defs":');
+      return JSON.parse(json);
+    },
+    { validate: base.validate },
+  );
+}
+
+/** Generations per user in 24h (each variation or page section counts as one). */
 const dailyLimit = () => Number(process.env.AI_DAILY_LIMIT) || 150;
 
-export async function assertAiQuota(userId: string) {
+export async function assertAiQuota(userId: string, needed = 1) {
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const [row] = await db
     .select({ n: count() })
     .from(aiGeneration)
     .where(and(eq(aiGeneration.userId, userId), gt(aiGeneration.createdAt, since)));
-  if ((row?.n ?? 0) >= dailyLimit()) {
+  if ((row?.n ?? 0) + needed > dailyLimit()) {
     throw new Error("Você atingiu o limite diário de gerações com IA. Tente novamente amanhã.");
   }
 }
@@ -61,4 +80,38 @@ export async function logGeneration(entry: {
     outputTokens: entry.usage?.outputTokens ?? 0,
     durationMs: entry.durationMs,
   });
+}
+
+/**
+ * One structured call: model → validated object, logged either way.
+ * Errors reach the user as `failMessage` (details stay in the log).
+ */
+export async function generateStructured<T>(opts: {
+  tier: AiTier;
+  schema: ReturnType<typeof strictSchema<T>>;
+  instructions: string;
+  prompt: string;
+  log: { userId: string; projectId: string; kind: string; prompt: string };
+  failMessage: string;
+}): Promise<T> {
+  const { id, model } = aiModel(opts.tier);
+  const started = Date.now();
+  const log = { ...opts.log, model: id };
+  try {
+    const result = await generateText({
+      model,
+      instructions: opts.instructions,
+      prompt: opts.prompt,
+      output: Output.object({ schema: opts.schema }),
+      providerOptions: { openai: { reasoningEffort: "low" } },
+      maxRetries: 1,
+    });
+    await logGeneration({ ...log, output: result.output, usage: result.usage, durationMs: Date.now() - started });
+    return result.output as T;
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    await logGeneration({ ...log, error: message, durationMs: Date.now() - started });
+    console.error(`[ai] ${opts.log.kind}`, message);
+    throw new Error(opts.failMessage);
+  }
 }
