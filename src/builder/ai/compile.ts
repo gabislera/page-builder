@@ -34,7 +34,12 @@ type Ctx = {
   /** Dark background: light text and inverted buttons. */
   dark: boolean;
   align: "left" | "center";
+  /** Inside half a Split: at most 2 columns. */
+  narrow?: boolean;
 };
+
+/** Desktop column count, capped in narrow columns. */
+const cols = (n: number, max: number, ctx: Ctx) => clamp(n, 1, ctx.narrow ? Math.min(2, max) : max);
 
 /**
  * Dashes are the most recognizable AI-writing tic: "a confiança cresce —
@@ -123,8 +128,44 @@ const darkBorder = () => ({
   radius: r(corners("20px")),
 });
 
+/**
+ * Grid of items. When the last row would be incomplete (5 items in 3
+ * columns), it becomes a centered flex wrap, so the leftover items sit in
+ * the middle instead of hanging on the left.
+ */
+function balancedGrid(columns: number, items: NodeSpec[], name: string): NodeSpec {
+  const width = { box: { maxWidth: r("1120px"), width: r("100%") } };
+  if (items.length <= columns || items.length % columns === 0)
+    return grid(r(columns, columns > 2 ? 2 : undefined, 1), items, { align: r("stretch"), ...width }, name);
+  const gap = 24;
+  const itemWidth = r(
+    `calc((100% - ${(columns - 1) * gap}px) / ${columns})`,
+    columns > 2 ? `calc((100% - ${gap}px) / 2)` : undefined,
+    "100%",
+  );
+  const sized = items.map((item) => {
+    const props = item.props ?? {};
+    const box = (props.box as Record<string, unknown> | undefined) ?? {};
+    return { ...item, props: { ...props, box: { ...box, width: itemWidth } } };
+  });
+  return h(
+    "Container",
+    {
+      ...containerPresets.stack,
+      direction: r("row"),
+      wrap: r(true),
+      justify: r("center"),
+      align: r("stretch"),
+      gap: r(`${gap}px`),
+      ...width,
+    },
+    sized,
+    name,
+  );
+}
+
 function features(spec: Extract<LeafSpec, { type: "Features" }>, ctx: Ctx): NodeSpec {
-  const columns = clamp(spec.columns, 2, 4);
+  const columns = Math.max(cols(spec.columns, 4, ctx), ctx.narrow ? 1 : 2);
   const inline = spec.style === "inline";
   const boxed = spec.style === "cards";
   const items = spec.items.slice(0, 12).map((item) =>
@@ -156,19 +197,15 @@ function features(spec: Extract<LeafSpec, { type: "Features" }>, ctx: Ctx): Node
       item.title,
     ),
   );
-  return grid(
-    r(columns, columns > 2 ? 2 : undefined, 1),
-    items,
-    { box: { maxWidth: r("1120px"), width: r("100%") } },
-    "Benefícios",
-  );
+  return balancedGrid(columns, items, "Benefícios");
 }
 
 function steps(spec: Extract<LeafSpec, { type: "Steps" }>, ctx: Ctx): NodeSpec {
   const items = spec.items.slice(0, 6);
-  const columns = clamp(items.length, 2, 4);
-  return grid(
-    r(columns, 2, 1),
+  // up to 4 in one row; 5 or 6 go in rows of 3
+  const columns = cols(items.length <= 4 ? Math.max(items.length, 2) : 3, 4, ctx);
+  return balancedGrid(
+    columns,
     items.map((s, i) =>
       surfaceCard(
         [
@@ -196,7 +233,6 @@ function steps(spec: Extract<LeafSpec, { type: "Steps" }>, ctx: Ctx): NodeSpec {
         ctx,
       ),
     ),
-    { box: { maxWidth: r("1120px"), width: r("100%") } },
     "Passos",
   );
 }
@@ -250,7 +286,7 @@ function testimonials(spec: Extract<LeafSpec, { type: "Testimonials" }>, ctx: Ct
     return h(
       "Carousel",
       {
-        slidesPerView: r(3, 2, 1),
+        slidesPerView: r(ctx.narrow ? 1 : 3, ctx.narrow ? 1 : 2, 1),
         gap: r("24px", undefined, "16px"),
         arrowPosition: "outside",
         showArrows: r(true, undefined, false),
@@ -273,7 +309,7 @@ function testimonials(spec: Extract<LeafSpec, { type: "Testimonials" }>, ctx: Ct
       "Depoimentos",
     );
   }
-  const columns = items.length === 4 ? 2 : clamp(items.length, 2, 3);
+  const columns = cols(items.length === 4 ? 2 : Math.max(items.length, 2), 3, ctx);
   return grid(r(columns, columns > 2 ? 2 : undefined, 1), cards, { align: r("stretch"), ...width }, "Depoimentos");
 }
 
@@ -322,7 +358,7 @@ function pricing(spec: Extract<LeafSpec, { type: "Pricing" }>): NodeSpec {
 
 function stats(spec: Extract<LeafSpec, { type: "Stats" }>, ctx: Ctx): NodeSpec {
   const items = spec.items.slice(0, 4);
-  const columns = clamp(items.length, 2, 4);
+  const columns = cols(Math.max(items.length, 2), 4, ctx);
   return grid(
     r(columns, 2, 2),
     items.map((s) =>
@@ -334,7 +370,8 @@ function stats(spec: Extract<LeafSpec, { type: "Stats" }>, ctx: Ctx): NodeSpec {
           prefix: s.prefix,
           suffix: s.suffix,
           label: s.label,
-          ...(ctx.dark ? { numberTypography: { color: "#ffffff" }, labelTypography: { color: white(70) } } : {}),
+          numberTypography: { textAlign: r("center"), ...(ctx.dark ? { color: "#ffffff" } : {}) },
+          labelTypography: { textAlign: r("center"), ...(ctx.dark ? { color: white(70) } : {}) },
         },
         [],
         "Contador",
@@ -386,7 +423,8 @@ function leaf(spec: LeafSpec, ctx: Ctx): NodeSpec {
     case "Title":
       return title(spec.text, {
         tag: spec.level,
-        size: TITLE_SIZE[spec.size],
+        // half a Split: the hero scale would wrap into 6+ lines
+        size: ctx.narrow && spec.size === "display" ? r("48px", "40px", "32px") : TITLE_SIZE[spec.size],
         align: ctx.align,
         color: textColor,
         maxWidth: spec.size === "display" ? "900px" : "760px",
@@ -513,7 +551,7 @@ function block(spec: BlockSpec, ctx: Ctx): NodeSpec {
       return spec.boxed ? card(children, props, "Caixa") : stack(children, props, "Coluna");
     }
     case "Split": {
-      const left = { ...ctx, align: "left" as const };
+      const left = { ...ctx, align: "left" as const, narrow: true };
       const content = stack(
         spec.content.map((c) => leaf(c, left)),
         { gap: r("20px"), align: r("flex-start") },
@@ -617,9 +655,24 @@ export function compileSection(raw: SectionSpec): NodeSpec {
 
   const [desktop, mobile] = SPACING[spec.spacing] ?? SPACING.normal;
   const anchorId = spec.anchor ? slug(spec.anchor) : "";
-  return section(spec.name || "Seção", children, {
+  // left-aligned: text starts at the edge of a centered 1120px column, like the grids below it
+  const content =
+    ctx.align === "left"
+      ? [
+          stack(
+            children,
+            {
+              gap: r("48px", undefined, "32px"),
+              align: r("flex-start"),
+              box: { width: r("100%"), maxWidth: r("1120px") },
+            },
+            "Conteúdo",
+          ),
+        ]
+      : children;
+  return section(spec.name || "Seção", content, {
     padding: r(sides(desktop, "24px"), undefined, sides(mobile, "16px")),
-    alignItems: r(ctx.align === "center" ? "center" : "stretch"),
+    alignItems: r("center"),
     background: toneBackground(spec.tone),
     ...(anchorId ? { box: { anchorId } } : {}),
   });

@@ -1,8 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { Check, FilePlus2, Loader2, Plus } from "lucide-react";
+import { Check, FilePlus2, Loader2, Plus, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { AiPageWizard } from "#/components/ai-page-wizard";
 import { SlugInput } from "#/components/slug-input";
 import { Button } from "#/components/ui/button";
 import {
@@ -20,6 +21,8 @@ import { cn } from "#/lib/utils";
 import { createPage, listPageTemplates, previewPageTemplate } from "#/server/pages";
 
 const BLANK = "blank";
+/** "Create with AI" card: swaps the template grid for the wizard. */
+const AI = "ai";
 /** Width the preview is rendered at (desktop) before being scaled down. */
 const PREVIEW_WIDTH = 1280;
 
@@ -87,73 +90,95 @@ export function NewPageDialog({ projectId, projectSlug }: { projectId: string; p
         <DialogHeader>
           <DialogTitle>Nova página</DialogTitle>
           <DialogDescription>
-            Comece em branco ou a partir de um modelo pronto. Tudo pode ser editado depois, e o modelo já usa as cores e
-            fontes do seu site.
+            {templateId === AI
+              ? "Descreva o negócio e a oferta. A IA monta a estrutura e escreve a página inteira com as cores e fontes do seu site."
+              : "Comece em branco, a partir de um modelo pronto ou crie com IA. Tudo pode ser editado depois, e o modelo já usa as cores e fontes do seu site."}
           </DialogDescription>
         </DialogHeader>
-        <div className="-mx-1 grid min-h-0 grid-cols-1 gap-4 overflow-y-auto px-1 py-1 sm:grid-cols-2 lg:grid-cols-4">
-          <TemplateCard
-            selected={templateId === BLANK}
-            onSelect={() => choose(BLANK, "")}
-            name="Em branco"
-            description="Uma seção inicial para você montar do seu jeito."
-          >
-            <div className="flex size-full items-center justify-center">
-              <Plus className="size-8 text-muted-foreground" />
+        {templateId === AI ? (
+          <AiPageWizard
+            projectId={projectId}
+            onBack={() => setTemplateId(BLANK)}
+            onCreated={(pageId) => navigate({ to: "/editor/$pageId", params: { pageId } })}
+          />
+        ) : (
+          <>
+            <div className="-mx-1 grid min-h-0 grid-cols-1 gap-4 overflow-y-auto px-1 py-1 sm:grid-cols-3 lg:grid-cols-5">
+              <TemplateCard
+                selected={false}
+                onSelect={() => setTemplateId(AI)}
+                name="Criar com IA"
+                description="Descreva o negócio e receba a página pronta, com textos e estrutura."
+              >
+                <div className="flex size-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-primary/25 via-primary/5 to-transparent">
+                  <Sparkles className="size-9 text-primary" />
+                  <span className="text-xs font-medium text-muted-foreground">Descreva e receba a página pronta</span>
+                </div>
+              </TemplateCard>
+              <TemplateCard
+                selected={templateId === BLANK}
+                onSelect={() => choose(BLANK, "")}
+                name="Em branco"
+                description="Uma seção inicial para você montar do seu jeito."
+              >
+                <div className="flex size-full items-center justify-center">
+                  <Plus className="size-8 text-muted-foreground" />
+                </div>
+              </TemplateCard>
+              {templates.isLoading
+                ? [0, 1, 2].map((i) => <div key={i} className="aspect-[4/5] animate-pulse rounded-xl bg-muted" />)
+                : null}
+              {templates.data?.map((t) => (
+                <TemplateCard
+                  key={t.id}
+                  selected={templateId === t.id}
+                  onSelect={() => choose(t.id, t.name)}
+                  name={t.name}
+                  description={t.description}
+                >
+                  <TemplatePreview projectId={projectId} templateId={t.id} />
+                </TemplateCard>
+              ))}
             </div>
-          </TemplateCard>
-          {templates.isLoading
-            ? [0, 1, 2].map((i) => <div key={i} className="aspect-[4/5] animate-pulse rounded-xl bg-muted" />)
-            : null}
-          {templates.data?.map((t) => (
-            <TemplateCard
-              key={t.id}
-              selected={templateId === t.id}
-              onSelect={() => choose(t.id, t.name)}
-              name={t.name}
-              description={t.description}
-            >
-              <TemplatePreview projectId={projectId} templateId={t.id} />
-            </TemplateCard>
-          ))}
-        </div>
-        <DialogFooter className="flex-col gap-2 sm:flex-row sm:items-center">
-          <form
-            className="grid w-full gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (name.trim()) create.mutate();
-            }}
-          >
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="new-page-name" className="text-xs text-muted-foreground">
-                Nome da página
-              </label>
-              <Input
-                id="new-page-name"
-                autoFocus
-                placeholder="ex.: Lançamento do curso"
-                value={name}
-                onChange={(e) => rename(e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-xs text-muted-foreground">Endereço</span>
-              <SlugInput
-                prefix={`/p/${projectSlug}/`}
-                value={slug}
-                onChange={(v) => {
-                  setSlug(v);
-                  setSlugTouched(true);
+            <DialogFooter className="flex-col gap-2 sm:flex-row sm:items-center">
+              <form
+                className="grid w-full gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (name.trim()) create.mutate();
                 }}
-              />
-            </div>
-            <Button type="submit" disabled={create.isPending || !name.trim()}>
-              {create.isPending ? <Loader2 className="size-4 animate-spin" /> : <FilePlus2 className="size-4" />}
-              Criar página
-            </Button>
-          </form>
-        </DialogFooter>
+              >
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="new-page-name" className="text-xs text-muted-foreground">
+                    Nome da página
+                  </label>
+                  <Input
+                    id="new-page-name"
+                    autoFocus
+                    placeholder="ex.: Lançamento do curso"
+                    value={name}
+                    onChange={(e) => rename(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs text-muted-foreground">Endereço</span>
+                  <SlugInput
+                    prefix={`/p/${projectSlug}/`}
+                    value={slug}
+                    onChange={(v) => {
+                      setSlug(v);
+                      setSlugTouched(true);
+                    }}
+                  />
+                </div>
+                <Button type="submit" disabled={create.isPending || !name.trim()}>
+                  {create.isPending ? <Loader2 className="size-4 animate-spin" /> : <FilePlus2 className="size-4" />}
+                  Criar página
+                </Button>
+              </form>
+            </DialogFooter>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

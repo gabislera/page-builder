@@ -10,6 +10,7 @@ import { renderPageHtml } from "#/builder/renderer/render-page";
 import { buildPageTemplate, type PageTemplate } from "#/builder/templates/pages";
 import { db } from "#/db";
 import { page, pageSection, project, section } from "#/db/schema";
+import { slugify } from "#/lib/slug";
 
 export const publicPagePath = (projectSlug: string, pageSlug: string) => `/p/${projectSlug}/${pageSlug}`;
 
@@ -158,6 +159,19 @@ export async function uniqueSlug(projectId: string, base: string) {
     if (!taken) return slug;
     slug = `${base}-${i}`;
   }
+}
+
+/** Slug for a new page: the requested one (must be free) or one derived from the name. */
+export async function newPageSlug(projectId: string, requested: string | undefined, name: string) {
+  const chosen = requested ? slugify(requested) : "";
+  if (chosen) {
+    const taken = await db.query.page.findFirst({
+      where: and(eq(page.projectId, projectId), eq(page.slug, chosen), isNull(page.deletedAt)),
+    });
+    if (taken) throw new Error("Já existe uma página com esse endereço");
+    return chosen;
+  }
+  return uniqueSlug(projectId, slugify(name) || "pagina");
 }
 
 export async function loadSections(pageId: string): Promise<SectionTree[]> {

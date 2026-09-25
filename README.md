@@ -63,6 +63,7 @@ A IA não escreve props do Craft. Ela escreve **AI-Spec** (`builder/ai/spec.ts`)
 
 - Servidor: `server/ai.ts` (server function) e `server/ai-store.ts` (modelo, limite diário, log em `ai_generation`).
 - Editor: aba "Gerar com IA" na biblioteca de seções. São 3 variações em paralelo, com preview real.
+- Página inteira ("Nova página → Criar com IA"): briefing, depois roteiro interno (modelo `smart`), depois seções em paralelo (modelo `fast`) e `createAiPage` compilando no servidor. Tipos de página, receitas e prompts ficam em `builder/ai/page.ts`. O roteiro decide o fundo e a âncora de cada seção.
 - Configure `OPENAI_API_KEY` no `.env.local`. Modelos e limite são opcionais (veja `.env.example`).
 - Um bloco novo no AI-Spec precisa de schema em `spec.ts`, de um `case` em `compile.ts` e, se ajudar, de uma menção nas regras de `prompt.ts`.
 

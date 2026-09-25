@@ -7,7 +7,7 @@ import { mergePage, type SectionTree, type SitePart } from "#/builder/core/tree"
 import { blankPage, buildPageTemplate, PAGE_TEMPLATES } from "#/builder/templates/pages";
 import { db } from "#/db";
 import { page, pageSection, project, section } from "#/db/schema";
-import { isValidSlug, slugify } from "#/lib/slug";
+import { isValidSlug } from "#/lib/slug";
 import { requirePageAccess, requireProjectAccess } from "./access.ts";
 import { authMiddleware } from "./middleware.ts";
 import {
@@ -17,6 +17,7 @@ import {
   loadSections,
   loadSitePart,
   loadSiteSettings,
+  newPageSlug,
   publishPageById,
   renderTemplatePreview,
   uniqueSlug,
@@ -84,14 +85,7 @@ export const createPage = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await requireProjectAccess(context.user.id, data.projectId);
-    const chosen = data.slug ? slugify(data.slug) : "";
-    if (chosen) {
-      const taken = await db.query.page.findFirst({
-        where: and(eq(page.projectId, data.projectId), eq(page.slug, chosen), isNull(page.deletedAt)),
-      });
-      if (taken) throw new Error("Já existe uma página com esse endereço");
-    }
-    const slug = chosen || (await uniqueSlug(data.projectId, slugify(data.name) || "pagina"));
+    const slug = await newPageSlug(data.projectId, data.slug, data.name);
     const template = PAGE_TEMPLATES.find((t) => t.id === data.templateId);
     const tree = template ? buildPageTemplate(template) : blankPage();
     return db.transaction(async (tx) => {
