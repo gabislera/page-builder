@@ -73,46 +73,6 @@ pnpm install
 pnpm db:migrate
 pnpm dev                                 # http://localhost:3100
 ```
-
-Depois é só criar uma conta em `/signup`.
-
-<details>
-<summary><b>Variáveis de ambiente</b></summary>
-
-| Variável | Obrigatória | Descrição |
-|---|:---:|---|
-| `DATABASE_URL` | Sim | Conexão do Postgres (o `.env.example` já aponta para o Docker) |
-| `BETTER_AUTH_SECRET` | Sim | Segredo da sessão. Gere com `openssl rand -base64 32` |
-| `BETTER_AUTH_URL` | Sim | Endereço do app (`http://localhost:3100`) |
-| `S3_*` | Sim | Storage de arquivos (o `.env.example` já aponta para o MinIO) |
-| `OPENAI_API_KEY` | Não | Liga os recursos de IA. Sem ela, o resto funciona normalmente |
-| `OPENAI_MODEL_FAST` / `OPENAI_MODEL_SMART` | Não | Troca os modelos usados (padrão: `gpt-5.4-mini` e `gpt-5.5`) |
-| `AI_DAILY_LIMIT` | Não | Gerações por usuário a cada 24h (padrão: 150) |
-
-</details>
-
-<details>
-<summary><b>Serviços locais (Docker)</b></summary>
-
-| Serviço | Endereço | Usuário / senha |
-|---|---|---|
-| Postgres | `localhost:5440` | `builder` / `builder` |
-| MinIO (API) | `localhost:9100` | `builder` / `builder-secret` |
-| MinIO (console) | `localhost:9101` | `builder` / `builder-secret` |
-
-</details>
-
-### Scripts
-
-| Comando | O que faz |
-|---|---|
-| `pnpm dev` | Servidor de desenvolvimento |
-| `pnpm build` | Build de produção |
-| `pnpm db:generate` | Gera uma migração a partir do schema |
-| `pnpm db:migrate` | Aplica as migrações |
-| `pnpm db:studio` | Abre o Drizzle Studio |
-| `pnpm check` | Lint e formatação (Biome) |
-
 ---
 
 ## Arquitetura
@@ -132,23 +92,4 @@ src/
 └── db/schema/        tabelas (Drizzle)
 ```
 
-**Ideias principais**
 
-- **Uma view por componente.** A mesma view React renderiza no editor e na página publicada, então o que você vê é o que vai ao ar.
-- **Página por seções.** Cada seção é salva separadamente, o que permite reaproveitar cabeçalho, rodapé e modelos.
-- **Publicar é gerar HTML.** O HTML fica pronto no momento da publicação, e cada visita só recebe o arquivo já montado.
-- **A IA não escreve código.** Ela descreve a seção numa linguagem simples de blocos e tokens de design, e um compilador transforma isso em componentes do editor. Assim, o resultado sempre segue o tema, é responsivo e continua editável.
-
-```
-pedido do usuário ──► OpenAI (JSON validado) ──► compilador ──► componentes do editor
-```
-
-<details>
-<summary><b>Adicionando um componente</b></summary>
-
-1. Crie `src/builder/components/<nome>.tsx` exportando um `ComponentDefinition` (use `button.tsx` como exemplo).
-2. Registre em `src/builder/registry.ts`.
-3. Adicione na barra lateral (`src/builder/editor/toolbox.tsx`), se ele for arrastável.
-4. Se precisar de JS na página publicada, crie `runtime/features/<feature>.ts` e registre em `runtime/index.ts`.
-
-</details>
