@@ -3,7 +3,9 @@ node_modules
 dist
 dist-ssr
 *.local
-.env
+# any env file (.env, .env.production...) except the example
+.env*
+!.env.example
 .nitro
 .tanstack
 .wrangler

@@ -7,6 +7,23 @@ import { Label } from "#/components/ui/label";
 import { authClient } from "#/lib/auth-client";
 import { APP_NAME } from "#/lib/brand";
 
+/** Better Auth error codes in Portuguese (the library answers in English). */
+const AUTH_ERRORS: Record<string, string> = {
+  INVALID_EMAIL_OR_PASSWORD: "E-mail ou senha incorretos.",
+  USER_ALREADY_EXISTS: "Já existe uma conta com esse e-mail.",
+  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: "Já existe uma conta com esse e-mail.",
+  INVALID_EMAIL: "Esse e-mail não parece válido.",
+  INVALID_PASSWORD: "Senha inválida.",
+  PASSWORD_TOO_SHORT: "A senha precisa ter pelo menos 8 caracteres.",
+  PASSWORD_TOO_LONG: "A senha é longa demais.",
+  FAILED_TO_CREATE_USER: "Não foi possível criar a conta. Tente novamente.",
+};
+
+function authErrorMessage(error: { code?: string; status?: number }) {
+  if (error.status === 429) return "Muitas tentativas. Espere um pouco e tente de novo.";
+  return (error.code && AUTH_ERRORS[error.code]) || "Não foi possível continuar. Tente novamente.";
+}
+
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const navigate = useNavigate();
   const [name, setName] = useState("");
@@ -25,7 +42,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         : await authClient.signIn.email({ email, password });
     setLoading(false);
     if (res.error) {
-      setError(res.error.message ?? "Não foi possível entrar");
+      setError(authErrorMessage(res.error));
       return;
     }
     navigate({ to: "/projects" });
