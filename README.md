@@ -1,86 +1,154 @@
+<div align="center">
+
 # Page Builder
 
-Construtor de páginas drag-and-drop por seções. Front e back no mesmo projeto (TanStack Start + server functions), editor com Craft.js e publicação em HTML estático gerado pelas mesmas views React do editor.
+**Construtor visual de landing pages, com IA que monta seções e páginas inteiras.**
+
+Arraste seções, edite direto no canvas, veja como fica no celular e publique em HTML estático e rápido.
+
+![React](https://img.shields.io/badge/React_19-20232a?logo=react&logoColor=61dafb)
+![TanStack Start](https://img.shields.io/badge/TanStack_Start-ff4154?logo=reactquery&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178c6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_v4-06b6d4?logo=tailwindcss&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169e1?logo=postgresql&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-10b981?logo=openai&logoColor=white)
+
+[Recursos](#recursos) · [Stack](#stack) · [Como rodar](#como-rodar) · [Arquitetura](#arquitetura)
+
+</div>
+
+---
+
+## Recursos
+
+### Editor
+- **Arrastar e soltar por seções**, com mais de 30 componentes: títulos, botões, formulários, galerias, abas, carrossel, FAQ, tabela de preços, contagem regressiva, depoimentos e outros.
+- **Responsivo de verdade**: cada propriedade pode ter um valor para desktop, tablet e celular, e o canvas mostra exatamente o que vai ao ar.
+- **Edição direto no canvas**, desfazer e refazer, atalhos, autosave e aviso quando outra aba salvou antes.
+- **Biblioteca de seções prontas**, modelos de página e seções salvas como modelo próprio.
+
+### IA
+- **Gerar seção**: descreva o que quer e escolha entre 3 variações, com preview real.
+- **Criar página inteira**: a partir de um briefing, a IA sugere 3 identidades visuais (cores e fontes), monta a estrutura e escreve todas as seções em paralelo.
+- **Editar com IA** (`⌘I`): reescreve textos, ajusta estilos ou refaz uma seção inteira. Tudo desfaz com um `Ctrl+Z`.
+
+### Publicação e marketing
+- **Publicação em HTML estático**, gerado pelas mesmas views do editor. As páginas carregam rápido e não precisam de React no navegador.
+- **Tema do site**: cores, fontes, logo, cabeçalho e rodapé compartilhados entre as páginas.
+- **Leads e visitas**: formulários salvam contatos (com UTMs), e há métricas de acesso por página.
+- **SEO e rastreamento**: título, descrição, imagem de compartilhamento, sitemap, pixels (Meta, Google, TikTok) e aviso de cookies (LGPD).
+
+---
 
 ## Stack
 
 | Camada | Tecnologia |
 |---|---|
-| App (front + back) | TanStack Start (React 19, Vite, TanStack Router, server functions) |
-| Editor drag-and-drop | @craftjs/core 0.2.12 |
-| UI do editor | Tailwind CSS v4 + shadcn/ui (Radix) + lucide |
-| Estado | Zustand (UI do editor) + TanStack Query (dados) |
-| Texto rico / código | Tiptap 3 / CodeMirror 6 |
-| Banco | PostgreSQL 17 + Drizzle ORM |
-| Auth | Better Auth (e-mail e senha) |
-| Arquivos | S3 compatível (MinIO local), upload direto por URL pré-assinada |
-| Lint/format | Biome |
+| App (front + back) | [TanStack Start](https://tanstack.com/start) · React 19 · Vite · server functions |
+| Editor | [Craft.js](https://craft.js.org) · Tiptap · CodeMirror |
+| Interface | Tailwind CSS v4 · shadcn/ui · lucide |
+| Estado e dados | Zustand · TanStack Query |
+| Banco | PostgreSQL · [Drizzle ORM](https://orm.drizzle.team) |
+| Autenticação | [Better Auth](https://better-auth.com) |
+| Arquivos | S3 compatível (MinIO no ambiente local) |
+| IA | [AI SDK](https://ai-sdk.dev) · OpenAI (Structured Outputs) |
+| Qualidade | TypeScript · Biome |
 
-## Rodando local
+---
+
+## Como rodar
+
+**Pré-requisitos:** Node 22+, [pnpm](https://pnpm.io) e Docker.
 
 ```bash
+# 1. banco e storage
 docker compose up -d postgres minio
-docker compose run --rm minio-setup   # cria o bucket "assets" (só na primeira vez)
-cp .env.example .env.local            # gere BETTER_AUTH_SECRET: openssl rand -base64 32
+docker compose run --rm minio-setup      # cria o bucket (só na primeira vez)
+
+# 2. variáveis de ambiente
+cp .env.example .env.local               # depois preencha os valores abaixo
+
+# 3. dependências, banco e servidor
 pnpm install
 pnpm db:migrate
-pnpm dev                              # http://localhost:3100
+pnpm dev                                 # http://localhost:3100
 ```
 
-- Postgres: `localhost:5440` (builder/builder)
-- MinIO: API `localhost:9100`, console `localhost:9101` (builder/builder-secret)
+Depois é só criar uma conta em `/signup`.
+
+<details>
+<summary><b>Variáveis de ambiente</b></summary>
+
+| Variável | Obrigatória | Descrição |
+|---|:---:|---|
+| `DATABASE_URL` | Sim | Conexão do Postgres (o `.env.example` já aponta para o Docker) |
+| `BETTER_AUTH_SECRET` | Sim | Segredo da sessão. Gere com `openssl rand -base64 32` |
+| `BETTER_AUTH_URL` | Sim | Endereço do app (`http://localhost:3100`) |
+| `S3_*` | Sim | Storage de arquivos (o `.env.example` já aponta para o MinIO) |
+| `OPENAI_API_KEY` | Não | Liga os recursos de IA. Sem ela, o resto funciona normalmente |
+| `OPENAI_MODEL_FAST` / `OPENAI_MODEL_SMART` | Não | Troca os modelos usados (padrão: `gpt-5.4-mini` e `gpt-5.5`) |
+| `AI_DAILY_LIMIT` | Não | Gerações por usuário a cada 24h (padrão: 150) |
+
+</details>
+
+<details>
+<summary><b>Serviços locais (Docker)</b></summary>
+
+| Serviço | Endereço | Usuário / senha |
+|---|---|---|
+| Postgres | `localhost:5440` | `builder` / `builder` |
+| MinIO (API) | `localhost:9100` | `builder` / `builder-secret` |
+| MinIO (console) | `localhost:9101` | `builder` / `builder-secret` |
+
+</details>
+
+### Scripts
+
+| Comando | O que faz |
+|---|---|
+| `pnpm dev` | Servidor de desenvolvimento |
+| `pnpm build` | Build de produção |
+| `pnpm db:generate` | Gera uma migração a partir do schema |
+| `pnpm db:migrate` | Aplica as migrações |
+| `pnpm db:studio` | Abre o Drizzle Studio |
+| `pnpm check` | Lint e formatação (Biome) |
+
+---
 
 ## Arquitetura
 
 ```
 src/
-  builder/
-    core/          motor de estilos, tipos responsivos, árvore (split/merge), craftify
-    components/    um arquivo por componente: props, View, css, Settings
-    controls/      controles do painel de configurações (shadcn)
-    editor/        shell do editor, canvas em iframe, painéis, autosave, atalhos
-    renderer/      JSON → HTML publicado (renderToStaticMarkup das mesmas Views)
-    runtime/       JS vanilla da página publicada (modal, formulário, contador...)
-    templates/     modelos de seção e de página
-    registry.ts    catálogo de componentes (resolvedName → definição)
-  server/          server functions (projetos, páginas, seções, assets)
-  routes/          telas, editor, página pública /p/:projeto/:página, APIs
-  db/schema/       tabelas Drizzle (auth + produto)
+├── builder/
+│   ├── components/   um arquivo por componente: props, view, CSS e painel
+│   ├── core/         motor de estilos, valores responsivos, árvore de nós
+│   ├── editor/       canvas, painéis, autosave, atalhos
+│   ├── renderer/     árvore de nós → HTML publicado
+│   ├── runtime/      JS leve da página publicada (modal, carrossel, formulário…)
+│   ├── templates/    seções e páginas prontas
+│   └── ai/           linguagem da IA, compilador e prompts
+├── server/           server functions (projetos, páginas, IA, arquivos)
+├── routes/           telas, editor, páginas públicas e APIs
+└── db/schema/        tabelas (Drizzle)
 ```
 
-### Conceitos
+**Ideias principais**
 
-- **Página por seções.** A raiz (`Page`) só aceita `Header`, `Section` e `Footer`. Cada filho da raiz é salvo como uma linha em `section`, com sua própria árvore de nós. A tabela `page_section` define a ordem.
-- **Seções globais.** Uma seção com `is_global = true` é compartilhada por várias páginas. Editar em uma página altera todas; ao publicar, as páginas publicadas afetadas são republicadas.
-- **Responsivo real.** Props responsivas são `{ desktop, tablet?, mobile? }` com cascata (mobile herda do tablet, que herda do desktop). O motor de estilos gera CSS com media queries (tablet ≤ 1024px, mobile ≤ 600px). O canvas é um iframe na largura do dispositivo, então o editor mostra exatamente o que vai ao ar.
-- **Uma View por componente.** A mesma View React renderiza no editor e na publicação. Interatividade da página publicada vem de scripts vanilla em `runtime/`, incluídos só quando algum componente da página precisa.
-- **Salvamento.** Autosave com debounce, rascunho local para recuperar trabalho e controle de versão otimista: se outra aba salvou antes, o editor avisa o conflito.
-- **Server functions sem vazar o banco.** Funções que usam o `db` fora de um handler ficam em módulos próprios (ex.: `server/page-store.ts`); assim o compilador consegue tirar o driver do Postgres do bundle do navegador.
+- **Uma view por componente.** A mesma view React renderiza no editor e na página publicada, então o que você vê é o que vai ao ar.
+- **Página por seções.** Cada seção é salva separadamente, o que permite reaproveitar cabeçalho, rodapé e modelos.
+- **Publicar é gerar HTML.** O HTML fica pronto no momento da publicação, e cada visita só recebe o arquivo já montado.
+- **A IA não escreve código.** Ela descreve a seção numa linguagem simples de blocos e tokens de design, e um compilador transforma isso em componentes do editor. Assim, o resultado sempre segue o tema, é responsivo e continua editável.
 
-### Geração com IA
+```
+pedido do usuário ──► OpenAI (JSON validado) ──► compilador ──► componentes do editor
+```
 
-A IA não escreve props do Craft. Ela escreve **AI-Spec** (`builder/ai/spec.ts`): blocos (`Features`, `Pricing`, `Split`...), textos e tokens de design (tom da seção, tamanho do título). O compilador (`builder/ai/compile.ts`) transforma isso em `NodeSpec` com os mesmos helpers dos templates, então a seção gerada segue o tema, é responsiva e fica editável como qualquer outra.
+<details>
+<summary><b>Adicionando um componente</b></summary>
 
-- Servidor: `server/ai.ts` (server function) e `server/ai-store.ts` (modelo, limite diário, log em `ai_generation`).
-- Editor: aba "Gerar com IA" na biblioteca de seções. São 3 variações em paralelo, com preview real.
-- Página inteira ("Nova página → Criar com IA"): briefing, depois roteiro interno (modelo `smart`), depois seções em paralelo (modelo `fast`) e `createAiPage` compilando no servidor. Tipos de página, receitas e prompts ficam em `builder/ai/page.ts`. O roteiro decide o fundo e a âncora de cada seção.
-- Configure `OPENAI_API_KEY` no `.env.local`. Modelos e limite são opcionais (veja `.env.example`).
-- Um bloco novo no AI-Spec precisa de schema em `spec.ts`, de um `case` em `compile.ts` e, se ajudar, de uma menção nas regras de `prompt.ts`.
-
-### Adicionando um componente
-
-1. Crie `src/builder/components/<nome>.tsx` exportando um `ComponentDefinition` (veja `button.tsx`).
+1. Crie `src/builder/components/<nome>.tsx` exportando um `ComponentDefinition` (use `button.tsx` como exemplo).
 2. Registre em `src/builder/registry.ts`.
-3. Adicione na Toolbox (`src/builder/editor/toolbox.tsx`) se for arrastável.
+3. Adicione na barra lateral (`src/builder/editor/toolbox.tsx`), se ele for arrastável.
 4. Se precisar de JS na página publicada, crie `runtime/features/<feature>.ts` e registre em `runtime/index.ts`.
 
-## Scripts
-
-| Comando | O que faz |
-|---|---|
-| `pnpm dev` | servidor de desenvolvimento na porta 3100 |
-| `pnpm build` | build de produção (Nitro, Node) |
-| `pnpm db:generate` | gera migração a partir do schema |
-| `pnpm db:migrate` | aplica migrações |
-| `pnpm db:studio` | Drizzle Studio |
-| `pnpm check` | Biome (lint + format) |
+</details>
