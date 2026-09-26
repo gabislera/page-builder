@@ -13,8 +13,6 @@ Arraste seções, edite direto no canvas, veja como fica no celular e publique e
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169e1?logo=postgresql&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/OpenAI-10b981?logo=openai&logoColor=white)
 
-[Recursos](#recursos) · [Stack](#stack) · [Como rodar](#como-rodar) · [Arquitetura](#arquitetura)
-
 </div>
 
 ---
